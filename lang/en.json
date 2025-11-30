@@ -1,0 +1,70 @@
+{
+  "DEATH_OPTIONS": {
+    "Settings": {
+      "Duration": {
+        "Name": "Duration: Countdown",
+        "Hint": "Time in seconds for the countdown (0-10). Set to 0 to disable."
+      },
+      "BlazeMessage": {
+        "Name": "Text: Blaze of Glory",
+        "Hint": "The message displayed in chat when Blaze of Glory is chosen."
+      },
+      "Background": {
+        "Name": "Image: Main Screen",
+        "Hint": "The background image displayed behind the three choices."
+      },
+      "Blaze": {
+        "Name": "Image: Blaze of Glory",
+        "Hint": "The image shown when a player selects 'Blaze of Glory'."
+      },
+      "AvoidScar": {
+        "Name": "Image: Avoid Death (Scar)",
+        "Hint": "The image shown when Avoid Death roll fails (Roll <= Level)."
+      },
+      "AvoidSafe": {
+        "Name": "Image: Avoid Death (Safe)",
+        "Hint": "The image shown when Avoid Death roll succeeds (Roll > Level)."
+      },
+      "Hope": {
+        "Name": "Image: Result Hope",
+        "Hint": "The image displayed when the 'Risk it All' roll results in Hope."
+      },
+      "Fear": {
+        "Name": "Image: Result Fear",
+        "Hint": "The image displayed when the 'Risk it All' roll results in Fear."
+      },
+      "Critical": {
+        "Name": "Image: Result Critical",
+        "Hint": "The image displayed when the 'Risk it All' roll is a Critical Success."
+      },
+      "SoundSuspense": {
+        "Name": "Sound: Countdown",
+        "Hint": "The ticking/suspense sound played during the 6-second countdown."
+      },
+      "SoundBlaze": {
+        "Name": "Sound: Blaze of Glory",
+        "Hint": "The sound effect played when 'Blaze of Glory' is selected."
+      },
+      "SoundAvoidSafe": {
+        "Name": "Sound: Avoid Death (Safe)",
+        "Hint": "Sound played when Avoid Death succeeds."
+      },
+      "SoundAvoidScar": {
+        "Name": "Sound: Avoid Death (Scar)",
+        "Hint": "Sound played when Avoid Death fails (Scar)."
+      },
+      "SoundHope": {
+        "Name": "Sound: Result Hope",
+        "Hint": "Sound played on a Hope result."
+      },
+      "SoundFear": {
+        "Name": "Sound: Result Fear",
+        "Hint": "Sound played on a Fear result."
+      },
+      "SoundCritical": {
+        "Name": "Sound: Result Critical",
+        "Hint": "Sound played on a Critical result."
+      }
+    }
+  }
+}

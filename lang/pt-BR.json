@@ -1,0 +1,70 @@
+{
+  "DEATH_OPTIONS": {
+    "Settings": {
+      "Duration": {
+        "Name": "Duração: Contagem Regressiva",
+        "Hint": "Tempo em segundos para a contagem regressiva (0-10). Defina como 0 para desativar."
+      },
+      "BlazeMessage": {
+        "Name": "Texto: Blaze of Glory",
+        "Hint": "A mensagem exibida no chat quando Blaze of Glory é escolhido."
+      },
+      "Background": {
+        "Name": "Imagem: Tela Principal",
+        "Hint": "A imagem de fundo exibida atrás das três escolhas."
+      },
+      "Blaze": {
+        "Name": "Imagem: Blaze of Glory",
+        "Hint": "A imagem mostrada quando um jogador seleciona 'Blaze of Glory'."
+      },
+      "AvoidScar": {
+        "Name": "Imagem: Evitar a Morte (Cicatriz)",
+        "Hint": "A imagem mostrada quando a rolagem de Evitar a Morte falha (Rolagem <= Nível)."
+      },
+      "AvoidSafe": {
+        "Name": "Imagem: Evitar a Morte (Seguro)",
+        "Hint": "A imagem mostrada quando a rolagem de Evitar a Morte é bem-sucedida (Rolagem > Nível)."
+      },
+      "Hope": {
+        "Name": "Imagem: Resultado Esperança",
+        "Hint": "A imagem exibida quando a rolagem de 'Arriscar Tudo' resulta em Esperança."
+      },
+      "Fear": {
+        "Name": "Imagem: Resultado Medo",
+        "Hint": "A imagem exibida quando a rolagem de 'Arriscar Tudo' resulta em Medo."
+      },
+      "Critical": {
+        "Name": "Imagem: Resultado Crítico",
+        "Hint": "A imagem exibida quando a rolagem de 'Arriscar Tudo' é um Sucesso Crítico."
+      },
+      "SoundSuspense": {
+        "Name": "Som: Contagem Regressiva",
+        "Hint": "O som de suspense tocado durante a contagem regressiva de 6 segundos."
+      },
+      "SoundBlaze": {
+        "Name": "Som: Blaze of Glory",
+        "Hint": "O efeito sonoro tocado quando 'Blaze of Glory' é selecionado."
+      },
+      "SoundAvoidSafe": {
+        "Name": "Som: Evitar a Morte (Seguro)",
+        "Hint": "Som tocado quando Evitar a Morte é bem-sucedido."
+      },
+      "SoundAvoidScar": {
+        "Name": "Som: Evitar a Morte (Cicatriz)",
+        "Hint": "Som tocado quando Evitar a Morte falha (Cicatriz)."
+      },
+      "SoundHope": {
+        "Name": "Som: Resultado Esperança",
+        "Hint": "Som tocado em um resultado de Esperança."
+      },
+      "SoundFear": {
+        "Name": "Som: Resultado Medo",
+        "Hint": "Som tocado em um resultado de Medo."
+      },
+      "SoundCritical": {
+        "Name": "Som: Resultado Crítico",
+        "Hint": "Som tocado em um resultado Crítico."
+      }
+    }
+  }
+}

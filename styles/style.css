@@ -1,0 +1,193 @@
+/* Fullscreen Container for Images (Results) */
+#risk-it-all-media-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto; 
+}
+
+#risk-it-all-media-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Close/Skip Button */
+.media-skip-btn, .roll-close-btn {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    z-index: 10001;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: "Signika", sans-serif;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.media-skip-btn:hover, .roll-close-btn:hover {
+    background: rgba(200, 50, 50, 0.8);
+    border-color: red;
+    transform: scale(1.05);
+}
+
+/* Player Interface (Main Screen) */
+#risk-it-all-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9998;
+    background-color: #111;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#risk-it-all-overlay::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7); 
+    backdrop-filter: blur(4px);
+    z-index: 0;
+}
+
+.risk-content-wrapper {
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.risk-title {
+    color: white;
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    font-family: "Modesto Condensed", serif;
+    text-shadow: 0 0 15px #aa00ff;
+    letter-spacing: 2px;
+}
+
+/* --- Death Options Menu Styles --- */
+.death-options-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.option-btn {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    width: 250px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    position: relative;
+    overflow: hidden;
+    opacity: 1;
+}
+
+/* Class to hide unselected buttons */
+.hidden-btn {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+}
+
+.option-btn:hover {
+    transform: translateY(-10px);
+    border-color: white;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+.option-btn h2 {
+    font-family: "Modesto Condensed", serif;
+    font-size: 2.5rem;
+    color: white;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px black;
+    z-index: 2;
+}
+
+.option-btn p {
+    font-family: "Signika", sans-serif;
+    color: #ccc;
+    text-align: center;
+    font-size: 1rem;
+    z-index: 2;
+}
+
+/* Specific Colors for Options */
+.btn-avoid {
+    border-color: #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+.btn-avoid:hover {
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+    background: linear-gradient(to bottom, rgba(255, 215, 0, 0.1), rgba(0,0,0,0.8));
+}
+
+.btn-blaze {
+    border-color: #ff4500;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.2);
+}
+.btn-blaze:hover {
+    box-shadow: 0 0 40px rgba(255, 69, 0, 0.6);
+    background: linear-gradient(to bottom, rgba(255, 69, 0, 0.1), rgba(0,0,0,0.8));
+}
+
+.btn-risk {
+    border-color: #aa00ff;
+    box-shadow: 0 0 15px rgba(170, 0, 255, 0.2);
+}
+.btn-risk:hover {
+    box-shadow: 0 0 40px rgba(170, 0, 255, 0.6);
+    background: linear-gradient(to bottom, rgba(170, 0, 255, 0.1), rgba(0,0,0,0.8));
+}
