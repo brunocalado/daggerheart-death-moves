@@ -38,7 +38,7 @@ There are two ways for the Gamemaster to trigger the Death Moves screen for a pl
 4.  Select the dying player from the dialog list.
 
 <p align="center">
-  <img width="800" src="docs/sidebar.webp">
+  <img width="600" src="docs/sidebar.webp">
 </p>
 
 ### Option 2: Macro
