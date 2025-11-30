@@ -29,12 +29,23 @@ You need to enable sound to play the video.
 
 ## 🛠️ Usage
 
-1.  **GM Trigger:** As a Gamemaster, create a macro with the following command:
+There are two ways for the Gamemaster to trigger the Death Moves screen for a player:
+
+### Option 1: Sidebar Button (New)
+1.  Open the **Daggerheart Menu** (the system's sidebar).
+2.  Locate the **Death Moves** section.
+3.  Click the **Trigger Death Move** button (skull icon).
+4.  Select the dying player from the dialog list.
+
+### Option 2: Macro
+1.  Create a macro with the following command:
     ```javascript
     DeathMoves.trigger();
     ```
-2.  **Select Player:** Run the macro and select the dying player from the list.
-3.  **Choose Your Fate:** The player receives the Death Moves screen. Once they click a button, the sequence begins.
+2.  Run the macro and select the dying player from the list.
+
+**After triggering:**
+* **Choose Your Fate:** The player receives the Death Moves screen. Once they click a button, the sequence begins.
 
 <p align="center">
   <img width="800" src="docs/preview.webp">
