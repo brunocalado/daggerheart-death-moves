@@ -31,11 +31,15 @@ You need to enable sound to play the video.
 
 There are two ways for the Gamemaster to trigger the Death Moves screen for a player:
 
-### Option 1: Sidebar Button (New)
+### Option 1: Sidebar Button
 1.  Open the **Daggerheart Menu** (the system's sidebar).
 2.  Locate the **Death Moves** section.
 3.  Click the **Trigger Death Move** button (skull icon).
 4.  Select the dying player from the dialog list.
+
+<p align="center">
+  <img width="800" src="docs/sidebar.webp">
+</p>
 
 ### Option 2: Macro
 1.  Create a macro with the following command:
