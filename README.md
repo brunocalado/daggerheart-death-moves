@@ -48,7 +48,8 @@ There are two ways for the Gamemaster to trigger the Death Moves screen for a pl
     ```
 2.  Run the macro and select the dying player from the list.
 
-**After triggering:**
+### After Triggering
+
 * **Choose Your Fate:** The player receives the Death Moves screen. Once they click a button, the sequence begins.
 
 <p align="center">
