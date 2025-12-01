@@ -3,7 +3,7 @@
 **Daggerheart: Death Moves** is a Foundry VTT module designed to elevate the tension and immersion of the "Death Move" moment in the game. Instead of a simple manual procedure, this module presents the player with the three canonical choices in a dramatic, audiovisual interface.
 
 You need to enable sound to play the video.
-<video src="https://github.com/user-attachments/assets/31ed37a2-b251-4013-b5a3-e69d2c9e4ab1" 
+<video src="https://github.com/user-attachments/assets/42b54d53-d3f7-43bf-9307-906797cb1000" 
        controls 
        width="720"
        autoplay 
