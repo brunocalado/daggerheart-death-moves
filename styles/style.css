@@ -164,6 +164,18 @@
     z-index: 2;
 }
 
+/* --- Probability Text (Novo Estilo) --- */
+.probability-text {
+    margin-top: 15px;
+    font-size: 0.9rem; /* Fonte reduzida */
+    font-family: "Signika", sans-serif;
+    font-weight: normal;
+    color: rgba(255, 255, 255, 0.5); /* Branco Transparente/Discreto */
+    text-align: center; /* Centralizado */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 /* Specific Colors for Options */
 .btn-avoid {
     border-color: #FFD700;

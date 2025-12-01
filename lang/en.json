@@ -9,6 +9,10 @@
         "Name": "Text: Blaze of Glory",
         "Hint": "The message displayed in chat when Blaze of Glory is chosen."
       },
+      "ShowProbabilities": {
+        "Name": "Show Probabilities",
+        "Hint": "If checked, displays the percentage chance of outcomes below each death option."
+      },
       "Background": {
         "Name": "Image: Main Screen",
         "Hint": "The background image displayed behind the three choices."
@@ -64,6 +68,48 @@
       "SoundCritical": {
         "Name": "Sound: Result Critical",
         "Hint": "Sound played on a Critical result."
+      }
+    },
+    "UI": {
+      "MainTitle": "CHOOSE YOUR FATE",
+      "Close": "Close",
+      "Avoid": {
+        "Title": "Avoid Death",
+        "Subtitle": "Roll a Die vs Level",
+        "ScarLabel": "SCAR"
+      },
+      "Blaze": {
+        "Title": "Blaze of Glory",
+        "Subtitle": "Go out with a bang!",
+        "DeathLabel": "DEATH"
+      },
+      "Risk": {
+        "Title": "Risk it All",
+        "Subtitle": "Death or Legend",
+        "ProbText": "DEATH: 50% | LIFE: 50%"
+      }
+    },
+    "Chat": {
+      "Avoid": {
+        "Flavor": "Avoid Death Roll",
+        "ResultScar": "Avoid Death Result: SCAR",
+        "ResultSafe": "Avoid Death Result: SAFE",
+        "MsgScar": "You got a Scar!",
+        "MsgSafe": "You can rest for now.",
+        "RollDetails": "(Roll: {roll} vs Level: {level})",
+        "NoActor": "Rolled: <strong>{roll}</strong> (No actor assigned)"
+      },
+      "Risk": {
+        "Speaker": "Risk It All",
+        "HopeTitle": "HOPE TRIUMPHS!",
+        "HopeDesc": "You stand, clearing Hit Points and/or Stress equal to the Hope Die value.",
+        "FearTitle": "FEAR TAKES HOLD...",
+        "FearDesc": "You died!",
+        "CriticalTitle": "CRITICAL SUCCESS!",
+        "CriticalDesc": "You stand and clear all Hit Points and Stress."
+      },
+      "Blaze": {
+        "Title": "BLAZE OF GLORY!"
       }
     }
   }

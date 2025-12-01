@@ -3,50 +3,54 @@
     "Settings": {
       "Duration": {
         "Name": "Duração: Contagem Regressiva",
-        "Hint": "Tempo em segundos para a contagem regressiva (0-10). Defina como 0 para desativar."
+        "Hint": "Tempo em segundos para a contagem (0-10). Defina como 0 para desativar."
       },
       "BlazeMessage": {
-        "Name": "Texto: Blaze of Glory",
-        "Hint": "A mensagem exibida no chat quando Blaze of Glory é escolhido."
+        "Name": "Texto: Glória Final",
+        "Hint": "A mensagem exibida no chat quando o jogador escolhe Glória Final."
+      },
+      "ShowProbabilities": {
+        "Name": "Exibir Probabilidades",
+        "Hint": "Se marcado, exibe a porcentagem de chance dos resultados (Cicatriz/Morte) abaixo de cada opção."
       },
       "Background": {
         "Name": "Imagem: Tela Principal",
         "Hint": "A imagem de fundo exibida atrás das três escolhas."
       },
       "Blaze": {
-        "Name": "Imagem: Blaze of Glory",
-        "Hint": "A imagem mostrada quando um jogador seleciona 'Blaze of Glory'."
+        "Name": "Imagem: Glória Final",
+        "Hint": "A imagem mostrada quando o jogador seleciona 'Glória Final'."
       },
       "AvoidScar": {
         "Name": "Imagem: Evitar a Morte (Cicatriz)",
-        "Hint": "A imagem mostrada quando a rolagem de Evitar a Morte falha (Rolagem <= Nível)."
+        "Hint": "A imagem mostrada quando o teste de Evitar a Morte falha (Rolagem <= Nível)."
       },
       "AvoidSafe": {
-        "Name": "Imagem: Evitar a Morte (Seguro)",
-        "Hint": "A imagem mostrada quando a rolagem de Evitar a Morte é bem-sucedida (Rolagem > Nível)."
+        "Name": "Imagem: Evitar a Morte (Salvo)",
+        "Hint": "A imagem mostrada quando o teste de Evitar a Morte é bem-sucedido (Rolagem > Nível)."
       },
       "Hope": {
         "Name": "Imagem: Resultado Esperança",
-        "Hint": "A imagem exibida quando a rolagem de 'Arriscar Tudo' resulta em Esperança."
+        "Hint": "A imagem exibida quando o resultado de 'Arriscar Tudo' é Esperança."
       },
       "Fear": {
         "Name": "Imagem: Resultado Medo",
-        "Hint": "A imagem exibida quando a rolagem de 'Arriscar Tudo' resulta em Medo."
+        "Hint": "A imagem exibida quando o resultado de 'Arriscar Tudo' é Medo."
       },
       "Critical": {
         "Name": "Imagem: Resultado Crítico",
-        "Hint": "A imagem exibida quando a rolagem de 'Arriscar Tudo' é um Sucesso Crítico."
+        "Hint": "A imagem exibida quando o resultado de 'Arriscar Tudo' é um Sucesso Crítico."
       },
       "SoundSuspense": {
         "Name": "Som: Contagem Regressiva",
-        "Hint": "O som de suspense tocado durante a contagem regressiva de 6 segundos."
+        "Hint": "O som de suspense tocado durante a contagem de 6 segundos."
       },
       "SoundBlaze": {
-        "Name": "Som: Blaze of Glory",
-        "Hint": "O efeito sonoro tocado quando 'Blaze of Glory' é selecionado."
+        "Name": "Som: Glória Final",
+        "Hint": "O efeito sonoro tocado quando 'Glória Final' é selecionado."
       },
       "SoundAvoidSafe": {
-        "Name": "Som: Evitar a Morte (Seguro)",
+        "Name": "Som: Evitar a Morte (Salvo)",
         "Hint": "Som tocado quando Evitar a Morte é bem-sucedido."
       },
       "SoundAvoidScar": {
@@ -55,15 +59,57 @@
       },
       "SoundHope": {
         "Name": "Som: Resultado Esperança",
-        "Hint": "Som tocado em um resultado de Esperança."
+        "Hint": "Som tocado no resultado de Esperança."
       },
       "SoundFear": {
         "Name": "Som: Resultado Medo",
-        "Hint": "Som tocado em um resultado de Medo."
+        "Hint": "Som tocado no resultado de Medo."
       },
       "SoundCritical": {
         "Name": "Som: Resultado Crítico",
-        "Hint": "Som tocado em um resultado Crítico."
+        "Hint": "Som tocado no resultado de Crítico."
+      }
+    },
+    "UI": {
+      "MainTitle": "ESCOLHA SEU DESTINO",
+      "Close": "Fechar",
+      "Avoid": {
+        "Title": "Evitar a Morte",
+        "Subtitle": "Role um Dado vs Nível",
+        "ScarLabel": "CICATRIZ"
+      },
+      "Blaze": {
+        "Title": "Glória Final",
+        "Subtitle": "Saia com estilo!",
+        "DeathLabel": "MORTE"
+      },
+      "Risk": {
+        "Title": "Arriscar Tudo",
+        "Subtitle": "Morte ou Lenda",
+        "ProbText": "MORTE: 50% | VIDA: 50%"
+      }
+    },
+    "Chat": {
+      "Avoid": {
+        "Flavor": "Rolagem Evitar a Morte",
+        "ResultScar": "Resultado: CICATRIZ",
+        "ResultSafe": "Resultado: SALVO",
+        "MsgScar": "Você ganhou uma Cicatriz!",
+        "MsgSafe": "Você pode descansar por enquanto.",
+        "RollDetails": "(Rolagem: {roll} vs Nível: {level})",
+        "NoActor": "Rolou: <strong>{roll}</strong> (Nenhum ator atribuído)"
+      },
+      "Risk": {
+        "Speaker": "Arriscar Tudo",
+        "HopeTitle": "A ESPERANÇA TRIUNFA!",
+        "HopeDesc": "Você se levanta, limpando Pontos de Vida e/ou Estresse iguais ao valor do Dado de Esperança.",
+        "FearTitle": "O MEDO DOMINA...",
+        "FearDesc": "Você morreu!",
+        "CriticalTitle": "SUCESSO CRÍTICO!",
+        "CriticalDesc": "Você se levanta e limpa todos os Pontos de Vida e Estresse."
+      },
+      "Blaze": {
+        "Title": "GLÓRIA FINAL!"
       }
     }
   }
