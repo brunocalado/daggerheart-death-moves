@@ -203,3 +203,68 @@
     box-shadow: 0 0 40px rgba(170, 0, 255, 0.6);
     background: linear-gradient(to bottom, rgba(170, 0, 255, 0.1), rgba(0,0,0,0.8));
 }
+
+/* --- GM DIALOG STYLES (High Contrast & Readability) --- */
+/* Forces a dark background with white text regardless of Foundry theme */
+.death-moves-dialog .window-content {
+    background: #151515 !important; /* Almost black */
+    color: #ffffff !important;       /* Pure white */
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.death-moves-dialog header.window-header {
+    background: #222;
+    border-bottom: 2px solid #8b0000;
+    color: #fff;
+    font-family: "Modesto Condensed", serif;
+    font-size: 1.1rem;
+}
+
+.death-moves-dialog .death-form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #fff; /* High contrast */
+    font-size: 1.1rem;
+}
+
+.death-moves-dialog .death-form-group p {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: #ddd; /* Light grey for secondary text */
+}
+
+/* High Contrast Inputs */
+.death-moves-dialog select.death-select {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #777;
+    width: 100%;
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 1rem;
+}
+
+.death-moves-dialog select.death-select:focus {
+    border-color: #ff4500;
+    outline: none;
+}
+
+/* Clear Action Button */
+.death-moves-dialog .dialog-buttons button {
+    background: #444;
+    border: 1px solid #888;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 8px;
+    font-size: 1rem;
+}
+
+.death-moves-dialog .dialog-buttons button:hover {
+    background: #666;
+    border-color: white;
+    cursor: pointer;
+}

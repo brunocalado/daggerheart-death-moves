@@ -158,12 +158,14 @@ export class DeathUI {
     }
 
     static createGMDialog(users, onTrigger) {
+        // Clean HTML, style is handled by CSS class .death-moves-dialog
         const content = `
-            <div class="form-group">
+            <div class="death-form-group">
                 <label>Select Player:</label>
-                <select id="death-player-select" style="width: 100%">
+                <select id="death-player-select" class="death-select">
                     ${users.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
                 </select>
+                <p>This will send the Death Moves screen to the selected player.</p>
             </div>
         `;
 
@@ -179,7 +181,9 @@ export class DeathUI {
                         onTrigger(userId);
                     }
                 }
-            }
+            },
+            default: "trigger",
+            classes: ["death-moves-dialog"] // Unique class for targeting
         }).render(true);
     }
 }
