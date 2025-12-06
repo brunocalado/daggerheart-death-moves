@@ -28,6 +28,15 @@ export class DeathSettings {
             default: "A hero falls, but their legend rises..."
         });
 
+        game.settings.register(MODULE_ID, 'riskItAllDoubleRoll', {
+            name: "DEATH_OPTIONS.Settings.RiskDoubleRoll.Name",
+            hint: "DEATH_OPTIONS.Settings.RiskDoubleRoll.Hint",
+            scope: 'world',
+            config: true,
+            type: Boolean,
+            default: true // Changed to true by default
+        });
+
         // --- PROBABILITIES ---
         game.settings.register(MODULE_ID, 'showProbabilities', {
             name: "DEATH_OPTIONS.Settings.ShowProbabilities.Name",

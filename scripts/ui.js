@@ -157,6 +157,29 @@ export class DeathUI {
         return finish;
     }
 
+    /**
+     * Shows a fullscreen pulsing border effect
+     * @param {string} type - 'fear' or 'hope'
+     */
+    static showBorderEffect(type) {
+        // Remove existing if any to avoid stacking or mixed classes
+        this.removeBorderEffect();
+
+        const div = document.createElement('div');
+        div.id = 'risk-border-overlay';
+        
+        if (type) {
+            div.classList.add(`border-${type}`);
+        }
+
+        document.body.appendChild(div);
+    }
+
+    static removeBorderEffect() {
+        const existing = document.getElementById('risk-border-overlay');
+        if (existing) existing.remove();
+    }
+
     static createGMDialog(users, onTrigger) {
         // Clean HTML, style is handled by CSS class .death-moves-dialog
         const content = `

@@ -16,14 +16,15 @@ You need to enable sound to play the video.
 
 * **Cinematic Selection Screen:** When triggered, the player is presented with a full-screen overlay featuring three distinct options: **Avoid Death**, **Blaze of Glory**, and **Risk it All**.
 * **Audiovisual Immersion:** The module brings death moves to life by automatically playing specific images, animations, and sounds for every outcome, ensuring a dramatic experience.
+* **Sequential Dramatic Rolls:** The "Risk it All" mechanic now builds tension by rolling the **Fear** die first, waiting, and then rolling the **Hope** die, accompanied by immersive screen effects (pulsing borders).
 * **3D Dice Integration:** Seamlessly integrates with **Dice So Nice!** to display rolls directly on the screen.
 * **Rule Assistance:** Automatically posts the correct rule interpretation in the chat based on the roll result.
 * **Configurable Countdown:** Customize the duration of the suspenseful countdown, or disable it completely for instant results.
 
 ### The Options
-* **Avoid Death:** Features a suspenseful countdown (configurable) and an automatic check against the linked character's Level, displaying unique visual results for Safe or Scar outcomes.
+* **Avoid Death:** Features a suspenseful countdown and visual effects (pulsing gold border). Automatically checks against the linked character's Level, displaying unique visual results for Safe or Scar outcomes.
 * **Blaze of Glory:** Triggers a dramatic sound effect, a configurable chat message, and displays a splash art, allowing the player to narrate their final heroic moment.
-* **Risk it All:** The classic experience with a countdown (configurable), dice rolling, and cinematic results for Hope, Fear, or Critical Success.
+* **Risk it All:** A high-stakes moment featuring a dramatic sequential roll. The screen reacts to the dice—pulsing purple for Fear and gold for Hope—culminating in cinematic results for Hope, Fear, or Critical Success.
 
 ---
 
@@ -60,7 +61,7 @@ There are two ways for the Gamemaster to trigger the Death Moves screen for a pl
 
 ## ⚙️ Configuration
 
-You can customize the entire experience in **Configure Settings > Module Settings > Daggerheart: Death Moves**. This allows you to replace all background images, result screens, and sound effects. You can also adjust the countdown duration from 0 to 10 seconds and customize the Blaze of Glory chat message.
+You can customize the entire experience in **Configure Settings > Module Settings > Daggerheart: Death Moves**. This allows you to replace all background images, result screens, and sound effects. You can also adjust the countdown duration, toggle the sequential rolling for "Risk it All", and customize the Blaze of Glory chat message.
 
 ---
 

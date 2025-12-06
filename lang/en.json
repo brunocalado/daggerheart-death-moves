@@ -9,6 +9,10 @@
         "Name": "Text: Blaze of Glory",
         "Hint": "The message displayed in chat when Blaze of Glory is chosen."
       },
+      "RiskDoubleRoll": {
+        "Name": "Risk It All: Double Roll (Sequential)",
+        "Hint": "If enabled, Risk It All will roll the Fear die first, wait 5 seconds, and then roll the Hope die for dramatic effect."
+      },
       "ShowProbabilities": {
         "Name": "Show Probabilities",
         "Hint": "If checked, displays the percentage chance of outcomes below each death option."

@@ -9,6 +9,10 @@
         "Name": "Texto: Glória Final",
         "Hint": "A mensagem exibida no chat quando o jogador escolhe Glória Final."
       },
+      "RiskDoubleRoll": {
+        "Name": "Arriscar Tudo: Rolagem Sequencial",
+        "Hint": "Se ativado, Arriscar Tudo rolará primeiro o Dado de Medo, aguardará 5 segundos e depois rolará o Dado de Esperança."
+      },
       "ShowProbabilities": {
         "Name": "Exibir Probabilidades",
         "Hint": "Se marcado, exibe a porcentagem de chance dos resultados (Cicatriz/Morte) abaixo de cada opção."

@@ -1,5 +1,6 @@
 import { DeathSettings } from './settings.js';
 import { DeathAudioManager } from './audio.js';
+import { DeathUI } from './ui.js';
 import { SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 
 /**
@@ -8,6 +9,10 @@ import { SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 export class DeathLogic {
     
     static async handleAvoidDeath() {
+        // Show Gold Border Effect (Local + Network)
+        DeathUI.showBorderEffect('hope');
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'hope' });
+
         const roll = new Roll('1d12');
         await roll.evaluate();
 
@@ -19,6 +24,10 @@ export class DeathLogic {
         if (game.dice3d) {
             try { await game.dice3d.showForRoll(roll, game.user, true); } catch (e) {}
         }
+
+        // Remove Border Effect after roll (Local + Network)
+        DeathUI.removeBorderEffect();
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
 
         const rollTotal = roll.total;
         const actor = game.user.character;
@@ -68,6 +77,9 @@ export class DeathLogic {
         });
     }
 
+    /**
+     * Standard Risk It All (Simultaneous Roll)
+     */
     static async handleRiskItAll() {
         const roll = new Roll('1d12 + 1d12');
         await roll.evaluate();
@@ -80,9 +92,53 @@ export class DeathLogic {
 
         const hopeVal = roll.terms[0].total;
         const fearVal = roll.terms[2].total;
+
+        this._processRiskResult(hopeVal, fearVal);
+    }
+
+    /**
+     * Sequential Risk It All (Fear then Hope with delay)
+     */
+    static async handleRiskItAllSequential() {
+        // 1. Fear Phase - Show Purple Border (Local + Network)
+        DeathUI.showBorderEffect('fear');
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'fear' });
+        
+        const fearRoll = new Roll('1d12');
+        await fearRoll.evaluate();
+        // Fear styling (Purple)
+        if (fearRoll.terms[0]) fearRoll.terms[0].options.appearance = { colorset: "custom", foreground: "#FFFFFF", background: "#2c003e", texture: "none" };
+        if (game.dice3d) await game.dice3d.showForRoll(fearRoll, game.user, true);
+
+        // 2. Wait 5 seconds
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // 3. Hope Phase - Show Gold Border (Local + Network)
+        DeathUI.showBorderEffect('hope');
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'hope' });
+        
+        const hopeRoll = new Roll('1d12');
+        await hopeRoll.evaluate();
+        // Hope styling (Gold)
+        if (hopeRoll.terms[0]) hopeRoll.terms[0].options.appearance = { colorset: "custom", foreground: "#000000", background: "#FFD700", texture: "none" };
+        if (game.dice3d) await game.dice3d.showForRoll(hopeRoll, game.user, true);
+
+        // 4. Wait Extra Delay (4 seconds) before result
+        await new Promise(resolve => setTimeout(resolve, 4000));
+
+        // 5. Cleanup and Result (Local + Network)
+        DeathUI.removeBorderEffect();
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
+        
+        this._processRiskResult(hopeRoll.total, fearRoll.total);
+    }
+
+    /**
+     * Shared logic for processing Risk It All results
+     */
+    static _processRiskResult(hopeVal, fearVal) {
         let resultKey, messageText;
 
-        // Risk it All Rules
         if (hopeVal > fearVal) {
             resultKey = 'hopePath';
             messageText = `<div style="font-weight: bold; margin-bottom: 5px; color: #FFD700;">${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeTitle")}</div>

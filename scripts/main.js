@@ -24,6 +24,12 @@ class DeathMovesController {
                 case SOCKET_TYPES.PLAY_SOUND: 
                     DeathAudioManager.playSound(payload.soundKey); 
                     break;
+                case SOCKET_TYPES.SHOW_BORDER: 
+                    DeathUI.showBorderEffect(payload.borderType);
+                    break;
+                case SOCKET_TYPES.REMOVE_BORDER:
+                    DeathUI.removeBorderEffect();
+                    break;
             }
         });
         
@@ -67,9 +73,19 @@ class DeathMovesController {
                 DeathLogic.handleBlazeOfGlory(() => document.getElementById('risk-it-all-overlay')?.remove());
             },
             onRisk: async (btnElement) => {
+                // Execute countdown regardless of mode
                 await DeathMovesController._runCountdown(btnElement);
+                
+                // Remove UI
                 document.getElementById('risk-it-all-overlay')?.remove();
-                DeathLogic.handleRiskItAll();
+
+                const doubleRollMode = DeathSettings.get('riskItAllDoubleRoll');
+                
+                if (doubleRollMode) {
+                    await DeathLogic.handleRiskItAllSequential();
+                } else {
+                    DeathLogic.handleRiskItAll();
+                }
             }
         };
 
