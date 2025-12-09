@@ -2,6 +2,13 @@
 
 **Daggerheart: Death Moves** is a Foundry VTT module designed to transform the "Death Move" moment into a high-stakes, cinematic event. Instead of a simple manual roll, this module orchestrates a dramatic audiovisual experience for the whole table.
 
+You need to enable sound to play the video.
+<video src="https://github.com/user-attachments/assets/37cafad1-4a04-4367-bee7-754d2198a257" 
+       controls 
+       width="720"
+       autoplay 
+       loop 
+       muted></video>
 ---
 
 ## 🌟 Key Features
@@ -28,11 +35,20 @@ The Gamemaster initiates the scene when a character falls:
 * **Sidebar:** Open the Daggerheart Menu (sidebar) and click the **"Trigger Death Move"** button (skull icon). Select the player from the list.
 * **Macro:** Execute `DeathMoves.trigger()` via a script macro.
 
+<p align="center">
+  <img width="400" src="docs/sidebar.webp">
+</p>
+
+
 ### 2. The Player Chooses
 The target player receives the interactive screen. A suspenseful countdown (configurable) adds pressure.
 * **Avoid Death:** Automatically rolls 1d12 against the character's Level.
 * **Risk it All:** Initiates the sequential Hope vs. Fear roll.
 * **Blaze of Glory:** Triggers a heroic finale message and sound.
+
+<p align="center">
+  <img width="800" src="docs/sidebar.webp">
+</p>
 
 ### 3. The Table Watches
 Everyone else is in **Spectator Mode**. They cannot interact, but they see the announcement banner and hear the sounds in sync with the active player.
