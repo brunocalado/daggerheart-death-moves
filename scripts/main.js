@@ -1,6 +1,6 @@
 /**
  * Daggerheart Death Moves
- * Refactored Entry Point
+ * Refactored Entry Point - V13 Compatible
  */
 import { MODULE_ID, SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 import { DeathSettings } from './settings.js';
@@ -17,6 +17,15 @@ class DeathMovesController {
             switch (payload.type) {
                 case SOCKET_TYPES.SHOW_UI: 
                     DeathMovesController._handleShowUI(payload); 
+                    break;
+                case SOCKET_TYPES.SHOW_SPECTATOR_UI:
+                    DeathMovesController._handleSpectatorUI(payload);
+                    break;
+                case SOCKET_TYPES.REMOVE_SPECTATOR_UI:
+                    DeathUI.removeSpectatorOverlay();
+                    break;
+                case SOCKET_TYPES.SHOW_ANNOUNCEMENT:
+                    DeathUI.showAnnouncement(payload.text);
                     break;
                 case SOCKET_TYPES.PLAY_MEDIA: 
                     DeathAudioManager.playMedia(payload.mediaKey); 
@@ -50,37 +59,52 @@ class DeathMovesController {
         const users = game.users.filter(u => u.active && !u.isGM);
         if (users.length === 0) return ui.notifications.warn("No players connected.");
 
-        DeathUI.createGMDialog(users, (userId) => {
-            game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_UI, targetUserId: userId });
-            ui.notifications.info("Death Moves sent to player.");
+        DeathUI.createGMDialog(users, (targetUserId) => {
+            // Calculate probabilities for the TARGET actor (Server-Side Logic simulation)
+            const targetUser = game.users.get(targetUserId);
+            const targetActor = targetUser ? targetUser.character : null;
+            const probs = DeathUI.calculateProbabilitiesForActor(targetActor);
+
+            const payload = { 
+                targetUserId: targetUserId,
+                probs: probs 
+            };
+
+            // 1. Emit to the specific Target (Interactive Mode)
+            game.socket.emit(SOCKET_NAME, { ...payload, type: SOCKET_TYPES.SHOW_UI });
+            
+            // 2. Emit to everyone else (Spectator Mode)
+            game.socket.emit(SOCKET_NAME, { ...payload, type: SOCKET_TYPES.SHOW_SPECTATOR_UI });
+            
+            // 3. Show locally for the GM
+            DeathMovesController._handleSpectatorUI(payload);
         });
     }
 
-    // Handles displaying the UI for the specific target user
+    // Handles displaying the INTERACTIVE UI for the specific target user
     static async _handleShowUI(payload) {
         if (game.user.id !== payload.targetUserId) return;
 
         const callbacks = {
             onCancel: () => {
                 DeathAudioManager.stopCurrentSound();
+                game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_SPECTATOR_UI });
             },
             onAvoid: async (btnElement) => {
-                await DeathMovesController._runCountdown(btnElement);
+                // Pass sound key 'soundChatAvoid'
+                await DeathMovesController._handleSelectionSequence("Avoid Death", btnElement, 'soundChatAvoid');
                 DeathLogic.handleAvoidDeath();
-                document.getElementById('risk-it-all-overlay')?.remove();
             },
-            onBlaze: (btnElement) => {
-                DeathLogic.handleBlazeOfGlory(() => document.getElementById('risk-it-all-overlay')?.remove());
+            onBlaze: async (btnElement) => {
+                // Pass sound key 'soundChatBlaze'
+                await DeathMovesController._handleSelectionSequence("Blaze of Glory", btnElement, 'soundChatBlaze');
+                DeathLogic.handleBlazeOfGlory(() => {}); 
             },
             onRisk: async (btnElement) => {
-                // Execute countdown regardless of mode
-                await DeathMovesController._runCountdown(btnElement);
+                // Pass sound key 'soundChatRisk'
+                await DeathMovesController._handleSelectionSequence("Risk it All", btnElement, 'soundChatRisk');
                 
-                // Remove UI
-                document.getElementById('risk-it-all-overlay')?.remove();
-
                 const doubleRollMode = DeathSettings.get('riskItAllDoubleRoll');
-                
                 if (doubleRollMode) {
                     await DeathLogic.handleRiskItAllSequential();
                 } else {
@@ -89,7 +113,41 @@ class DeathMovesController {
             }
         };
 
-        DeathUI.createOverlay(callbacks);
+        DeathUI.createOverlay(callbacks, false, payload.probs);
+    }
+
+    // Handles displaying the PASSIVE UI for spectators
+    static _handleSpectatorUI(payload) {
+        if (game.user.id === payload.targetUserId) return;
+        DeathUI.createOverlay({}, true, payload.probs);
+    }
+
+    // New Flow: Countdown -> Clear UI -> Play Sound -> Announcement -> Delay
+    static async _handleSelectionSequence(optionName, btnElement, announcementSoundKey) {
+        // 1. Run Countdown FIRST (on the active button)
+        await DeathMovesController._runCountdown(btnElement);
+
+        // 2. Remove UI for EVERYONE (Target + Spectators)
+        DeathMovesController._cleanup(); 
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_SPECTATOR_UI }); 
+
+        // 3. Play Announcement Sound (Immediately when text appears)
+        if (announcementSoundKey) {
+            game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_SOUND, soundKey: announcementSoundKey });
+            DeathAudioManager.playSound(announcementSoundKey);
+        }
+
+        // 4. Show Announcement to EVERYONE
+        const announcementPayload = { type: SOCKET_TYPES.SHOW_ANNOUNCEMENT, text: optionName };
+        game.socket.emit(SOCKET_NAME, announcementPayload);
+        DeathUI.showAnnouncement(optionName); // Show locally
+
+        // 5. Wait 4 Seconds (3s reading + 1s fade buffer)
+        await new Promise(resolve => setTimeout(resolve, 4000));
+    }
+
+    static _cleanup() {
+        document.getElementById('risk-it-all-overlay')?.remove();
     }
 
     // Handles the visual countdown on the selected button
@@ -98,10 +156,12 @@ class DeathMovesController {
         const duration = DeathSettings.get('countdownDuration');
         if (duration <= 0) return;
 
-        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_SOUND, soundKey: 'soundSuspense' });
-        DeathAudioManager.playSound('soundSuspense');
-
+        // Loop: Plays sound every second (tick)
         for (let i = duration; i > 0; i--) {
+            // Play sound for everyone on each tick
+            game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_SOUND, soundKey: 'soundSuspense' });
+            DeathAudioManager.playSound('soundSuspense');
+
             DeathUI.updateCountdown(buttonElement, i);
             await new Promise(resolve => setTimeout(resolve, 1000));
         }

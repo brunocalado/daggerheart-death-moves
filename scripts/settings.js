@@ -9,6 +9,20 @@ export class DeathSettings {
         const audioPicker = { type: String, scope: 'world', config: true, filePicker: 'audio' };
 
         // --- CONFIGURATION ---
+        game.settings.register(MODULE_ID, 'soundLanguage', {
+            name: "DEATH_OPTIONS.Settings.SoundLanguage.Name",
+            hint: "DEATH_OPTIONS.Settings.SoundLanguage.Hint",
+            scope: 'world',
+            config: true,
+            type: String,
+            choices: {
+                "en": "English",
+                "pt-BR": "Português (Brasil)",
+                "custom": "Custom (Use File Paths Below)"
+            },
+            default: "en"
+        });
+
         game.settings.register(MODULE_ID, 'countdownDuration', {
             name: "DEATH_OPTIONS.Settings.Duration.Name",
             hint: "DEATH_OPTIONS.Settings.Duration.Hint",
@@ -34,7 +48,7 @@ export class DeathSettings {
             scope: 'world',
             config: true,
             type: Boolean,
-            default: true // Changed to true by default
+            default: true
         });
 
         // --- PROBABILITIES ---
@@ -69,7 +83,6 @@ export class DeathSettings {
             'criticalPath': 'critical.webp'
         };
 
-        // Automatically register settings based on keys matching en.json
         for (const [key, file] of Object.entries(paths)) {
             const keyBase = key.replace('Path', '');
             const i18nKey = DeathSettings._capitalize(keyBase);
@@ -85,13 +98,17 @@ export class DeathSettings {
 
     static _registerAudio(config) {
         const paths = {
+            'soundRollScreen': 'roll-screen.mp3', // NEW
             'soundSuspense': 'countdown.mp3',
             'soundBlaze': 'blaze.mp3',
             'soundAvoidSafe': 'avoid_safe.mp3',
             'soundAvoidScar': 'avoid_scar.mp3',
             'soundHope': 'hope.mp3',
             'soundFear': 'fear.mp3',
-            'soundCritical': 'critical.mp3'
+            'soundCritical': 'critical.mp3',
+            'soundChatAvoid': 'choice-avoid-death.mp3',
+            'soundChatBlaze': 'choice-blaze-of-glory.mp3',
+            'soundChatRisk': 'choice-risk-it-all.mp3'
         };
 
         for (const [key, file] of Object.entries(paths)) {
@@ -101,12 +118,49 @@ export class DeathSettings {
                 name: `DEATH_OPTIONS.Settings.${i18nKey}.Name`,
                 hint: `DEATH_OPTIONS.Settings.${i18nKey}.Hint`,
                 ...config,
-                default: `modules/${MODULE_ID}/assets/audio/${file}`
+                default: `modules/${MODULE_ID}/assets/audio/english/${file}` // Default to english folder structure
             });
         }
     }
 
     static get(key) {
         return game.settings.get(MODULE_ID, key);
+    }
+
+    /**
+     * Gets the correct audio path based on the Language Setting.
+     * @param {string} key - The setting key (e.g., 'soundBlaze')
+     * @returns {string} - The path to the audio file.
+     */
+    static getAudioPath(key) {
+        const lang = game.settings.get(MODULE_ID, 'soundLanguage');
+        
+        // Define default filenames mapping (must match keys in _registerAudio)
+        const filenames = {
+            'soundRollScreen': 'roll-screen.mp3',
+            'soundSuspense': 'countdown.mp3',
+            'soundBlaze': 'blaze.mp3',
+            'soundAvoidSafe': 'avoid_safe.mp3',
+            'soundAvoidScar': 'avoid_scar.mp3',
+            'soundHope': 'hope.mp3',
+            'soundFear': 'fear.mp3',
+            'soundCritical': 'critical.mp3',
+            'soundChatAvoid': 'choice-avoid-death.mp3',
+            'soundChatBlaze': 'choice-blaze-of-glory.mp3',
+            'soundChatRisk': 'choice-risk-it-all.mp3'
+        };
+
+        const filename = filenames[key];
+
+        if (lang === 'custom') {
+            // Return whatever is manually set in the settings
+            return game.settings.get(MODULE_ID, key);
+        } else if (lang === 'pt-BR') {
+            // Force PT-BR path
+            return `modules/${MODULE_ID}/assets/audio/ptbr/${filename}`;
+        } else {
+            // Force English path (default)
+            return `modules/${MODULE_ID}/assets/audio/english/${filename}`;
+        }
     }
 }

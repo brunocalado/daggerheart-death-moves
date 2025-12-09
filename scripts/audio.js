@@ -3,8 +3,14 @@ import { DeathSettings } from './settings.js';
 export class DeathAudioManager {
     static currentRequestSound = null;
 
+    /**
+     * Plays a sound based on the key.
+     * NOW USES DeathSettings.getAudioPath() to handle language selection.
+     */
     static playSound(settingKey) {
-        const soundSrc = DeathSettings.get(settingKey);
+        // Use the new helper method to resolve path based on language
+        const soundSrc = DeathSettings.getAudioPath(settingKey);
+        
         if (soundSrc) {
             AudioHelper.play({src: soundSrc, volume: 1.0, autoplay: true, loop: false}, false);
         }

@@ -1,6 +1,10 @@
 {
   "DEATH_OPTIONS": {
     "Settings": {
+      "SoundLanguage": {
+        "Name": "Sound Language",
+        "Hint": "Select which audio folder to use. 'Custom' uses the file paths defined below."
+      },
       "Duration": {
         "Name": "Duration: Countdown",
         "Hint": "Time in seconds for the countdown (0-10). Set to 0 to disable."
@@ -34,20 +38,24 @@
         "Hint": "The image shown when Avoid Death roll succeeds (Roll > Level)."
       },
       "Hope": {
-        "Name": "Image: Result Hope",
+        "Name": "Image: Risk it All (Hope)",
         "Hint": "The image displayed when the 'Risk it All' roll results in Hope."
       },
       "Fear": {
-        "Name": "Image: Result Fear",
+        "Name": "Image: Risk it All (Fear)",
         "Hint": "The image displayed when the 'Risk it All' roll results in Fear."
       },
       "Critical": {
-        "Name": "Image: Result Critical",
+        "Name": "Image: Risk it All (Critical)",
         "Hint": "The image displayed when the 'Risk it All' roll is a Critical Success."
+      },
+      "SoundRollScreen": {
+        "Name": "Sound: Roll Screen Open",
+        "Hint": "Sound played when the main selection screen appears."
       },
       "SoundSuspense": {
         "Name": "Sound: Countdown",
-        "Hint": "The ticking/suspense sound played during the 6-second countdown."
+        "Hint": "The ticking/suspense sound played during the countdown (plays every second)."
       },
       "SoundBlaze": {
         "Name": "Sound: Blaze of Glory",
@@ -62,20 +70,33 @@
         "Hint": "Sound played when Avoid Death fails (Scar)."
       },
       "SoundHope": {
-        "Name": "Sound: Result Hope",
+        "Name": "Sound: Risk it All (Hope)",
         "Hint": "Sound played on a Hope result."
       },
       "SoundFear": {
-        "Name": "Sound: Result Fear",
+        "Name": "Sound: Risk it All (Fear)",
         "Hint": "Sound played on a Fear result."
       },
       "SoundCritical": {
-        "Name": "Sound: Result Critical",
+        "Name": "Sound: Risk it All (Critical)",
         "Hint": "Sound played on a Critical result."
+      },
+      "SoundChatAvoid": {
+        "Name": "Sound: Announcement (Avoid)",
+        "Hint": "Sound played when the Avoid Death announcement banner appears."
+      },
+      "SoundChatBlaze": {
+        "Name": "Sound: Announcement (Blaze)",
+        "Hint": "Sound played when the Blaze of Glory announcement banner appears."
+      },
+      "SoundChatRisk": {
+        "Name": "Sound: Announcement (Risk)",
+        "Hint": "Sound played when the Risk it All announcement banner appears."
       }
     },
     "UI": {
       "MainTitle": "CHOOSE YOUR FATE",
+      "MainTitleSpectator": "Waiting for Player Choice...",
       "Close": "Close",
       "Avoid": {
         "Title": "Avoid Death",
