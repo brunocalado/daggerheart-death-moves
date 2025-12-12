@@ -2,7 +2,7 @@
   "id": "daggerheart-death-moves",
   "title": "Daggerheart: Death Moves",
   "description": "Enhances the Death Move moment with immersive audio, visual effects, and a dramatic interface for choosing between Avoid Death, Blaze of Glory, or Risk it All.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "compatibility": {
     "minimum": "13",
     "verified": "13"

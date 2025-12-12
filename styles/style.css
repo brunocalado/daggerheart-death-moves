@@ -247,8 +247,9 @@
 }
 
 /* --- GM DIALOG STYLES (High Contrast & Readability) --- */
-/* Forces a dark background with white text regardless of Foundry theme */
-.death-moves-dialog .window-content {
+/* V13 UPDATE: Supports both .window-content (V1) and .window-body (V2) */
+.death-moves-dialog .window-content,
+.death-moves-dialog .window-body {
     background: #151515 !important; /* Almost black */
     color: #ffffff !important;       /* Pure white */
     border: 1px solid #444;
@@ -295,7 +296,9 @@
 }
 
 /* Clear Action Button */
-.death-moves-dialog .dialog-buttons button {
+/* V13 UPDATE: Targeted correct footer buttons for V2 */
+.death-moves-dialog .dialog-buttons button,
+.death-moves-dialog .window-footer button {
     background: #444;
     border: 1px solid #888;
     color: white;
@@ -305,7 +308,8 @@
     font-size: 1rem;
 }
 
-.death-moves-dialog .dialog-buttons button:hover {
+.death-moves-dialog .dialog-buttons button:hover,
+.death-moves-dialog .window-footer button:hover {
     background: #666;
     border-color: white;
     cursor: pointer;

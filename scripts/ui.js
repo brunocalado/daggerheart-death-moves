@@ -227,7 +227,13 @@ export class DeathUI {
         if (existing) existing.remove();
     }
 
-    static createGMDialog(users, onTrigger) {
+    /**
+     * V13 Update: Uses DialogV2 to avoid deprecation warnings.
+     */
+    static async createGMDialog(users, onTrigger) {
+        // Import DialogV2 from API
+        const { DialogV2 } = foundry.applications.api;
+
         const content = `
             <div class="death-form-group">
                 <label>Select Player:</label>
@@ -238,21 +244,30 @@ export class DeathUI {
             </div>
         `;
 
-        new Dialog({
-            title: "Trigger Death Moves",
-            content: content,
-            buttons: {
-                trigger: {
-                    label: "Trigger",
-                    icon: `<i class="fas fa-skull"></i>`,
-                    callback: (html) => {
-                        const userId = html.find('#death-player-select').val();
-                        onTrigger(userId);
-                    }
-                }
+        // Use DialogV2.wait for async handling
+        const result = await DialogV2.wait({
+            window: { 
+                title: "Trigger Death Moves", 
+                icon: "fas fa-skull" 
             },
-            default: "trigger",
-            classes: ["death-moves-dialog"] 
-        }).render(true);
+            content: content,
+            buttons: [{
+                action: "trigger",
+                label: "Trigger",
+                icon: "fas fa-skull",
+                callback: (event, button, dialog) => {
+                    // Access the DOM element directly from the dialog instance
+                    const select = dialog.element.querySelector('#death-player-select');
+                    return select ? select.value : null;
+                }
+            }],
+            close: () => null,
+            classes: ["death-moves-dialog"] // Keep original class for styling
+        });
+
+        // Callback only if confirmed
+        if (result) {
+            onTrigger(result);
+        }
     }
 }

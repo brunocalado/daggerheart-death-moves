@@ -12,7 +12,8 @@ export class DeathAudioManager {
         const soundSrc = DeathSettings.getAudioPath(settingKey);
         
         if (soundSrc) {
-            AudioHelper.play({src: soundSrc, volume: 1.0, autoplay: true, loop: false}, false);
+            // V13 FIX: AudioHelper is now namespaced under foundry.audio
+            foundry.audio.AudioHelper.play({src: soundSrc, volume: 1.0, autoplay: true, loop: false}, false);
         }
     }
 
