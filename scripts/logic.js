@@ -149,7 +149,7 @@ export class DeathLogic {
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: "Death Moves" }),
             content: this._createStyledChatContent(mainTitle, mainText, bgImage),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER // UPDATED: type -> style
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER
         });
     }
 
@@ -219,21 +219,24 @@ export class DeathLogic {
      * @param {number} fearVal - Value of the Fear die
      */
     static _processRiskResult(hopeVal, fearVal) {
-        let resultKey, mainTitle, mainText;
+        let resultKey, mainTitle, mainText, soundKey;
 
         if (hopeVal > fearVal) {
             // Case: Hope is greater. Character lives and recovers.
             resultKey = 'hopePath';
+            soundKey = 'soundHope'; // Define sound explicitly
             mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeTitle");
             mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeDesc");
         } else if (fearVal > hopeVal) {
             // Case: Fear is greater. Character dies.
             resultKey = 'fearPath';
+            soundKey = 'soundFear'; // Define sound explicitly
             mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearTitle");
             mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearDesc");
         } else {
             // Case: Tie. Critical Success. Full recovery.
             resultKey = 'criticalPath';
+            soundKey = 'soundCritical'; // Define sound explicitly
             mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.CriticalTitle");
             mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.CriticalDesc");
         }
@@ -248,7 +251,13 @@ export class DeathLogic {
         const fullText = diceText + mainText;
         const bgImage = DeathSettings.get(resultKey) || "";
 
-        // Play audiovisual media
+        // Play Sound (Explicitly call both Socket and Local)
+        if (soundKey) {
+            game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_SOUND, soundKey: soundKey });
+            DeathAudioManager.playSound(soundKey);
+        }
+
+        // Play Media (Image Overlay)
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_MEDIA, mediaKey: resultKey });
         DeathAudioManager.playMedia(resultKey);
 
@@ -256,7 +265,7 @@ export class DeathLogic {
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Speaker") }),
             content: this._createStyledChatContent(mainTitle, fullText, bgImage),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER // UPDATED: type -> style
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER
         });
     }
 
@@ -276,7 +285,7 @@ export class DeathLogic {
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: "Death Moves" }),
             content: this._createStyledChatContent(title, blazeMsg, bgImage),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER // UPDATED: type -> style
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER
         });
 
         // Trigger callback to remove UI if provided
