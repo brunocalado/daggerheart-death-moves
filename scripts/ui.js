@@ -225,6 +225,15 @@ export class DeathUI {
         const div = document.createElement('div');
         div.id = 'risk-border-overlay';
         if (type) div.classList.add(`border-${type}`);
+        
+        // --- ADICIONADO: Label de Texto (HOPE / FEAR) ---
+        if (type) {
+            const label = document.createElement('div');
+            label.classList.add('border-label');
+            label.innerText = type.toUpperCase(); // Converte 'hope' para "HOPE"
+            div.appendChild(label);
+        }
+
         document.body.appendChild(div);
     }
 

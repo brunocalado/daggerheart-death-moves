@@ -316,34 +316,87 @@
 }
 
 /* --- NEW Pulsing Border Overlay --- */
+/* ATUALIZADO: Técnica do 'Buraco' para cantos internos arredondados */
 #risk-border-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    /* Recuamos o elemento 20px para dentro da tela */
+    top: 20px; 
+    left: 20px; 
+    right: 20px; 
+    bottom: 20px;
+    width: auto;
+    height: auto;
     z-index: 10500;
-    pointer-events: none; /* Allows clicks to pass through to dice */
+    pointer-events: none; 
     box-sizing: border-box;
-    border-style: solid;
-    border-width: 20px;
+    
+    /* Aumentamos o raio para 60px para garantir que a curva sobreviva ao desfoque */
+    border-radius: 60px;
+    
+    /* Removemos a borda padrão */
+    border: none;
+    
+    /* A Animação agora cria a borda sólida usando uma sombra gigante que se espalha para fora */
     animation: borderPulse 2s infinite ease-in-out;
 }
 
+/* --- NEW: Border Text Label (HOPE / FEAR) --- */
+#risk-border-overlay .border-label {
+    position: absolute;
+    top: 30px; /* Ajustado pois o pai já tem margem de 20px do topo */
+    width: 100%;
+    text-align: center;
+    font-family: "Modesto Condensed", serif;
+    font-size: 6rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 10px;
+    z-index: 10501; /* Above the border itself */
+    opacity: 0;
+    animation: fadeInText 0.5s ease-out forwards;
+}
+
 .border-fear {
-    border-color: #4b0082; /* Indigo/Dark Purple */
-    box-shadow: inset 0 0 60px #4b0082, 0 0 20px #4b0082;
+    /* Define a cor principal para a sombra e texto */
+    color: #4b0082; /* Indigo/Dark Purple */
+}
+
+.border-fear .border-label {
+    color: #da70d6; /* Orchid */
+    text-shadow: 0 0 20px #4b0082, 0 0 40px black;
 }
 
 .border-hope {
-    border-color: #FFD700; /* Gold */
-    box-shadow: inset 0 0 60px #FFD700, 0 0 20px #FFD700;
+    /* Define a cor principal para a sombra e texto */
+    color: #FFD700; /* Gold */
+}
+
+.border-hope .border-label {
+    color: #FFD700; /* Gold */
+    text-shadow: 0 0 20px #FFD700, 0 0 40px black;
 }
 
 @keyframes borderPulse {
-    0% { opacity: 0.5; box-shadow: inset 0 0 40px currentColor; }
-    50% { opacity: 1; box-shadow: inset 0 0 80px currentColor; }
-    100% { opacity: 0.5; box-shadow: inset 0 0 40px currentColor; }
+    0% { 
+        /* Aumentamos a opacidade mínima para 0.8 para evitar que o canto pareça quadrado */
+        opacity: 0.8; 
+        /* Reduzimos o desfoque interno (de 40px para 20px) para manter a definição da curva */
+        box-shadow: 0 0 0 100vmax currentColor, inset 0 0 20px currentColor; 
+    }
+    50% { 
+        opacity: 1; 
+        /* Reduzimos o desfoque máximo (de 80px para 50px) */
+        box-shadow: 0 0 0 100vmax currentColor, inset 0 0 50px currentColor; 
+    }
+    100% { 
+        opacity: 0.8; 
+        box-shadow: 0 0 0 100vmax currentColor, inset 0 0 20px currentColor; 
+    }
+}
+
+@keyframes fadeInText {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes fadeIn {

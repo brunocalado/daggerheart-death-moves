@@ -1,7 +1,8 @@
 # 1.2.2
-- fixed duplicated audio
-- removed warnings from messages
-- risk it all show correct probability
+- Fixed duplicated audio
+- Removed warnings from messages
+- Risk It All shows correct probability
+- Style improvements
 
 # 1.2.1
 - update for appv2
