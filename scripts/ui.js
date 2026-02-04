@@ -187,7 +187,22 @@ export class DeathUI {
         if (closeBtn) closeBtn.remove();
     }
 
-    static updateCountdown(element, number) {
+    /**
+     * Updates the countdown on a button.
+     * Updated to handle remote calls (ID string) or local calls (DOM Element).
+     * @param {HTMLElement|string} elementOrId - The button element or its ID string
+     * @param {number} number - The number to display
+     */
+    static updateCountdown(elementOrId, number) {
+        let element = elementOrId;
+        
+        // If we received an ID string via socket, find the element in the local DOM
+        if (typeof elementOrId === 'string') {
+            element = document.getElementById(elementOrId);
+        }
+
+        if (!element) return;
+
         const contentContainer = element.querySelector('.btn-content');
         if (contentContainer) {
             contentContainer.innerHTML = `<h2 style="font-size: 6rem; margin:0; line-height: 250px; color: white; text-shadow: 0 0 20px black;">${number}</h2>`;

@@ -39,6 +39,12 @@ class DeathMovesController {
                 case SOCKET_TYPES.REMOVE_BORDER:
                     DeathUI.removeBorderEffect();
                     break;
+                case SOCKET_TYPES.UPDATE_COUNTDOWN: 
+                    DeathUI.updateCountdown(payload.buttonId, payload.number);
+                    break;
+                case SOCKET_TYPES.HIDE_UNSELECTED: // Novo: Sincroniza a ocultação
+                    DeathUI.hideOthers(payload.buttonId);
+                    break;
             }
         });
         
@@ -124,6 +130,9 @@ class DeathMovesController {
 
     // New Flow: Countdown -> Clear UI -> Play Sound -> Announcement -> Delay
     static async _handleSelectionSequence(optionName, btnElement, announcementSoundKey) {
+        // 0. Update visuals immediately for everyone (Hide other buttons)
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.HIDE_UNSELECTED, buttonId: btnElement.id });
+        
         // 1. Run Countdown FIRST (on the active button)
         await DeathMovesController._runCountdown(btnElement);
 
@@ -156,13 +165,25 @@ class DeathMovesController {
         const duration = DeathSettings.get('countdownDuration');
         if (duration <= 0) return;
 
+        // Get the ID of the button being clicked to synchronize with others
+        const btnId = buttonElement.id;
+
         // Loop: Plays sound every second (tick)
         for (let i = duration; i > 0; i--) {
             // Play sound for everyone on each tick
             game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_SOUND, soundKey: 'soundSuspense' });
             DeathAudioManager.playSound('soundSuspense');
 
+            // Update Local UI
             DeathUI.updateCountdown(buttonElement, i);
+
+            // Update Spectators UI
+            game.socket.emit(SOCKET_NAME, { 
+                type: SOCKET_TYPES.UPDATE_COUNTDOWN, 
+                buttonId: btnId, 
+                number: i 
+            });
+
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }

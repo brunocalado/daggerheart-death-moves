@@ -98,6 +98,10 @@ export class DeathLogic {
             try { await game.dice3d.showForRoll(roll, game.user, true); } catch (e) {}
         }
 
+        // --- ATUALIZAÇÃO: Adicionado delay de 3 segundos ---
+        // Permite ver o dado antes de mostrar o resultado/imagem
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
         // Remove Border Effect after roll (Local + Network)
         DeathUI.removeBorderEffect();
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
@@ -166,6 +170,9 @@ export class DeathLogic {
         if (roll.terms[2]) roll.terms[2].options.appearance = { colorset: "custom", foreground: "#FFFFFF", background: "#2c003e", texture: "none" };
 
         if (game.dice3d) await game.dice3d.showForRoll(roll, game.user, true);
+
+        // --- Opcional: Adicionar delay aqui também se desejar ---
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         const hopeVal = roll.terms[0].total;
         const fearVal = roll.terms[2].total;
