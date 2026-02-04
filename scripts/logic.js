@@ -149,7 +149,7 @@ export class DeathLogic {
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: "Death Moves" }),
             content: this._createStyledChatContent(mainTitle, mainText, bgImage),
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER // UPDATED: type -> style
         });
     }
 
@@ -256,7 +256,7 @@ export class DeathLogic {
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Speaker") }),
             content: this._createStyledChatContent(mainTitle, fullText, bgImage),
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER // UPDATED: type -> style
         });
     }
 
@@ -276,7 +276,7 @@ export class DeathLogic {
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: "Death Moves" }),
             content: this._createStyledChatContent(title, blazeMsg, bgImage),
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER // UPDATED: type -> style
         });
 
         // Trigger callback to remove UI if provided

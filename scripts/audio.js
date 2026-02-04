@@ -13,6 +13,7 @@ export class DeathAudioManager {
         
         if (soundSrc) {
             // V13 FIX: AudioHelper is now namespaced under foundry.audio
+            // Using broadcast: false because we handle socket synchronization manually in logic.js
             foundry.audio.AudioHelper.play({src: soundSrc, volume: 1.0, autoplay: true, loop: false}, false);
         }
     }
@@ -26,16 +27,10 @@ export class DeathAudioManager {
 
     // Maps visual media keys to their corresponding audio settings
     static playMedia(settingKey) {
-        let soundSetting = "";
-        if (settingKey === 'hopePath') soundSetting = 'soundHope';
-        if (settingKey === 'fearPath') soundSetting = 'soundFear';
-        if (settingKey === 'criticalPath') soundSetting = 'soundCritical';
-        if (settingKey === 'avoidSafePath') soundSetting = 'soundAvoidSafe';
-        if (settingKey === 'avoidScarPath') soundSetting = 'soundAvoidScar';
-        if (settingKey === 'blazePath') soundSetting = 'soundBlaze';
-
-        if (soundSetting) this.playSound(soundSetting);
-
+        // --- FIX: REMOVED AUTO-SOUND LOGIC ---
+        // logic.js already calls playSound() explicitly alongside playMedia().
+        // Keeping the sound logic here causes duplication (double audio).
+        
         const src = DeathSettings.get(settingKey);
         if (!src) return Promise.resolve();
         
