@@ -69,6 +69,7 @@ export class DeathLogic {
                     z-index: 1;
                     font-family: 'Lato', sans-serif;
                     line-height: 1.4;
+                    width: 100%;
                 ">
                     ${text}
                 </span>
@@ -86,7 +87,14 @@ export class DeathLogic {
         DeathUI.showBorderEffect('hope');
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'hope' });
 
-        const roll = new Roll('1d12');
+        // --- NEW LOGIC: Check for Phoenix Item ---
+        const actor = game.user.character;
+        const phoenixName = DeathSettings.get('phoenixItemName');
+        const hasPhoenix = actor ? actor.items.some(i => i.name === phoenixName) : false;
+
+        const formula = hasPhoenix ? '1d12 + 1' : '1d12';
+        
+        const roll = new Roll(formula);
         await roll.evaluate();
 
         // Dice So Nice styling (Custom Gold/Black)
@@ -98,16 +106,17 @@ export class DeathLogic {
             try { await game.dice3d.showForRoll(roll, game.user, true); } catch (e) {}
         }
 
-        // --- ATUALIZAÇÃO: Adicionado delay de 3 segundos ---
-        // Permite ver o dado antes de mostrar o resultado/imagem
+        // Delay to allow seeing the dice
         await new Promise(resolve => setTimeout(resolve, 3000));
 
-        // Remove Border Effect after roll (Local + Network)
+        // Remove Border Effect
         DeathUI.removeBorderEffect();
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
 
         const rollTotal = roll.total;
-        const actor = game.user.character;
+        // Get the raw d12 roll (without bonus)
+        const rawRoll = roll.terms[0].total;
+        
         let resultKey = null;
         let soundKey = null;
         let mainTitle = "";
@@ -116,8 +125,6 @@ export class DeathLogic {
         if (actor) {
             const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
             
-            // Logic: Roll <= Level is a SCAR
-            // Logic: Roll > Level is SAFE
             if (rollTotal <= level) {
                 // SCAR
                 mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.ResultScar");
@@ -131,15 +138,40 @@ export class DeathLogic {
                 resultKey = 'avoidSafePath';
                 soundKey = 'soundAvoidSafe';
             }
-            // Append roll details to the text
-            mainText += `<br><span style="font-size: 0.8em; color: #ccc; margin-top: 10px; display: block;">${game.i18n.format("DEATH_OPTIONS.Chat.Avoid.RollDetails", {roll: rollTotal, level: level})}</span>`;
+            
+            // --- UPDATE: Organized Chat Visuals ---
+            let detailsHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); width: 100%; font-size: 0.9em;">`;
+            
+            // Line 1: The Raw Roll
+            detailsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="color: #ccc;">Roll (d12):</span>
+                                <span style="font-weight: bold; color: white;">${rawRoll}</span>
+                            </div>`;
+
+            // Line 2: Bonus (Conditional)
+            if (hasPhoenix) {
+                 detailsHtml += `<div style="display: flex; justify-content: space-between; color: #FFD700; margin-bottom: 4px;">
+                                    <span>${phoenixName}:</span>
+                                    <span>+1</span>
+                                </div>`;
+            }
+            
+            // Line 3: Final Total
+            detailsHtml += `<div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; padding-top: 4px; font-weight: bold;">
+                                <span style="color: #fff;">TOTAL:</span>
+                                <span style="font-size: 1.2em; color: #FFD700;">${rollTotal}</span>
+                            </div>`;
+            
+            // Target Level Info
+            detailsHtml += `<div style="text-align: center; font-size: 0.8em; color: #888; margin-top: 8px;">(Level Threshold: ${level})</div>`;
+            detailsHtml += `</div>`;
+
+            mainText += detailsHtml;
         } else {
-            // Fallback if no actor is assigned to the user
             mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.Flavor");
             mainText = game.i18n.format("DEATH_OPTIONS.Chat.Avoid.NoActor", {roll: rollTotal});
         }
 
-        // Trigger audiovisual effects based on result
         if (resultKey && soundKey) {
             game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_MEDIA, mediaKey: resultKey });
             game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_SOUND, soundKey: soundKey });
@@ -149,7 +181,6 @@ export class DeathLogic {
 
         const bgImage = DeathSettings.get(resultKey) || "";
 
-        // Send Styled Chat Message
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: "Death Moves" }),
             content: this._createStyledChatContent(mainTitle, mainText, bgImage),
@@ -165,13 +196,11 @@ export class DeathLogic {
         const roll = new Roll('1d12 + 1d12');
         await roll.evaluate();
         
-        // Dice styling: Term 0 is Hope (Gold), Term 2 is Fear (Purple)
         if (roll.terms[0]) roll.terms[0].options.appearance = { colorset: "custom", foreground: "#000000", background: "#FFD700", texture: "none" };
         if (roll.terms[2]) roll.terms[2].options.appearance = { colorset: "custom", foreground: "#FFFFFF", background: "#2c003e", texture: "none" };
 
         if (game.dice3d) await game.dice3d.showForRoll(roll, game.user, true);
 
-        // --- Opcional: Adicionar delay aqui também se desejar ---
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         const hopeVal = roll.terms[0].total;
@@ -185,35 +214,28 @@ export class DeathLogic {
      * Builds tension by rolling Fear first.
      */
     static async handleRiskItAllSequential() {
-        // 1. Fear Phase - Show Purple Border (Local + Network)
         DeathUI.showBorderEffect('fear');
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'fear' });
         
         const fearRoll = new Roll('1d12');
         await fearRoll.evaluate();
         
-        // Fear styling (Purple/White)
         if (fearRoll.terms[0]) fearRoll.terms[0].options.appearance = { colorset: "custom", foreground: "#FFFFFF", background: "#2c003e", texture: "none" };
         if (game.dice3d) await game.dice3d.showForRoll(fearRoll, game.user, true);
 
-        // 2. Wait 5 seconds for dramatic effect
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        // 3. Hope Phase - Show Gold Border (Local + Network)
         DeathUI.showBorderEffect('hope');
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'hope' });
         
         const hopeRoll = new Roll('1d12');
         await hopeRoll.evaluate();
         
-        // Hope styling (Gold/Black)
         if (hopeRoll.terms[0]) hopeRoll.terms[0].options.appearance = { colorset: "custom", foreground: "#000000", background: "#FFD700", texture: "none" };
         if (game.dice3d) await game.dice3d.showForRoll(hopeRoll, game.user, true);
 
-        // 4. Wait Extra Delay (4 seconds) before processing result
         await new Promise(resolve => setTimeout(resolve, 4000));
 
-        // 5. Cleanup and Result (Local + Network)
         DeathUI.removeBorderEffect();
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
         
@@ -229,26 +251,22 @@ export class DeathLogic {
         let resultKey, mainTitle, mainText, soundKey;
 
         if (hopeVal > fearVal) {
-            // Case: Hope is greater. Character lives and recovers.
             resultKey = 'hopePath';
-            soundKey = 'soundHope'; // Define sound explicitly
+            soundKey = 'soundHope'; 
             mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeTitle");
             mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeDesc");
         } else if (fearVal > hopeVal) {
-            // Case: Fear is greater. Character dies.
             resultKey = 'fearPath';
-            soundKey = 'soundFear'; // Define sound explicitly
+            soundKey = 'soundFear'; 
             mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearTitle");
             mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearDesc");
         } else {
-            // Case: Tie. Critical Success. Full recovery.
             resultKey = 'criticalPath';
-            soundKey = 'soundCritical'; // Define sound explicitly
+            soundKey = 'soundCritical'; 
             mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.CriticalTitle");
             mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.CriticalDesc");
         }
 
-        // Add dice results to text
         const diceText = `
             <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; font-weight: bold; width: 100%;">
                 <span style="color: #FFD700; text-shadow: 1px 1px 2px black;">Hope: ${hopeVal}</span>
@@ -258,17 +276,14 @@ export class DeathLogic {
         const fullText = diceText + mainText;
         const bgImage = DeathSettings.get(resultKey) || "";
 
-        // Play Sound (Explicitly call both Socket and Local)
         if (soundKey) {
             game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_SOUND, soundKey: soundKey });
             DeathAudioManager.playSound(soundKey);
         }
 
-        // Play Media (Image Overlay)
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_MEDIA, mediaKey: resultKey });
         DeathAudioManager.playMedia(resultKey);
 
-        // Create Styled Chat Message
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Speaker") }),
             content: this._createStyledChatContent(mainTitle, fullText, bgImage),
@@ -295,7 +310,6 @@ export class DeathLogic {
             style: CONST.CHAT_MESSAGE_STYLES.OTHER
         });
 
-        // Trigger callback to remove UI if provided
         if(overlayRemoveCallback) overlayRemoveCallback();
         
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_MEDIA, mediaKey: blazeKey });

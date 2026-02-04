@@ -10,6 +10,7 @@
   "url": "https://github.com/brunocalado/daggerheart-death-moves",
   "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-death-moves/main/module.json",
   "download": "https://codeload.github.com/brunocalado/daggerheart-death-moves/zip/main",
+  
   "relationships": {
     "systems": [
       {
@@ -17,8 +18,17 @@
         "type": "system",
         "compatibility": {}
       }
+    ],
+    "requires": [
+      {
+        "id": "dice-so-nice",
+        "type": "module",
+        "title": "Dice So Nice!",
+        "compatibility": {}
+      }
     ]
-  },
+  },  
+  
   "esmodules": [
     "scripts/main.js"
   ],

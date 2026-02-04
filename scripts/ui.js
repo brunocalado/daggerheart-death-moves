@@ -19,24 +19,33 @@ export class DeathUI {
         let avoidProb = "";
         const scarLabel = game.i18n.localize("DEATH_OPTIONS.UI.Avoid.ScarLabel");
 
+        // --- PHOENIX FEATHER CHECK ---
+        const phoenixName = DeathSettings.get('phoenixItemName');
+        const hasPhoenix = actor ? actor.items.some(i => i.name === phoenixName) : false;
+
         if (actor) {
             const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
-            // Counts outcomes <= Level (which cause a Scar)
-            const outcomeCount = Math.min(12, Math.max(0, level));
+            
+            const bonus = hasPhoenix ? 1 : 0;
+            const effectiveLevelThreshold = level - bonus;
+            
+            const outcomeCount = Math.min(12, Math.max(0, effectiveLevelThreshold));
             const percent = Math.round((outcomeCount / 12) * 100);
             
             avoidProb = `${scarLabel}: ${percent}%`;
+
+            if (hasPhoenix) {
+                // UPDATE: Aumentado margin-top para 15px e removida a palavra "Active"
+                avoidProb += `<div style="color: #FFD700; font-size: 0.8em; margin-top: 15px; text-shadow: 0 0 5px black;">🪶 ${phoenixName} (+1)</div>`;
+            }
+
         } else {
             avoidProb = `${scarLabel}: ?`;
         }
 
         const deathLabel = game.i18n.localize("DEATH_OPTIONS.UI.Blaze.DeathLabel");
         
-        // --- PROBABILITY UPDATE ---
-        // Risk It All: 1d12 (Hope) vs 1d12 (Fear)
-        // Hope >= Fear = Life (Success). Total outcomes: 78/144 = ~54%
-        // Hope < Fear = Death (Failure). Total outcomes: 66/144 = ~46%
-        // Updated: Removed emojis as requested
+        // Risk It All Text
         const riskProbText = `LIFE: 54% | DEATH: 46%`;
 
         return {
@@ -57,9 +66,6 @@ export class DeathUI {
         if (existing) existing.remove();
 
         // --- PLAY OPENING SOUND ---
-        // We only want to trigger the sound locally for the person seeing the UI.
-        // If the GM triggers it, the GM sees the spectator view and players see the main view.
-        // Both calls createOverlay, so we play it here.
         DeathAudioManager.playSound('soundRollScreen');
 
         const bgPath = DeathSettings.get('backgroundPath');
@@ -187,16 +193,8 @@ export class DeathUI {
         if (closeBtn) closeBtn.remove();
     }
 
-    /**
-     * Updates the countdown on a button.
-     * Updated to handle remote calls (ID string) or local calls (DOM Element).
-     * @param {HTMLElement|string} elementOrId - The button element or its ID string
-     * @param {number} number - The number to display
-     */
     static updateCountdown(elementOrId, number) {
         let element = elementOrId;
-        
-        // If we received an ID string via socket, find the element in the local DOM
         if (typeof elementOrId === 'string') {
             element = document.getElementById(elementOrId);
         }
@@ -241,11 +239,10 @@ export class DeathUI {
         div.id = 'risk-border-overlay';
         if (type) div.classList.add(`border-${type}`);
         
-        // --- ADICIONADO: Label de Texto (HOPE / FEAR) ---
         if (type) {
             const label = document.createElement('div');
             label.classList.add('border-label');
-            label.innerText = type.toUpperCase(); // Converte 'hope' para "HOPE"
+            label.innerText = type.toUpperCase(); 
             div.appendChild(label);
         }
 
@@ -257,11 +254,7 @@ export class DeathUI {
         if (existing) existing.remove();
     }
 
-    /**
-     * V13 Update: Uses DialogV2 to avoid deprecation warnings.
-     */
     static async createGMDialog(users, onTrigger) {
-        // Import DialogV2 from API
         const { DialogV2 } = foundry.applications.api;
 
         const content = `
@@ -274,7 +267,6 @@ export class DeathUI {
             </div>
         `;
 
-        // Use DialogV2.wait for async handling
         const result = await DialogV2.wait({
             window: { 
                 title: "Trigger Death Moves", 
@@ -286,16 +278,14 @@ export class DeathUI {
                 label: "Trigger",
                 icon: "fas fa-skull",
                 callback: (event, button, dialog) => {
-                    // Access the DOM element directly from the dialog instance
                     const select = dialog.element.querySelector('#death-player-select');
                     return select ? select.value : null;
                 }
             }],
             close: () => null,
-            classes: ["death-moves-dialog"] // Keep original class for styling
+            classes: ["death-moves-dialog"]
         });
 
-        // Callback only if confirmed
         if (result) {
             onTrigger(result);
         }
