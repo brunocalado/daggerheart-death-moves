@@ -31,7 +31,13 @@ export class DeathUI {
         }
 
         const deathLabel = game.i18n.localize("DEATH_OPTIONS.UI.Blaze.DeathLabel");
-        const riskProbText = game.i18n.localize("DEATH_OPTIONS.UI.Risk.ProbText");
+        
+        // --- PROBABILITY UPDATE ---
+        // Risk It All: 1d12 (Hope) vs 1d12 (Fear)
+        // Hope >= Fear = Life (Success). Total outcomes: 78/144 = ~54%
+        // Hope < Fear = Death (Failure). Total outcomes: 66/144 = ~46%
+        // Updated: Removed emojis as requested
+        const riskProbText = `LIFE: 54% | DEATH: 46%`;
 
         return {
             avoid: avoidProb,
