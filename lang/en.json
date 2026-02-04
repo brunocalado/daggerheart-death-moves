@@ -1,9 +1,20 @@
 {
   "DEATH_OPTIONS": {
     "Settings": {
+      "MediaConfig": {
+        "Name": "Media Configuration (Images & Audio)",
+        "Label": "Configure Media Paths",
+        "Hint": "Click to customize all images and sound effects used by the module.",
+        "Saved": "Media settings saved successfully."
+      },
+      "Headers": {
+        "Images": "Images",
+        "Audio": "Audio Files"
+      },
+      "AudioWarning": "Note: Audio paths below are only used if 'Sound Language' is set to 'Custom'.",
       "SoundLanguage": {
         "Name": "Sound Language",
-        "Hint": "Select which audio folder to use. 'Custom' uses the file paths defined below."
+        "Hint": "Select which audio folder to use. 'Custom' uses the file paths defined in the Media Configuration menu."
       },
       "Duration": {
         "Name": "Duration: Countdown",
@@ -21,98 +32,32 @@
         "Name": "Show Probabilities",
         "Hint": "If checked, displays the percentage chance of outcomes below each death option."
       },
-      "Background": {
-        "Name": "Image: Main Screen",
-        "Hint": "The background image displayed behind the three choices."
-      },
-      "Blaze": {
-        "Name": "Image: Blaze of Glory",
-        "Hint": "The image shown when a player selects 'Blaze of Glory'."
-      },
-      "AvoidScar": {
-        "Name": "Image: Avoid Death (Scar)",
-        "Hint": "The image shown when Avoid Death roll fails (Roll <= Level)."
-      },
-      "AvoidSafe": {
-        "Name": "Image: Avoid Death (Safe)",
-        "Hint": "The image shown when Avoid Death roll succeeds (Roll > Level)."
-      },
-      "Hope": {
-        "Name": "Image: Risk it All (Hope)",
-        "Hint": "The image displayed when the 'Risk it All' roll results in Hope."
-      },
-      "Fear": {
-        "Name": "Image: Risk it All (Fear)",
-        "Hint": "The image displayed when the 'Risk it All' roll results in Fear."
-      },
-      "Critical": {
-        "Name": "Image: Risk it All (Critical)",
-        "Hint": "The image displayed when the 'Risk it All' roll is a Critical Success."
-      },
-      "SoundRollScreen": {
-        "Name": "Sound: Roll Screen Open",
-        "Hint": "Sound played when the main selection screen appears."
-      },
-      "SoundSuspense": {
-        "Name": "Sound: Countdown",
-        "Hint": "The ticking/suspense sound played during the countdown (plays every second)."
-      },
-      "SoundBlaze": {
-        "Name": "Sound: Blaze of Glory",
-        "Hint": "The sound effect played when 'Blaze of Glory' is selected."
-      },
-      "SoundAvoidSafe": {
-        "Name": "Sound: Avoid Death (Safe)",
-        "Hint": "Sound played when Avoid Death succeeds."
-      },
-      "SoundAvoidScar": {
-        "Name": "Sound: Avoid Death (Scar)",
-        "Hint": "Sound played when Avoid Death fails (Scar)."
-      },
-      "SoundHope": {
-        "Name": "Sound: Risk it All (Hope)",
-        "Hint": "Sound played on a Hope result."
-      },
-      "SoundFear": {
-        "Name": "Sound: Risk it All (Fear)",
-        "Hint": "Sound played on a Fear result."
-      },
-      "SoundCritical": {
-        "Name": "Sound: Risk it All (Critical)",
-        "Hint": "Sound played on a Critical result."
-      },
-      "SoundChatAvoid": {
-        "Name": "Sound: Announcement (Avoid)",
-        "Hint": "Sound played when the Avoid Death announcement banner appears."
-      },
-      "SoundChatBlaze": {
-        "Name": "Sound: Announcement (Blaze)",
-        "Hint": "Sound played when the Blaze of Glory announcement banner appears."
-      },
-      "SoundChatRisk": {
-        "Name": "Sound: Announcement (Risk)",
-        "Hint": "Sound played when the Risk it All announcement banner appears."
-      }
+      "Background": { "Name": "Main Screen Background", "Hint": "The background image displayed behind the three choices." },
+      "Blaze": { "Name": "Blaze of Glory Result", "Hint": "The image shown when a player selects 'Blaze of Glory'." },
+      "AvoidScar": { "Name": "Avoid Death (Scar)", "Hint": "The image shown when Avoid Death roll fails (Roll <= Level)." },
+      "AvoidSafe": { "Name": "Avoid Death (Safe)", "Hint": "The image shown when Avoid Death roll succeeds (Roll > Level)." },
+      "Hope": { "Name": "Risk it All (Hope)", "Hint": "The image displayed when the 'Risk it All' roll results in Hope." },
+      "Fear": { "Name": "Risk it All (Fear)", "Hint": "The image displayed when the 'Risk it All' roll results in Fear." },
+      "Critical": { "Name": "Risk it All (Critical)", "Hint": "The image displayed when the 'Risk it All' roll is a Critical Success." },
+      "SoundRollScreen": { "Name": "Roll Screen Open", "Hint": "Sound played when the main selection screen appears." },
+      "SoundSuspense": { "Name": "Countdown Ticking", "Hint": "The ticking/suspense sound played during the countdown (plays every second)." },
+      "SoundBlaze": { "Name": "Blaze of Glory Event", "Hint": "The sound effect played when 'Blaze of Glory' is selected." },
+      "SoundAvoidSafe": { "Name": "Avoid Death (Safe)", "Hint": "Sound played when Avoid Death succeeds." },
+      "SoundAvoidScar": { "Name": "Avoid Death (Scar)", "Hint": "Sound played when Avoid Death fails (Scar)." },
+      "SoundHope": { "Name": "Risk it All (Hope)", "Hint": "Sound played on a Hope result." },
+      "SoundFear": { "Name": "Risk it All (Fear)", "Hint": "Sound played on a Fear result." },
+      "SoundCritical": { "Name": "Risk it All (Critical)", "Hint": "Sound played on a Critical result." },
+      "SoundChatAvoid": { "Name": "Announcement (Avoid)", "Hint": "Sound played when the Avoid Death announcement banner appears." },
+      "SoundChatBlaze": { "Name": "Announcement (Blaze)", "Hint": "Sound played when the Blaze of Glory announcement banner appears." },
+      "SoundChatRisk": { "Name": "Announcement (Risk)", "Hint": "Sound played when the Risk it All announcement banner appears." }
     },
     "UI": {
       "MainTitle": "CHOOSE YOUR FATE",
       "MainTitleSpectator": "Waiting for Player Choice...",
       "Close": "Close",
-      "Avoid": {
-        "Title": "Avoid Death",
-        "Subtitle": "Roll a Die vs Level",
-        "ScarLabel": "SCAR"
-      },
-      "Blaze": {
-        "Title": "Blaze of Glory",
-        "Subtitle": "Go out with a bang!",
-        "DeathLabel": "DEATH"
-      },
-      "Risk": {
-        "Title": "Risk it All",
-        "Subtitle": "Death or Legend",
-        "ProbText": "DEATH: 50% | LIFE: 50%"
-      }
+      "Avoid": { "Title": "Avoid Death", "Subtitle": "Roll a Die vs Level", "ScarLabel": "SCAR" },
+      "Blaze": { "Title": "Blaze of Glory", "Subtitle": "Go out with a bang!", "DeathLabel": "DEATH" },
+      "Risk": { "Title": "Risk it All", "Subtitle": "Death or Legend", "ProbText": "DEATH: 50% | LIFE: 50%" }
     },
     "Chat": {
       "Avoid": {
@@ -133,9 +78,7 @@
         "CriticalTitle": "CRITICAL SUCCESS!",
         "CriticalDesc": "You stand and clear all Hit Points and Stress."
       },
-      "Blaze": {
-        "Title": "BLAZE OF GLORY!"
-      }
+      "Blaze": { "Title": "BLAZE OF GLORY!" }
     }
   }
 }

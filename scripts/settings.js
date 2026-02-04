@@ -1,14 +1,50 @@
 import { MODULE_ID } from './constants.js';
+import { DeathMediaConfig } from './media-config.js'; // Importa a nova classe
 
-/**
- * Manages module settings registration.
- */
 export class DeathSettings {
-    static register() {
-        const imagePicker = { type: String, scope: 'world', config: true, filePicker: 'image' };
-        const audioPicker = { type: String, scope: 'world', config: true, filePicker: 'audio' };
+    
+    // --- DEFINIÇÕES ESTÁTICAS (Para reuso no Menu) ---
+    
+    static getImageDefinitions() {
+        return [
+            { key: 'backgroundPath', locKey: 'Background', default: `modules/${MODULE_ID}/assets/images/roll-screen.webp` },
+            { key: 'hopePath', locKey: 'Hope', default: `modules/${MODULE_ID}/assets/images/hope.webp` },
+            { key: 'fearPath', locKey: 'Fear', default: `modules/${MODULE_ID}/assets/images/fear.webp` },
+            { key: 'criticalPath', locKey: 'Critical', default: `modules/${MODULE_ID}/assets/images/critical.webp` },
+            { key: 'avoidSafePath', locKey: 'AvoidSafe', default: `modules/${MODULE_ID}/assets/images/avoid_safe.webp` },
+            { key: 'avoidScarPath', locKey: 'AvoidScar', default: `modules/${MODULE_ID}/assets/images/avoid_scar.webp` },
+            { key: 'blazePath', locKey: 'Blaze', default: `modules/${MODULE_ID}/assets/images/blaze.webp` }
+        ];
+    }
 
-        // --- CONFIGURATION ---
+    static getAudioDefinitions() {
+        return [
+            { key: 'soundRollScreen', locKey: 'SoundRollScreen', filename: 'roll-screen.mp3' },
+            { key: 'soundSuspense', locKey: 'SoundSuspense', filename: 'countdown.mp3' },
+            { key: 'soundBlaze', locKey: 'SoundBlaze', filename: 'blaze.mp3' },
+            { key: 'soundAvoidSafe', locKey: 'SoundAvoidSafe', filename: 'avoid_safe.mp3' },
+            { key: 'soundAvoidScar', locKey: 'SoundAvoidScar', filename: 'avoid_scar.mp3' },
+            { key: 'soundHope', locKey: 'SoundHope', filename: 'hope.mp3' },
+            { key: 'soundFear', locKey: 'SoundFear', filename: 'fear.mp3' },
+            { key: 'soundCritical', locKey: 'SoundCritical', filename: 'critical.mp3' },
+            { key: 'soundChatAvoid', locKey: 'SoundChatAvoid', filename: 'choice-avoid-death.mp3' },
+            { key: 'soundChatBlaze', locKey: 'SoundChatBlaze', filename: 'choice-blaze-of-glory.mp3' },
+            { key: 'soundChatRisk', locKey: 'SoundChatRisk', filename: 'choice-risk-it-all.mp3' }
+        ];
+    }
+
+    static register() {
+        // 1. REGISTRO DO MENU (BOTÃO)
+        game.settings.registerMenu(MODULE_ID, 'mediaConfigMenu', {
+            name: "DEATH_OPTIONS.Settings.MediaConfig.Name",
+            label: "DEATH_OPTIONS.Settings.MediaConfig.Label",
+            hint: "DEATH_OPTIONS.Settings.MediaConfig.Hint",
+            icon: "fas fa-photo-video",
+            type: DeathMediaConfig,
+            restricted: true
+        });
+
+        // 2. CONFIGURAÇÕES GERAIS (Visíveis)
         game.settings.register(MODULE_ID, 'soundLanguage', {
             name: "DEATH_OPTIONS.Settings.SoundLanguage.Name",
             hint: "DEATH_OPTIONS.Settings.SoundLanguage.Hint",
@@ -18,7 +54,7 @@ export class DeathSettings {
             choices: {
                 "en": "English",
                 "pt-BR": "Português (Brasil)",
-                "custom": "Custom (Use File Paths Below)"
+                "custom": "Custom (Use File Paths in Media Menu)" // Texto ajustado
             },
             default: "en"
         });
@@ -33,7 +69,6 @@ export class DeathSettings {
             default: 6
         });
 
-        // --- Nome do Item Phoenix Feather ---
         game.settings.register(MODULE_ID, 'phoenixItemName', {
             name: "Phoenix Item Name", 
             hint: "Name of the item that grants +1 bonus to Avoid Death rolls.",
@@ -70,79 +105,35 @@ export class DeathSettings {
             default: true
         });
 
-        // --- IMAGE PATHS ---
-        this._registerImagePaths(imagePicker);
-
-        // --- AUDIO PATHS ---
-        this._registerAudioPaths(audioPicker);
+        // 3. REGISTRO DAS IMAGENS E ÁUDIOS (Ocultos / Config: false)
+        this._registerHiddenPaths();
     }
 
-    static _registerImagePaths(configObj) {
-        const paths = [
-            { key: 'backgroundPath', locKey: 'Background', default: `modules/${MODULE_ID}/assets/images/roll-screen.webp` },
-            { key: 'hopePath', locKey: 'Hope', default: `modules/${MODULE_ID}/assets/images/hope.webp` },
-            { key: 'fearPath', locKey: 'Fear', default: `modules/${MODULE_ID}/assets/images/fear.webp` },
-            { key: 'criticalPath', locKey: 'Critical', default: `modules/${MODULE_ID}/assets/images/critical.webp` },
-            { key: 'avoidSafePath', locKey: 'AvoidSafe', default: `modules/${MODULE_ID}/assets/images/avoid_safe.webp` },
-            { key: 'avoidScarPath', locKey: 'AvoidScar', default: `modules/${MODULE_ID}/assets/images/avoid_scar.webp` },
-            { key: 'blazePath', locKey: 'Blaze', default: `modules/${MODULE_ID}/assets/images/blaze.webp` }
-        ];
+    static _registerHiddenPaths() {
+        const imageDefs = this.getImageDefinitions();
+        const audioDefs = this.getAudioDefinitions();
 
-        paths.forEach(p => {
+        // Registra Imagens
+        imageDefs.forEach(p => {
             game.settings.register(MODULE_ID, p.key, {
-                name: `DEATH_OPTIONS.Settings.${p.locKey}.Name`,
-                hint: `DEATH_OPTIONS.Settings.${p.locKey}.Hint`,
+                name: `DEATH_OPTIONS.Settings.${p.locKey}.Name`, // Ainda precisa de nome para o sistema interno
                 scope: 'world',
-                config: true,
+                config: false, // <--- OCULTO DA LISTA PRINCIPAL
                 type: String,
                 default: p.default,
                 filePicker: 'image'
             });
         });
-    }
 
-    static _registerAudioPaths(configObj) {
-        // Definimos os nomes dos arquivos aqui para usar nos DEFAULTS
-        const filenames = {
-            'soundRollScreen': 'roll-screen.mp3',
-            'soundSuspense': 'countdown.mp3',
-            'soundBlaze': 'blaze.mp3',
-            'soundAvoidSafe': 'avoid_safe.mp3',
-            'soundAvoidScar': 'avoid_scar.mp3',
-            'soundHope': 'hope.mp3',
-            'soundFear': 'fear.mp3',
-            'soundCritical': 'critical.mp3',
-            'soundChatAvoid': 'choice-avoid-death.mp3',
-            'soundChatBlaze': 'choice-blaze-of-glory.mp3',
-            'soundChatRisk': 'choice-risk-it-all.mp3'
-        };
-
-        const audioMap = [
-            { key: 'soundRollScreen', locKey: 'SoundRollScreen' },
-            { key: 'soundSuspense', locKey: 'SoundSuspense' },
-            { key: 'soundBlaze', locKey: 'SoundBlaze' },
-            { key: 'soundAvoidSafe', locKey: 'SoundAvoidSafe' },
-            { key: 'soundAvoidScar', locKey: 'SoundAvoidScar' },
-            { key: 'soundHope', locKey: 'SoundHope' },
-            { key: 'soundFear', locKey: 'SoundFear' },
-            { key: 'soundCritical', locKey: 'SoundCritical' },
-            { key: 'soundChatAvoid', locKey: 'SoundChatAvoid' },
-            { key: 'soundChatBlaze', locKey: 'SoundChatBlaze' },
-            { key: 'soundChatRisk', locKey: 'SoundChatRisk' }
-        ];
-
-        audioMap.forEach(a => {
-            const filename = filenames[a.key];
-            // CORREÇÃO: Define o caminho padrão em inglês em vez de string vazia
-            const defaultPath = filename ? `modules/${MODULE_ID}/assets/audio/english/${filename}` : "";
-
+        // Registra Áudios
+        audioDefs.forEach(a => {
+            const defaultPath = a.filename ? `modules/${MODULE_ID}/assets/audio/english/${a.filename}` : "";
             game.settings.register(MODULE_ID, a.key, {
                 name: `DEATH_OPTIONS.Settings.${a.locKey}.Name`,
-                hint: `DEATH_OPTIONS.Settings.${a.locKey}.Hint`,
                 scope: 'world',
-                config: true, 
+                config: false, // <--- OCULTO DA LISTA PRINCIPAL
                 type: String,
-                default: defaultPath, 
+                default: defaultPath,
                 filePicker: 'audio'
             });
         });
@@ -155,21 +146,11 @@ export class DeathSettings {
     static getAudioPath(key) {
         const lang = game.settings.get(MODULE_ID, 'soundLanguage');
         
-        const filenames = {
-            'soundRollScreen': 'roll-screen.mp3',
-            'soundSuspense': 'countdown.mp3',
-            'soundBlaze': 'blaze.mp3',
-            'soundAvoidSafe': 'avoid_safe.mp3',
-            'soundAvoidScar': 'avoid_scar.mp3',
-            'soundHope': 'hope.mp3',
-            'soundFear': 'fear.mp3',
-            'soundCritical': 'critical.mp3',
-            'soundChatAvoid': 'choice-avoid-death.mp3',
-            'soundChatBlaze': 'choice-blaze-of-glory.mp3',
-            'soundChatRisk': 'choice-risk-it-all.mp3'
-        };
+        // Mapeia filename baseado na key usando as definições
+        const def = this.getAudioDefinitions().find(d => d.key === key);
+        if (!def) return "";
 
-        const filename = filenames[key];
+        const filename = def.filename;
 
         if (lang === 'custom') {
             return game.settings.get(MODULE_ID, key);

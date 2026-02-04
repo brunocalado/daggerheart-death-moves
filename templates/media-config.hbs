@@ -1,0 +1,145 @@
+<div class="death-media-content">
+    
+    <!-- Estilos Inline -->
+    <style>
+        .death-media-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-height: 600px; /* Garante que não ultrapasse a tela */
+            overflow: hidden;
+        }
+
+        .death-media-tabs {
+            display: flex;
+            border-bottom: 2px solid #444;
+            margin-bottom: 0; /* Remove margem para colar no conteúdo */
+            gap: 5px;
+            flex-shrink: 0; /* Abas não encolhem */
+        }
+        
+        .death-media-tabs a {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            background: rgba(0,0,0,0.2);
+            color: #ccc;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+        
+        .death-media-tabs a:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .death-media-tabs a.active {
+            background: rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+            border: 1px solid #FFD700;
+            border-bottom: 1px solid #191919;
+            font-weight: bold;
+            margin-bottom: -2px;
+            z-index: 10;
+        }
+
+        /* Área de conteúdo rolável */
+        .tab-scroll-container {
+            flex: 1; /* Ocupa o resto da altura disponível */
+            overflow-y: auto; /* Habilita Scroll Vertical */
+            padding: 15px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 0 0 5px 5px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.03);
+            padding: 8px;
+            border-radius: 4px;
+        }
+        
+        .form-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .hint {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 4px;
+        }
+        
+        file-picker {
+            width: 100%;
+        }
+
+        .form-footer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #444;
+            flex-shrink: 0;
+        }
+    </style>
+
+    <p class="notes" style="margin-bottom: 10px;">{{localize "DEATH_OPTIONS.Settings.MediaConfig.Hint"}}</p>
+
+    <!-- Navigation Tabs -->
+    <nav class="death-media-tabs">
+        <a class="tab-nav" data-tab="images">
+            <i class="fas fa-images"></i> {{localize "DEATH_OPTIONS.Settings.Headers.Images"}}
+        </a>
+        <a class="tab-nav" data-tab="audio">
+            <i class="fas fa-music"></i> {{localize "DEATH_OPTIONS.Settings.Headers.Audio"}}
+        </a>
+    </nav>
+
+    <!-- Scrollable Content Wrapper -->
+    <div class="tab-scroll-container">
+        <!-- IMAGES TAB -->
+        <div class="tab-content" data-tab="images">
+            {{#each images}}
+            <div class="form-group">
+                <label>{{this.name}}</label>
+                <div class="form-fields">
+                    <file-picker name="{{this.key}}" type="image" value="{{this.value}}"></file-picker>
+                </div>
+                <p class="hint">{{this.hint}}</p>
+            </div>
+            {{/each}}
+        </div>
+
+        <!-- AUDIO TAB -->
+        <div class="tab-content" data-tab="audio">
+            <div class="notification info" style="margin-bottom: 15px;">
+                {{localize "DEATH_OPTIONS.Settings.AudioWarning"}}
+            </div>
+
+            {{#each sounds}}
+            <div class="form-group">
+                <label>{{this.name}}</label>
+                <div class="form-fields">
+                    <file-picker name="{{this.key}}" type="audio" value="{{this.value}}"></file-picker>
+                </div>
+                <p class="hint">{{this.hint}}</p>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <footer class="form-footer">
+        <button type="submit">
+            <i class="far fa-save"></i> {{localize "SETTINGS.Save"}}
+        </button>
+    </footer>
+</div>

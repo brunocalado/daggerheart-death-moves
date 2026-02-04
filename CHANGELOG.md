@@ -6,6 +6,7 @@
 - Counter will show to everyone
 - support for "Phoenix Feather"
 - delay for result of avoid death increased
+- improved settings display
 
 # 1.2.1
 - update for appv2

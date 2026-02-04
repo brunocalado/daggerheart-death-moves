@@ -1,52 +1,20 @@
 {
   "DEATH_OPTIONS": {
-    "UI": {
-      "MainTitle": "Escolha seu Destino",
-      "MainTitleSpectator": "Aguardando Escolha do Jogador...",
-      "Close": "Fechar",
-      "Avoid": {
-        "Title": "Evitar a Morte",
-        "Subtitle": "Encare o medo da morte.",
-        "ScarLabel": "Chance de Cicatriz"
-      },
-      "Blaze": {
-        "Title": "Glória Final",
-        "Subtitle": "Parta com um estrondo.",
-        "DeathLabel": "Morte"
-      },
-      "Risk": {
-        "Title": "Arriscar Tudo",
-        "Subtitle": "Role os dados pela sua vida.",
-        "ProbText": "Padrão/Sequencial"
-      }
-    },
-    "Chat": {
-      "Avoid": {
-        "ResultScar": "MARCADO PELA MORTE",
-        "MsgScar": "Você sobreviveu, mas não sem custo. Marque uma Cicatriz.",
-        "ResultSafe": "MORTE EVITADA",
-        "MsgSafe": "Você conseguiu se agarrar à vida. Limpe todo o Estresse.",
-        "RollDetails": "Rolagem: {roll} vs Nível: {level}",
-        "Flavor": "Luta contra a luz que se apaga...",
-        "NoActor": "Rolagem: {roll} (Sem Ator Atribuído)"
-      },
-      "Blaze": {
-        "Title": "UM HERÓI CAI"
-      },
-      "Risk": {
-        "Speaker": "Destino",
-        "HopeTitle": "ESPERANÇA TRIUNFA",
-        "HopeDesc": "Você se levanta novamente! Limpe todo dano e estresse.",
-        "FearTitle": "O MEDO CONSOME",
-        "FearDesc": "Sua jornada termina aqui. Crie um novo personagem.",
-        "CriticalTitle": "SUCESSO LENDÁRIO",
-        "CriticalDesc": "Você retorna com vida cheia e um ponto de Esperança!"
-      }
-    },
     "Settings": {
+      "MediaConfig": {
+        "Name": "Configuração de Mídia (Imagens e Áudio)",
+        "Label": "Configurar Caminhos de Mídia",
+        "Hint": "Clique para personalizar todas as imagens e efeitos sonoros usados pelo módulo.",
+        "Saved": "Configurações de mídia salvas com sucesso."
+      },
+      "Headers": {
+        "Images": "Imagens",
+        "Audio": "Arquivos de Áudio"
+      },
+      "AudioWarning": "Nota: Os caminhos de áudio abaixo são usados apenas se 'Idioma do Áudio' estiver definido como 'Customizado'.",
       "SoundLanguage": {
         "Name": "Idioma do Áudio",
-        "Hint": "Selecione a pasta de áudio. 'Customizado' usa os caminhos de arquivo definidos abaixo."
+        "Hint": "Selecione a pasta de áudio. 'Customizado' usa os caminhos definidos no menu Configurar Caminhos de Mídia."
       },
       "Duration": {
         "Name": "Duração da Contagem",
@@ -64,32 +32,52 @@
         "Name": "Mostrar Probabilidades",
         "Hint": "Mostra as chances calculadas em % nos botões."
       },
-      "Background": { "Name": "Imagem de Fundo", "Hint": "Imagem para a tela de seleção principal." },
-      "Blaze": { "Name": "Imagem Glória Final", "Hint": "Imagem para o resultado de Glória." },
-      "AvoidScar": { "Name": "Imagem Evitar (Cicatriz)", "Hint": "Imagem para resultado de Cicatriz." },
-      "AvoidSafe": { "Name": "Imagem Evitar (Salvo)", "Hint": "Imagem para resultado Salvo." },
-      "Hope": { "Name": "Imagem Risco (Esperança)", "Hint": "Imagem para resultado de Esperança." },
-      "Fear": { "Name": "Imagem Risco (Medo)", "Hint": "Imagem para resultado de Medo." },
-      "Critical": { "Name": "Imagem Risco (Crítico)", "Hint": "Imagem para resultado Crítico." },
-      "SoundRollScreen": { "Name": "Som: Abertura de Tela", "Hint": "Som tocado quando a tela de seleção aparece." },
-      "SoundSuspense": { "Name": "Som de Contagem", "Hint": "Som tocado durante a contagem (1x por segundo)." },
-      "SoundBlaze": { "Name": "Som Glória Final", "Hint": "Som para Glória Final." },
-      "SoundAvoidSafe": { "Name": "Som Evitar (Salvo)", "Hint": "Som para resultado Salvo." },
-      "SoundAvoidScar": { "Name": "Som Evitar (Cicatriz)", "Hint": "Som para resultado Cicatriz." },
-      "SoundHope": { "Name": "Som Risco (Esperança)", "Hint": "Som para resultado de Esperança." },
-      "SoundFear": { "Name": "Som Risco (Medo)", "Hint": "Som para resultado de Medo." },
-      "SoundCritical": { "Name": "Som Risco (Crítico)", "Hint": "Som para resultado Crítico." },
-      "SoundChatAvoid": {
-        "Name": "Som: Anúncio (Evitar)",
-        "Hint": "Som tocado quando o banner de anúncio de Evitar a Morte aparece."
+      "Background": { "Name": "Fundo da Tela", "Hint": "Imagem para a tela de seleção principal." },
+      "Blaze": { "Name": "Resultado: Glória Final", "Hint": "Imagem para o resultado de Glória." },
+      "AvoidScar": { "Name": "Resultado: Evitar (Cicatriz)", "Hint": "Imagem para resultado de Cicatriz." },
+      "AvoidSafe": { "Name": "Resultado: Evitar (Salvo)", "Hint": "Imagem para resultado Salvo." },
+      "Hope": { "Name": "Resultado: Risco (Esperança)", "Hint": "Imagem para resultado de Esperança." },
+      "Fear": { "Name": "Resultado: Risco (Medo)", "Hint": "Imagem para resultado de Medo." },
+      "Critical": { "Name": "Resultado: Risco (Crítico)", "Hint": "Imagem para resultado Crítico." },
+      "SoundRollScreen": { "Name": "Abertura de Tela", "Hint": "Som tocado quando a tela de seleção aparece." },
+      "SoundSuspense": { "Name": "Contagem Regressiva", "Hint": "Som tocado durante a contagem (1x por segundo)." },
+      "SoundBlaze": { "Name": "Glória Final", "Hint": "Som para Glória Final." },
+      "SoundAvoidSafe": { "Name": "Evitar (Salvo)", "Hint": "Som para resultado Salvo." },
+      "SoundAvoidScar": { "Name": "Evitar (Cicatriz)", "Hint": "Som para resultado Cicatriz." },
+      "SoundHope": { "Name": "Risco (Esperança)", "Hint": "Som para resultado de Esperança." },
+      "SoundFear": { "Name": "Risco (Medo)", "Hint": "Som para resultado de Medo." },
+      "SoundCritical": { "Name": "Risco (Crítico)", "Hint": "Som para resultado Crítico." },
+      "SoundChatAvoid": { "Name": "Anúncio (Evitar)", "Hint": "Som tocado quando o banner de anúncio de Evitar a Morte aparece." },
+      "SoundChatBlaze": { "Name": "Anúncio (Glória)", "Hint": "Som tocado quando o banner de anúncio de Glória Final aparece." },
+      "SoundChatRisk": { "Name": "Anúncio (Risco)", "Hint": "Som tocado quando o banner de anúncio de Arriscar Tudo aparece." }
+    },
+    "UI": {
+      "MainTitle": "Escolha seu Destino",
+      "MainTitleSpectator": "Aguardando Escolha do Jogador...",
+      "Close": "Fechar",
+      "Avoid": { "Title": "Evitar a Morte", "Subtitle": "Encare o medo da morte.", "ScarLabel": "Chance de Cicatriz" },
+      "Blaze": { "Title": "Glória Final", "Subtitle": "Parta com um estrondo.", "DeathLabel": "Morte" },
+      "Risk": { "Title": "Arriscar Tudo", "Subtitle": "Role os dados pela sua vida.", "ProbText": "Padrão/Sequencial" }
+    },
+    "Chat": {
+      "Avoid": {
+        "ResultScar": "MARCADO PELA MORTE",
+        "MsgScar": "Você sobreviveu, mas não sem custo. Marque uma Cicatriz.",
+        "ResultSafe": "MORTE EVITADA",
+        "MsgSafe": "Você conseguiu se agarrar à vida. Limpe todo o Estresse.",
+        "RollDetails": "Rolagem: {roll} vs Nível: {level}",
+        "Flavor": "Luta contra a luz que se apaga...",
+        "NoActor": "Rolagem: {roll} (Sem Ator Atribuído)"
       },
-      "SoundChatBlaze": {
-        "Name": "Som: Anúncio (Glória)",
-        "Hint": "Som tocado quando o banner de anúncio de Glória Final aparece."
-      },
-      "SoundChatRisk": {
-        "Name": "Som: Anúncio (Risco)",
-        "Hint": "Som tocado quando o banner de anúncio de Arriscar Tudo aparece."
+      "Blaze": { "Title": "UM HERÓI CAI" },
+      "Risk": {
+        "Speaker": "Destino",
+        "HopeTitle": "ESPERANÇA TRIUNFA",
+        "HopeDesc": "Você se levanta novamente! Limpe todo dano e estresse.",
+        "FearTitle": "O MEDO CONSOME",
+        "FearDesc": "Sua jornada termina aqui. Crie um novo personagem.",
+        "CriticalTitle": "SUCESSO LENDÁRIO",
+        "CriticalDesc": "Você retorna com vida cheia e um ponto de Esperança!"
       }
     }
   }
