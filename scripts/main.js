@@ -57,6 +57,9 @@ class DeathMovesController {
                 DeathMovesController.gmTriggerFlow();
             }
         };
+
+        // Check system automation settings on load
+        DeathMovesController._checkSystemAutomation();
     }
 
     // Triggered by GM to select a player
@@ -185,6 +188,19 @@ class DeathMovesController {
             });
 
             await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+
+    /**
+     * Checks if "Core" automation is active and disables Daggerheart system defaults if necessary.
+     * Runs on initialization to handle default settings or reload.
+     */
+    static async _checkSystemAutomation() {
+        if (!game.user.isGM) return; // Only GM updates settings
+
+        const automationMode = DeathSettings.get('automationMode');
+        if (automationMode === 'core') {
+            await DeathSettings.disableSystemAutomation();
         }
     }
 }

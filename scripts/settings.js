@@ -79,7 +79,12 @@ export class DeathSettings {
                 "none": "None",
                 "core": "Core"
             },
-            default: "none"
+            default: "core",
+            onChange: async (value) => {
+                if (value === 'core') {
+                    await DeathSettings.disableSystemAutomation();
+                }
+            }
         });
 
         game.settings.register(MODULE_ID, 'phoenixItemName', {
@@ -150,6 +155,33 @@ export class DeathSettings {
                 filePicker: 'audio'
             });
         });
+    }
+
+    /**
+     * Disables the default Daggerheart system automation for death moves
+     * to avoid conflicts with this module when in "Core" mode.
+     */
+    static async disableSystemAutomation() {
+        if (CONFIG.DH?.SETTINGS?.gameSettings?.Automation) {
+            const key = CONFIG.DH.SETTINGS.gameSettings.Automation;
+            const setting = game.settings.get(CONFIG.DH.id, key);
+            const currentSettings = typeof setting.toObject === 'function' ? setting.toObject() : setting;
+            
+            const da = currentSettings.deathMoveAutomation || {};
+
+            if (da.avoidDeath !== false || da.blazeOfGlory !== false || da.riskItAll !== false) {
+                await game.settings.set(CONFIG.DH.id, key, { 
+                    ...currentSettings,
+                    deathMoveAutomation: {
+                        ...da,
+                        avoidDeath: false,
+                        blazeOfGlory: false,
+                        riskItAll: false
+                    }
+                });
+                ui.notifications.info("Daggerheart Death Moves: System automation disabled (Core Mode active).");
+            }
+        }
     }
 
     static get(key) {
