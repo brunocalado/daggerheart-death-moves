@@ -69,6 +69,19 @@ export class DeathSettings {
             default: 6
         });
 
+        game.settings.register(MODULE_ID, 'automationMode', {
+            name: "DEATH_OPTIONS.Settings.Automation.Name",
+            hint: "DEATH_OPTIONS.Settings.Automation.Hint",
+            scope: 'world',
+            config: true,
+            type: String,
+            choices: {
+                "none": "None",
+                "core": "Core"
+            },
+            default: "none"
+        });
+
         game.settings.register(MODULE_ID, 'phoenixItemName', {
             name: "Phoenix Item Name", 
             hint: "Name of the item that grants +1 bonus to Avoid Death rolls.",

@@ -121,6 +121,7 @@ export class DeathLogic {
         let soundKey = null;
         let mainTitle = "";
         let mainText = "";
+        let isScar = false;
 
         if (actor) {
             const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
@@ -131,6 +132,7 @@ export class DeathLogic {
                 mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.MsgScar");
                 resultKey = 'avoidScarPath';
                 soundKey = 'soundAvoidScar';
+                isScar = true;
             } else {
                 // SAFE
                 mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.ResultSafe");
@@ -172,11 +174,31 @@ export class DeathLogic {
             mainText = game.i18n.format("DEATH_OPTIONS.Chat.Avoid.NoActor", {roll: rollTotal});
         }
 
+        let mediaPromise = Promise.resolve();
         if (resultKey && soundKey) {
             game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_MEDIA, mediaKey: resultKey });
             game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_SOUND, soundKey: soundKey });
-            DeathAudioManager.playMedia(resultKey);
+            mediaPromise = DeathAudioManager.playMedia(resultKey);
             DeathAudioManager.playSound(soundKey);
+        }
+
+        // --- AUTOMATION: Core ---
+        const automation = DeathSettings.get('automationMode');
+        if (automation === 'core' && isScar && actor) {
+            // Wait for image to disappear (or be closed by user)
+            await mediaPromise;
+
+            // Update Scars
+            const currentScars = foundry.utils.getProperty(actor, "system.scars") || 0;
+            const newScars = currentScars + 1;
+            await actor.update({"system.scars": newScars});
+
+            // Check for Death
+            if (newScars >= 6) {
+                mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearTitle");
+                mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearDesc");
+                mainText += `<br><br><em>(${game.i18n.localize("DEATH_OPTIONS.UI.Avoid.ScarLabel")}: ${newScars})</em>`;
+            }
         }
 
         const bgImage = DeathSettings.get(resultKey) || "";
@@ -206,7 +228,7 @@ export class DeathLogic {
         const hopeVal = roll.terms[0].total;
         const fearVal = roll.terms[2].total;
 
-        this._processRiskResult(hopeVal, fearVal);
+        await this._processRiskResult(hopeVal, fearVal);
     }
 
     /**
@@ -239,7 +261,7 @@ export class DeathLogic {
         DeathUI.removeBorderEffect();
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
         
-        this._processRiskResult(hopeRoll.total, fearRoll.total);
+        await this._processRiskResult(hopeRoll.total, fearRoll.total);
     }
 
     /**
@@ -247,7 +269,7 @@ export class DeathLogic {
      * @param {number} hopeVal - Value of the Hope die
      * @param {number} fearVal - Value of the Fear die
      */
-    static _processRiskResult(hopeVal, fearVal) {
+    static async _processRiskResult(hopeVal, fearVal) {
         let resultKey, mainTitle, mainText, soundKey;
 
         if (hopeVal > fearVal) {
@@ -273,7 +295,6 @@ export class DeathLogic {
                 <span style="color: #da70d6; text-shadow: 1px 1px 2px black;">Fear: ${fearVal}</span>
             </div>`;
         
-        const fullText = diceText + mainText;
         const bgImage = DeathSettings.get(resultKey) || "";
 
         if (soundKey) {
@@ -282,7 +303,46 @@ export class DeathLogic {
         }
 
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.PLAY_MEDIA, mediaKey: resultKey });
-        DeathAudioManager.playMedia(resultKey);
+        const mediaPromise = DeathAudioManager.playMedia(resultKey);
+
+        let distributionMsg = "";
+
+        // --- AUTOMATION: Core ---
+        const automation = DeathSettings.get('automationMode');
+        if (automation === 'core') {
+            try {
+                await mediaPromise;
+                const actor = game.user.character;
+                
+                if (actor) {
+                    if (hopeVal > fearVal) {
+                        // Hope: Distribute
+                        const dist = await DeathUI.showRiskDistributionDialog(actor, hopeVal);
+                        if (dist) {
+                            distributionMsg = `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.9em;">
+                                <strong>${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Recovered")}:</strong><br>
+                                <span style="color: #ff6666;">${dist.hp} HP</span>, <span style="color: #da70d6;">${dist.stress} Stress</span>
+                            </div>`;
+                        }
+                    } else if (hopeVal === fearVal) {
+                        // Critical: Clear HP/Stress
+                        await actor.update({
+                            "system.resources.hitPoints.value": 0,
+                            "system.resources.stress.value": 0
+                        });
+                        distributionMsg = `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.9em;">
+                            <strong>${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Recovered")}:</strong><br>
+                            ${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.AllRecovered")}
+                        </div>`;
+                    }
+                }
+            } catch (err) {
+                console.error("Death Moves | Automation Error:", err);
+                ui.notifications.error("Death Moves Automation failed. See console for details.");
+            }
+        }
+
+        const fullText = diceText + mainText + distributionMsg;
 
         ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ alias: game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Speaker") }),

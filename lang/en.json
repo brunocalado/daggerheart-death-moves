@@ -7,6 +7,10 @@
         "Hint": "Click to customize all images and sound effects used by the module.",
         "Saved": "Media settings saved successfully."
       },
+      "Automation": {
+        "Name": "Automation Mode",
+        "Hint": "Choose how the module interacts with character sheets."
+      },
       "Headers": {
         "Images": "Images",
         "Audio": "Audio Files"
@@ -57,7 +61,8 @@
       "Close": "Close",
       "Avoid": { "Title": "Avoid Death", "Subtitle": "Roll a Die vs Level", "ScarLabel": "SCAR" },
       "Blaze": { "Title": "Blaze of Glory", "Subtitle": "Go out with a bang!", "DeathLabel": "DEATH" },
-      "Risk": { "Title": "Risk it All", "Subtitle": "Death or Legend", "ProbText": "DEATH: 50% | LIFE: 50%" }
+      "Risk": { "Title": "Risk it All", "Subtitle": "Death or Legend", "ProbText": "DEATH: 50% | LIFE: 50%", "DistributeTitle": "Risk it All: Hope", "DistributeHint": "Distribute {total} points to reduce HP and/or Stress." },
+      "Apply": "Apply"
     },
     "Chat": {
       "Avoid": {
@@ -76,7 +81,9 @@
         "FearTitle": "FEAR TAKES HOLD...",
         "FearDesc": "You died!",
         "CriticalTitle": "CRITICAL SUCCESS!",
-        "CriticalDesc": "You stand and clear all Hit Points and Stress."
+        "CriticalDesc": "You stand and clear all Hit Points and Stress.",
+        "Recovered": "Recovered",
+        "AllRecovered": "All HP & Stress"
       },
       "Blaze": { "Title": "BLAZE OF GLORY!" }
     }

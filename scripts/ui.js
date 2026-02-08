@@ -290,4 +290,86 @@ export class DeathUI {
             onTrigger(result);
         }
     }
+
+    /**
+     * Shows a dialog to distribute Hope die value between HP and Stress.
+     */
+    static async showRiskDistributionDialog(actor, total) {
+        const { DialogV2 } = foundry.applications.api;
+
+        // Custom class to attach listeners after render
+        class RiskDialog extends DialogV2 {
+            _onRender(context, options) {
+                const slider = this.element.querySelector("#risk-slider");
+                const hpSpan = this.element.querySelector("#risk-hp-val");
+                const stressSpan = this.element.querySelector("#risk-stress-val");
+                
+                if (slider && hpSpan && stressSpan) {
+                    slider.addEventListener("input", (ev) => {
+                        const val = parseInt(ev.target.value);
+                        hpSpan.textContent = val;
+                        stressSpan.textContent = total - val;
+                    });
+                }
+            }
+        }
+
+        const content = `
+            <div class="death-moves-dialog-content">
+                <div class="death-form-group" style="text-align: center; padding: 10px;">
+                    <h3 style="margin-bottom: 20px; color: #FFD700; font-size: 1.4em;">
+                        ${game.i18n.format("DEATH_OPTIONS.UI.Risk.DistributeHint", {total})}
+                    </h3>
+                    
+                    <div class="flexrow" style="align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                        <div style="text-align: center; width: 60px;">
+                            <label style="display: block; font-weight: bold; color: #ff6666; margin-bottom: 5px;">HP</label>
+                            <span id="risk-hp-val" style="font-size: 1.8em; font-weight: bold; color: white;">0</span>
+                        </div>
+                        
+                        <input type="range" id="risk-slider" min="0" max="${total}" value="0" style="flex: 1; margin: 0 10px; cursor: pointer;">
+                        
+                        <div style="text-align: center; width: 60px;">
+                            <label style="display: block; font-weight: bold; color: #da70d6; margin-bottom: 5px;">Stress</label>
+                            <span id="risk-stress-val" style="font-size: 1.8em; font-weight: bold; color: white;">${total}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return await RiskDialog.wait({
+            window: { 
+                title: game.i18n.localize("DEATH_OPTIONS.UI.Risk.DistributeTitle"),
+                icon: "fas fa-heart-broken"
+            },
+            content: content,
+            buttons: [{
+                action: "apply",
+                label: game.i18n.localize("DEATH_OPTIONS.UI.Apply"),
+                icon: "fas fa-check",
+                callback: async (event, button, dialog) => {
+                    // Read from the live dialog element
+                    const slider = dialog.element.querySelector("#risk-slider");
+                    const hpVal = parseInt(slider.value);
+                    const stressVal = total - hpVal;
+                    
+                    const currentHP = foundry.utils.getProperty(actor, "system.resources.hitPoints.value") || 0;
+                    const currentStress = foundry.utils.getProperty(actor, "system.resources.stress.value") || 0;
+                    
+                    const newHP = Math.max(0, currentHP - hpVal);
+                    const newStress = Math.max(0, currentStress - stressVal);
+                    
+                    await actor.update({
+                        "system.resources.hitPoints.value": newHP,
+                        "system.resources.stress.value": newStress
+                    });
+                    
+                    return { hp: hpVal, stress: stressVal };
+                }
+            }],
+            close: () => null,
+            classes: ["death-moves-dialog"]
+        });
+    }
 }
