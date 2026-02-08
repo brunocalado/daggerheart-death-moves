@@ -101,11 +101,12 @@ export class DeathSettings {
             type: String,
             choices: {
                 "none": "None",
-                "core": "Core"
+                "core": "Core",
+                "homebrew": "Homebrew"
             },
             default: "core",
             onChange: async (value) => {
-                if (value === 'core') {
+                if (value === 'core' || value === 'homebrew') {
                     await DeathSettings.disableSystemAutomation();
                 }
             }

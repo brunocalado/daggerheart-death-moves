@@ -1,3 +1,7 @@
+# 1.2.5
+- Homebrew automated: https://www.reddit.com/r/daggerheart/comments/1nrdzxj/alternate_scar_rules_20_feedback_feedforward/
+
+
 # 1.2.4
 - Mode setting: disable image/sound
 - Auto Trigger

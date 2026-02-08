@@ -122,9 +122,10 @@ export class DeathLogic {
         let mainTitle = "";
         let mainText = "";
         let isScar = false;
+        let level = 0;
 
         if (actor) {
-            const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
+            level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
             
             if (rollTotal <= level) {
                 // SCAR
@@ -199,6 +200,18 @@ export class DeathLogic {
                 mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearDesc");
                 mainText += `<br><br><em>(${game.i18n.localize("DEATH_OPTIONS.UI.Avoid.ScarLabel")}: ${newScars})</em>`;
             }
+        } else if (automation === 'homebrew' && isScar && actor) {
+            await mediaPromise;
+            const { DeathHomebrew } = await import('./homebrew.js');
+            const rollData = {
+                rawRoll,
+                rollTotal,
+                level,
+                hasPhoenix,
+                phoenixName
+            };
+            await DeathHomebrew.handleAvoidDeathScar(actor, rollData);
+            return;
         }
 
         const bgImage = DeathSettings.get(resultKey) || "";
@@ -309,7 +322,7 @@ export class DeathLogic {
 
         // --- AUTOMATION: Core ---
         const automation = DeathSettings.get('automationMode');
-        if (automation === 'core') {
+        if (automation === 'core' || automation === 'homebrew') {
             try {
                 await mediaPromise;
                 const actor = game.user.character;
