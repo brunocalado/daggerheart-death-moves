@@ -7,6 +7,18 @@
         "Hint": "Clique para personalizar todas as imagens e efeitos sonoros usados pelo módulo.",
         "Saved": "Configurações de mídia salvas com sucesso."
       },
+      "MediaMode": {
+        "Name": "Modo de Mídia",
+        "Hint": "Escolha quais elementos de mídia apresentar durante os Movimentos de Morte.",
+        "Full": "Áudio e Imagem",
+        "Audio": "Apenas Áudio",
+        "Image": "Apenas Imagem",
+        "Minimal": "Minimalista (Nenhum)"
+      },
+      "GmFullScreen": {
+        "Name": "GM: Modo Tela Cheia",
+        "Hint": "Se ativado, o GM vê a tela de escolha em tela cheia. Se desativado, o GM vê sempre a versão compacta (janela)."
+      },
       "Automation": {
         "Name": "Modo de Automação",
         "Hint": "Escolha como o módulo interage com as fichas de personagem."

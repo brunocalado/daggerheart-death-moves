@@ -69,6 +69,8 @@ export class DeathUI {
         DeathAudioManager.playSound('soundRollScreen');
 
         const bgPath = DeathSettings.get('backgroundPath');
+        const mediaMode = DeathSettings.get('mediaMode');
+        const gmFullScreen = DeathSettings.get('gmFullScreen');
 
         // Determine probabilities
         let probs = forceProbs;
@@ -79,6 +81,10 @@ export class DeathUI {
         const overlay = document.createElement('div');
         overlay.id = 'risk-it-all-overlay';
         if (bgPath) overlay.style.backgroundImage = `url('${bgPath}')`;
+
+        if ((mediaMode === 'audio' || mediaMode === 'minimal') || (game.user.isGM && !gmFullScreen)) {
+            overlay.classList.add('compact-mode');
+        }
 
         if (isSpectator) {
             overlay.classList.add('spectator-mode');

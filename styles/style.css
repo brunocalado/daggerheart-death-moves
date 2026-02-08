@@ -80,6 +80,28 @@
     z-index: 0;
 }
 
+/* --- COMPACT MODE (Audio Only / Minimalist) --- */
+#risk-it-all-overlay.compact-mode {
+    width: auto;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    border: 2px solid #444;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    padding: 40px;
+}
+
+#risk-it-all-overlay.compact-mode::before {
+    display: none;
+}
+
+#risk-it-all-overlay.compact-mode .roll-close-btn {
+    top: 10px;
+    right: 10px;
+}
+
 /* --- SPECTATOR MODE STYLES --- */
 #risk-it-all-overlay.spectator-mode .option-btn {
     pointer-events: none; /* Disable clicking */

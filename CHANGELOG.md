@@ -1,3 +1,6 @@
+# 1.2.4
+- Mode setting: disable image/sound
+
 # 1.2.3
 - Death Move Automation Included: Add Scar and Update HP/Stress
 - Auto disable system Automation if Core is selected.

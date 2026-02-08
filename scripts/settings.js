@@ -45,6 +45,30 @@ export class DeathSettings {
         });
 
         // 2. CONFIGURAÇÕES GERAIS (Visíveis)
+        game.settings.register(MODULE_ID, 'mediaMode', {
+            name: "DEATH_OPTIONS.Settings.MediaMode.Name",
+            hint: "DEATH_OPTIONS.Settings.MediaMode.Hint",
+            scope: 'world',
+            config: true,
+            type: String,
+            choices: {
+                "full": "DEATH_OPTIONS.Settings.MediaMode.Full",
+                "audio": "DEATH_OPTIONS.Settings.MediaMode.Audio",
+                "image": "DEATH_OPTIONS.Settings.MediaMode.Image",
+                "minimal": "DEATH_OPTIONS.Settings.MediaMode.Minimal"
+            },
+            default: "full"
+        });
+
+        game.settings.register(MODULE_ID, 'gmFullScreen', {
+            name: "DEATH_OPTIONS.Settings.GmFullScreen.Name",
+            hint: "DEATH_OPTIONS.Settings.GmFullScreen.Hint",
+            scope: 'world',
+            config: true,
+            type: Boolean,
+            default: true
+        });
+
         game.settings.register(MODULE_ID, 'soundLanguage', {
             name: "DEATH_OPTIONS.Settings.SoundLanguage.Name",
             hint: "DEATH_OPTIONS.Settings.SoundLanguage.Hint",
@@ -185,6 +209,14 @@ export class DeathSettings {
     }
 
     static get(key) {
+        const mode = game.settings.get(MODULE_ID, 'mediaMode');
+
+        // If mode suppresses images (Audio Only or Minimalist), return empty string for image keys
+        if (mode === 'audio' || mode === 'minimal') {
+            const isImage = this.getImageDefinitions().some(d => d.key === key);
+            if (isImage) return "";
+        }
+
         return game.settings.get(MODULE_ID, key);
     }
 

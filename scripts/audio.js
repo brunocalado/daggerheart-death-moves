@@ -8,6 +8,9 @@ export class DeathAudioManager {
      * NOW USES DeathSettings.getAudioPath() to handle language selection.
      */
     static playSound(settingKey) {
+        const mode = DeathSettings.get('mediaMode');
+        if (mode === 'image' || mode === 'minimal') return;
+
         // Use the new helper method to resolve path based on language
         const soundSrc = DeathSettings.getAudioPath(settingKey);
         
@@ -31,6 +34,9 @@ export class DeathAudioManager {
         // logic.js already calls playSound() explicitly alongside playMedia().
         // Keeping the sound logic here causes duplication (double audio).
         
+        const mode = DeathSettings.get('mediaMode');
+        if (mode === 'audio' || mode === 'minimal') return Promise.resolve();
+
         const src = DeathSettings.get(settingKey);
         if (!src) return Promise.resolve();
         

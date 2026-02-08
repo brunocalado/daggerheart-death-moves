@@ -7,6 +7,18 @@
         "Hint": "Click to customize all images and sound effects used by the module.",
         "Saved": "Media settings saved successfully."
       },
+      "MediaMode": {
+        "Name": "Media Mode",
+        "Hint": "Choose which media elements to present during Death Moves.",
+        "Full": "Audio & Image",
+        "Audio": "Audio Only",
+        "Image": "Image Only",
+        "Minimal": "Minimalist (None)"
+      },
+      "GmFullScreen": {
+        "Name": "GM: Full Screen Mode",
+        "Hint": "If enabled, the GM sees the choice screen in full screen. If disabled, the GM always sees the compact version (window)."
+      },
       "Automation": {
         "Name": "Automation Mode",
         "Hint": "Choose how the module interacts with character sheets."
