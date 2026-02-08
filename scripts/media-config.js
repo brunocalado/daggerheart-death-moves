@@ -51,7 +51,16 @@ export class DeathMediaConfig extends HandlebarsApplicationMixin(ApplicationV2) 
             value: game.settings.get(MODULE_ID, def.key)
         }));
 
-        return { images, sounds };
+        const soundLanguage = {
+            value: game.settings.get(MODULE_ID, 'soundLanguage'),
+            choices: {
+                "en": "English",
+                "pt-BR": "Português (Brasil)",
+                "custom": "Custom"
+            }
+        };
+
+        return { images, sounds, soundLanguage };
     }
 
     /** @override */

@@ -2,8 +2,8 @@
   "DEATH_OPTIONS": {
     "Settings": {
       "MediaConfig": {
-        "Name": "Media Configuration (Images & Audio)",
-        "Label": "Configure Media Paths",
+        "Name": "Configure Media",
+        "Label": "Configure Media",
         "Hint": "Click to customize all images and sound effects used by the module.",
         "Saved": "Media settings saved successfully."
       },

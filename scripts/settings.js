@@ -73,7 +73,7 @@ export class DeathSettings {
             name: "DEATH_OPTIONS.Settings.SoundLanguage.Name",
             hint: "DEATH_OPTIONS.Settings.SoundLanguage.Hint",
             scope: 'world',
-            config: true,
+            config: false,
             type: String,
             choices: {
                 "en": "English",

@@ -2,8 +2,8 @@
   "DEATH_OPTIONS": {
     "Settings": {
       "MediaConfig": {
-        "Name": "Configuração de Mídia (Imagens e Áudio)",
-        "Label": "Configurar Caminhos de Mídia",
+        "Name": "Configurar Mídia",
+        "Label": "Configurar Mídia",
         "Hint": "Clique para personalizar todas as imagens e efeitos sonoros usados pelo módulo.",
         "Saved": "Configurações de mídia salvas com sucesso."
       },

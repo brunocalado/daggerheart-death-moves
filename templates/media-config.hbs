@@ -121,6 +121,16 @@
 
         <!-- AUDIO TAB -->
         <div class="tab-content" data-tab="audio">
+            <div class="form-group">
+                <label>{{localize "DEATH_OPTIONS.Settings.SoundLanguage.Name"}}</label>
+                <div class="form-fields">
+                    <select name="soundLanguage">
+                        {{selectOptions soundLanguage.choices selected=soundLanguage.value}}
+                    </select>
+                </div>
+                <p class="hint">{{localize "DEATH_OPTIONS.Settings.SoundLanguage.Hint"}}</p>
+            </div>
+
             <div class="notification info" style="margin-bottom: 15px;">
                 {{localize "DEATH_OPTIONS.Settings.AudioWarning"}}
             </div>
