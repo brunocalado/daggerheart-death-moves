@@ -260,16 +260,23 @@ export class DeathUI {
         if (existing) existing.remove();
     }
 
-    static async createGMDialog(users, onTrigger) {
+    static async createGMDialog(users, onTrigger, selectedUserId = null, reason = null, characterName = null) {
         const { DialogV2 } = foundry.applications.api;
+
+        const infoText = reason 
+            ? `<p style="color: #ff4500; font-weight: bold; margin-top: 20px;">${reason}<br><span style="color: #ccc; font-weight: normal;">(${characterName || 'Unknown'})</span></p>` 
+            : `<p>This will send the Death Moves screen to the selected player.</p>`;
 
         const content = `
             <div class="death-form-group">
                 <label>Select Player:</label>
                 <select id="death-player-select" class="death-select">
-                    ${users.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
+                    ${users.map(u => {
+                        const isSelected = (selectedUserId && u.id === selectedUserId) ? "selected" : "";
+                        return `<option value="${u.id}" ${isSelected}>${u.name}</option>`;
+                    }).join('')}
                 </select>
-                <p>This will send the Death Moves screen to the selected player.</p>
+                ${infoText}
             </div>
         `;
 

@@ -23,6 +23,13 @@
         "Name": "Modo de Automação",
         "Hint": "Escolha como o módulo interage com as fichas de personagem."
       },
+      "HpAutomation": {
+        "Name": "Gatilho de HP Máximo",
+        "Hint": "Define o comportamento quando o HP atinge o máximo (Morte).",
+        "None": "Nenhum (Manual)",
+        "Dialog": "Abrir Diálogo para GM",
+        "Auto": "Acionar Automaticamente (Direto para Jogador)"
+      },
       "Headers": {
         "Images": "Imagens",
         "Audio": "Arquivos de Áudio"

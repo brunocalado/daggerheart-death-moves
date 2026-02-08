@@ -53,22 +53,60 @@ class DeathMovesController {
         
         // Backward compatibility
         window.DeathOptions = { 
-            trigger: () => {
-                DeathMovesController.gmTriggerFlow();
+            trigger: (targetName) => {
+                DeathMovesController.gmTriggerFlow(targetName);
             }
         };
 
         // Check system automation settings on load
         DeathMovesController._checkSystemAutomation();
+
+        // Monitor Actor Updates for Death Condition
+        Hooks.on('updateActor', (actor, changes, options, userId) => {
+            if (!game.user.isGM) return;
+            
+            // Check Automation Setting
+            const triggerMode = DeathSettings.get('hpAutomationTrigger');
+            if (triggerMode === 'none') return;
+
+            if (!actor.hasPlayerOwner) return;
+
+            // Only proceed if HP value was changed
+            if (!foundry.utils.hasProperty(changes, "system.resources.hitPoints.value")) return;
+
+            const hp = foundry.utils.getProperty(actor, "system.resources.hitPoints.value");
+            const max = foundry.utils.getProperty(actor, "system.resources.hitPoints.max");
+
+            // If both are 0, do nothing
+            if (hp === 0 && max === 0) return;
+
+            // If HP reached Max, trigger Death Moves
+            if (hp >= max) {
+                // Find the appropriate user to target
+                const activeOwner = game.users.find(u => !u.isGM && u.active && actor.testUserPermission(u, "OWNER"));
+                const targetUser = activeOwner || game.users.find(u => !u.isGM && actor.testUserPermission(u, "OWNER"));
+                const targetName = targetUser ? targetUser.name : null;
+
+                if (triggerMode === 'dialog') {
+                    DeathMovesController.gmTriggerFlow(targetName, { 
+                        showDialog: true, 
+                        reason: "Last HP Marked!",
+                        characterName: actor.name 
+                    });
+                } else if (triggerMode === 'auto') {
+                    if (targetName) {
+                        DeathMovesController.gmTriggerFlow(targetName);
+                    }
+                }
+            }
+        });
     }
 
     // Triggered by GM to select a player
-    static async gmTriggerFlow() {
+    static async gmTriggerFlow(targetUserName = null, options = {}) {
         if (!game.user.isGM) return ui.notifications.warn("Only the GM can trigger this.");
-        const users = game.users.filter(u => u.active && !u.isGM);
-        if (users.length === 0) return ui.notifications.warn("No players connected.");
 
-        DeathUI.createGMDialog(users, (targetUserId) => {
+        const executeTrigger = (targetUserId) => {
             // Calculate probabilities for the TARGET actor (Server-Side Logic simulation)
             const targetUser = game.users.get(targetUserId);
             const targetActor = targetUser ? targetUser.character : null;
@@ -87,7 +125,26 @@ class DeathMovesController {
             
             // 3. Show locally for the GM
             DeathMovesController._handleSpectatorUI(payload);
-        });
+        };
+
+        if (targetUserName && !options.showDialog) {
+            const targetUser = game.users.getName(targetUserName);
+            if (!targetUser) return ui.notifications.warn(`Death Moves: User "${targetUserName}" not found.`);
+            return executeTrigger(targetUser.id);
+        }
+
+        const users = game.users.filter(u => u.active && !u.isGM);
+        if (users.length === 0) return ui.notifications.warn("No players connected.");
+
+        let preSelectedUserId = null;
+        if (targetUserName) {
+            const u = game.users.getName(targetUserName);
+            if (u) preSelectedUserId = u.id;
+        }
+
+        DeathUI.createGMDialog(users, (targetUserId) => {
+            executeTrigger(targetUserId);
+        }, preSelectedUserId, options.reason, options.characterName);
     }
 
     // Handles displaying the INTERACTIVE UI for the specific target user

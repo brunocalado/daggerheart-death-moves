@@ -1,5 +1,6 @@
 # 1.2.4
 - Mode setting: disable image/sound
+- Auto Trigger
 
 # 1.2.3
 - Death Move Automation Included: Add Scar and Update HP/Stress

@@ -33,7 +33,7 @@ You need to enable sound to play the video.
 ### 1. The GM Triggers the Move
 The Gamemaster initiates the scene when a character falls:
 * **Sidebar:** Open the Daggerheart Menu (sidebar) and click the **"Trigger Death Move"** button (skull icon). Select the player from the list.
-* **Macro:** Execute `DeathMoves.trigger()` via a script macro.
+* **Macro:** Execute `DeathMoves.trigger()` via a script macro. You can use `DeathMoves.trigger("User Name")`.
 
 <p align="center">
   <img width="400" src="docs/sidebar.webp">

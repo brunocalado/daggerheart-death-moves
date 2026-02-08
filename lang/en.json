@@ -23,6 +23,13 @@
         "Name": "Automation Mode",
         "Hint": "Choose how the module interacts with character sheets."
       },
+      "HpAutomation": {
+        "Name": "Max HP Trigger",
+        "Hint": "Define behavior when HP reaches maximum (Death).",
+        "None": "None (Manual)",
+        "Dialog": "Open GM Dialog",
+        "Auto": "Trigger Automatically (Direct to Player)"
+      },
       "Headers": {
         "Images": "Images",
         "Audio": "Audio Files"
