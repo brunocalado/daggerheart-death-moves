@@ -159,10 +159,10 @@ export class DeathLogic {
         // --- AUTOMATION: Core ---
         const automation = DeathSettings.get('automationMode');
         if (automation === 'core' && isScar && actor) {
-            const currentScars = foundry.utils.getProperty(actor, "system.scars") || 0;
-            const newScars = currentScars + 1;
-            await actor.update({"system.scars": newScars});
+            await DeathLogic._applyCoreScar(actor);
 
+            // Re-read scars after AE application to check threshold
+            const newScars = foundry.utils.getProperty(actor, "system.scars") || 0;
             if (newScars >= 6) {
                 mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearTitle");
                 mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearDesc");
@@ -186,6 +186,76 @@ export class DeathLogic {
             content: this._createStyledChatContent(mainTitle, mainText),
             style: CONST.CHAT_MESSAGE_STYLES.OTHER
         });
+    }
+
+    /**
+     * Applies a Core Scar to the actor using an Active Effect item.
+     * If the scar item already exists, increments the AE value by 1.
+     * If it does not exist, creates the item with value "1".
+     * @param {Actor} actor - The actor to apply the scar to.
+     */
+    static async _applyCoreScar(actor) {
+        const SCAR_ITEM_NAME = "Scar (Core)";
+
+        const existingItem = actor.items.find(i => i.name === SCAR_ITEM_NAME && i.type === "feature");
+
+        if (existingItem) {
+            // Item already exists — find the AE change for system.scars and increment its value
+            const effect = existingItem.effects.find(e =>
+                e.changes.some(c => c.key === "system.scars")
+            );
+
+            if (effect) {
+                const changeIndex = effect.changes.findIndex(c => c.key === "system.scars");
+                const currentValue = parseInt(effect.changes[changeIndex].value) || 1;
+                const newValue = currentValue + 1;
+
+                const updatedChanges = effect.changes.map((c, i) =>
+                    i === changeIndex ? { ...c, value: String(newValue) } : c
+                );
+
+                await effect.update({ changes: updatedChanges });
+            }
+        } else {
+            // Item does not exist — create it with value "1"
+            const itemData = {
+                name: SCAR_ITEM_NAME,
+                type: "feature",
+                img: "icons/skills/wounds/injury-pain-body-orange.webp",
+                system: {
+                    attribution: {},
+                    description: "<p>A scar from avoiding death.</p>",
+                    resource: null,
+                    actions: {},
+                    originItemType: null,
+                    multiclassOrigin: false,
+                    featureForm: "passive"
+                },
+                effects: [{
+                    name: SCAR_ITEM_NAME,
+                    type: "base",
+                    system: {
+                        rangeDependence: {
+                            enabled: false,
+                            type: "withinRange",
+                            target: "hostile",
+                            range: "melee"
+                        }
+                    },
+                    img: "icons/skills/wounds/injury-pain-body-orange.webp",
+                    changes: [{
+                        key: "system.scars",
+                        mode: 2,
+                        value: "1",
+                        priority: null
+                    }],
+                    disabled: false,
+                    transfer: true
+                }]
+            };
+
+            await actor.createEmbeddedDocuments("Item", [itemData]);
+        }
     }
 
     /**

@@ -1,3 +1,7 @@
+# 2.0.1
+
+- Core automation will use an active effect with SCAR instead of modifying the actor.
+
 # 2.0.0
 
 - After playing for a while with the visual effects, it became clear that the only truly beneficial part was the death moves automation combined with the homebrew. Because of this, this module has been rebuilt, removing everything that wasn't providing the best value for the sessions. Based on my experience, the recommended workflow now is to activate the scars homebrew and enable the module's automation to detect the last HP of linked actors.

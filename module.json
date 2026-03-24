@@ -2,7 +2,7 @@
   "id": "daggerheart-death-moves",
   "title": "Daggerheart: Death Moves",
   "description": "Enhances the Death Move moment with a dramatic interface for choosing between Avoid Death, Blaze of Glory, or Risk it All — with full automation support.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
@@ -16,7 +16,9 @@
       {
         "id": "daggerheart",
         "type": "system",
-        "compatibility": {}
+        "compatibility": {
+          "minimum": "1.9.0"
+        }
       }
     ],
     "requires": [
