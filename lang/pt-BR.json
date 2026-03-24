@@ -1,24 +1,6 @@
 {
   "DEATH_OPTIONS": {
     "Settings": {
-      "MediaConfig": {
-        "Name": "Configurar Mídia",
-        "Label": "Configurar Mídia",
-        "Hint": "Clique para personalizar todas as imagens e efeitos sonoros usados pelo módulo.",
-        "Saved": "Configurações de mídia salvas com sucesso."
-      },
-      "MediaMode": {
-        "Name": "Modo de Mídia",
-        "Hint": "Escolha quais elementos de mídia apresentar durante os Movimentos de Morte.",
-        "Full": "Áudio e Imagem",
-        "Audio": "Apenas Áudio",
-        "Image": "Apenas Imagem",
-        "Minimal": "Minimalista (Nenhum)"
-      },
-      "GmFullScreen": {
-        "Name": "GM: Modo Tela Cheia",
-        "Hint": "Se ativado, o GM vê a tela de escolha em tela cheia. Se desativado, o GM vê sempre a versão compacta (janela)."
-      },
       "Automation": {
         "Name": "Modo de Automação",
         "Hint": "Escolha como o módulo interage com as fichas de personagem."
@@ -30,49 +12,14 @@
         "Dialog": "Abrir Diálogo para GM",
         "Auto": "Acionar Automaticamente (Direto para Jogador)"
       },
-      "Headers": {
-        "Images": "Imagens",
-        "Audio": "Arquivos de Áudio"
-      },
-      "AudioWarning": "Nota: Os caminhos de áudio abaixo são usados apenas se 'Idioma do Áudio' estiver definido como 'Customizado'.",
-      "SoundLanguage": {
-        "Name": "Idioma do Áudio",
-        "Hint": "Selecione a pasta de áudio. 'Customizado' usa os caminhos definidos no menu Configurar Caminhos de Mídia."
-      },
-      "Duration": {
-        "Name": "Duração da Contagem",
-        "Hint": "Segundos para contar antes de revelar o resultado."
-      },
       "BlazeMessage": {
         "Name": "Mensagem Glória Final",
         "Hint": "Mensagem exibida no chat quando o jogador escolhe Glória Final."
       },
-      "RiskDoubleRoll": {
-        "Name": "Rolagem Sequencial de Risco",
-        "Hint": "Se ativado, rola Medo e depois Esperança sequencialmente para efeito dramático."
-      },
       "ShowProbabilities": {
         "Name": "Mostrar Probabilidades",
         "Hint": "Mostra as chances calculadas em % nos botões."
-      },
-      "Background": { "Name": "Fundo da Tela", "Hint": "Imagem para a tela de seleção principal." },
-      "Blaze": { "Name": "Resultado: Glória Final", "Hint": "Imagem para o resultado de Glória." },
-      "AvoidScar": { "Name": "Resultado: Evitar (Cicatriz)", "Hint": "Imagem para resultado de Cicatriz." },
-      "AvoidSafe": { "Name": "Resultado: Evitar (Salvo)", "Hint": "Imagem para resultado Salvo." },
-      "Hope": { "Name": "Resultado: Risco (Esperança)", "Hint": "Imagem para resultado de Esperança." },
-      "Fear": { "Name": "Resultado: Risco (Medo)", "Hint": "Imagem para resultado de Medo." },
-      "Critical": { "Name": "Resultado: Risco (Crítico)", "Hint": "Imagem para resultado Crítico." },
-      "SoundRollScreen": { "Name": "Abertura de Tela", "Hint": "Som tocado quando a tela de seleção aparece." },
-      "SoundSuspense": { "Name": "Contagem Regressiva", "Hint": "Som tocado durante a contagem (1x por segundo)." },
-      "SoundBlaze": { "Name": "Glória Final", "Hint": "Som para Glória Final." },
-      "SoundAvoidSafe": { "Name": "Evitar (Salvo)", "Hint": "Som para resultado Salvo." },
-      "SoundAvoidScar": { "Name": "Evitar (Cicatriz)", "Hint": "Som para resultado Cicatriz." },
-      "SoundHope": { "Name": "Risco (Esperança)", "Hint": "Som para resultado de Esperança." },
-      "SoundFear": { "Name": "Risco (Medo)", "Hint": "Som para resultado de Medo." },
-      "SoundCritical": { "Name": "Risco (Crítico)", "Hint": "Som para resultado Crítico." },
-      "SoundChatAvoid": { "Name": "Anúncio (Evitar)", "Hint": "Som tocado quando o banner de anúncio de Evitar a Morte aparece." },
-      "SoundChatBlaze": { "Name": "Anúncio (Glória)", "Hint": "Som tocado quando o banner de anúncio de Glória Final aparece." },
-      "SoundChatRisk": { "Name": "Anúncio (Risco)", "Hint": "Som tocado quando o banner de anúncio de Arriscar Tudo aparece." }
+      }
     },
     "UI": {
       "MainTitle": "Escolha seu Destino",

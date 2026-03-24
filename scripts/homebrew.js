@@ -1,5 +1,4 @@
 import { DeathLogic } from './logic.js';
-import { DeathSettings } from './settings.js';
 
 export class DeathHomebrew {
     
@@ -192,9 +191,8 @@ export class DeathHomebrew {
         
         await actor.createEmbeddedDocuments("Item", [itemData]);
         
-        const bgImage = DeathSettings.get('avoidScarPath') || "";
         const title = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.ResultScar");
-        
+
         let mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.MsgScar");
 
         // Rebuild details HTML (Standard Format)
@@ -232,7 +230,7 @@ export class DeathHomebrew {
         </div>`;
 
         ChatMessage.create({
-            content: DeathLogic._createStyledChatContent(title, mainText, bgImage),
+            content: DeathLogic._createStyledChatContent(title, mainText),
             style: CONST.CHAT_MESSAGE_STYLES.OTHER
         });
     }

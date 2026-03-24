@@ -1,24 +1,6 @@
 {
   "DEATH_OPTIONS": {
     "Settings": {
-      "MediaConfig": {
-        "Name": "Configure Media",
-        "Label": "Configure Media",
-        "Hint": "Click to customize all images and sound effects used by the module.",
-        "Saved": "Media settings saved successfully."
-      },
-      "MediaMode": {
-        "Name": "Media Mode",
-        "Hint": "Choose which media elements to present during Death Moves.",
-        "Full": "Audio & Image",
-        "Audio": "Audio Only",
-        "Image": "Image Only",
-        "Minimal": "Minimalist (None)"
-      },
-      "GmFullScreen": {
-        "Name": "GM: Full Screen Mode",
-        "Hint": "If enabled, the GM sees the choice screen in full screen. If disabled, the GM always sees the compact version (window)."
-      },
       "Automation": {
         "Name": "Automation Mode",
         "Hint": "Choose how the module interacts with character sheets."
@@ -30,49 +12,14 @@
         "Dialog": "Open GM Dialog",
         "Auto": "Trigger Automatically (Direct to Player)"
       },
-      "Headers": {
-        "Images": "Images",
-        "Audio": "Audio Files"
-      },
-      "AudioWarning": "Note: Audio paths below are only used if 'Sound Language' is set to 'Custom'.",
-      "SoundLanguage": {
-        "Name": "Sound Language",
-        "Hint": "Select which audio folder to use. 'Custom' uses the file paths defined in the Media Configuration menu."
-      },
-      "Duration": {
-        "Name": "Duration: Countdown",
-        "Hint": "Time in seconds for the countdown (0-10). Set to 0 to disable."
-      },
       "BlazeMessage": {
         "Name": "Text: Blaze of Glory",
         "Hint": "The message displayed in chat when Blaze of Glory is chosen."
       },
-      "RiskDoubleRoll": {
-        "Name": "Risk It All: Double Roll (Sequential)",
-        "Hint": "If enabled, Risk It All will roll the Fear die first, wait 5 seconds, and then roll the Hope die for dramatic effect."
-      },
       "ShowProbabilities": {
         "Name": "Show Probabilities",
         "Hint": "If checked, displays the percentage chance of outcomes below each death option."
-      },
-      "Background": { "Name": "Main Screen Background", "Hint": "The background image displayed behind the three choices." },
-      "Blaze": { "Name": "Blaze of Glory Result", "Hint": "The image shown when a player selects 'Blaze of Glory'." },
-      "AvoidScar": { "Name": "Avoid Death (Scar)", "Hint": "The image shown when Avoid Death roll fails (Roll <= Level)." },
-      "AvoidSafe": { "Name": "Avoid Death (Safe)", "Hint": "The image shown when Avoid Death roll succeeds (Roll > Level)." },
-      "Hope": { "Name": "Risk it All (Hope)", "Hint": "The image displayed when the 'Risk it All' roll results in Hope." },
-      "Fear": { "Name": "Risk it All (Fear)", "Hint": "The image displayed when the 'Risk it All' roll results in Fear." },
-      "Critical": { "Name": "Risk it All (Critical)", "Hint": "The image displayed when the 'Risk it All' roll is a Critical Success." },
-      "SoundRollScreen": { "Name": "Roll Screen Open", "Hint": "Sound played when the main selection screen appears." },
-      "SoundSuspense": { "Name": "Countdown Ticking", "Hint": "The ticking/suspense sound played during the countdown (plays every second)." },
-      "SoundBlaze": { "Name": "Blaze of Glory Event", "Hint": "The sound effect played when 'Blaze of Glory' is selected." },
-      "SoundAvoidSafe": { "Name": "Avoid Death (Safe)", "Hint": "Sound played when Avoid Death succeeds." },
-      "SoundAvoidScar": { "Name": "Avoid Death (Scar)", "Hint": "Sound played when Avoid Death fails (Scar)." },
-      "SoundHope": { "Name": "Risk it All (Hope)", "Hint": "Sound played on a Hope result." },
-      "SoundFear": { "Name": "Risk it All (Fear)", "Hint": "Sound played on a Fear result." },
-      "SoundCritical": { "Name": "Risk it All (Critical)", "Hint": "Sound played on a Critical result." },
-      "SoundChatAvoid": { "Name": "Announcement (Avoid)", "Hint": "Sound played when the Avoid Death announcement banner appears." },
-      "SoundChatBlaze": { "Name": "Announcement (Blaze)", "Hint": "Sound played when the Blaze of Glory announcement banner appears." },
-      "SoundChatRisk": { "Name": "Announcement (Risk)", "Hint": "Sound played when the Risk it All announcement banner appears." }
+      }
     },
     "UI": {
       "MainTitle": "CHOOSE YOUR FATE",
