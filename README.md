@@ -2,6 +2,10 @@
 
 **Daggerheart: Death Moves** is a Foundry VTT module that enhances the "Death Move" moment with a dramatic interface and full automation support for choosing between **Avoid Death**, **Blaze of Glory**, or **Risk it All**.
 
+<p align="center">
+  <img width="700" src="docs/preview.webp">
+</p>
+
 ---
 
 ## 🌟 Key Features
