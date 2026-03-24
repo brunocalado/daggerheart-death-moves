@@ -56,7 +56,7 @@ export class DeathHomebrew {
                 "type": "base",
                 "system": { "rangeDependence": { "enabled": false, "type": "withinRange", "target": "hostile", "range": "melee" } },
                 "img": "icons/skills/wounds/injury-pain-body-orange.webp",
-                "changes": [{ "key": "system.resources.hope.max", "mode": 2, "value": "-1", "priority": null }],
+                "changes": [{ "key": "system.scars", "mode": 2, "value": "1", "priority": null }],
                 "disabled": false,
                 "transfer": true
             }],

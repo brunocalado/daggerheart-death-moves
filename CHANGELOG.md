@@ -1,6 +1,7 @@
 # 2.0.1
 
 - Core automation will use an active effect with SCAR instead of modifying the actor.
+- Homebrew automation will use an active effect with SCAR instead of hope max AE.
 
 # 2.0.0
 
