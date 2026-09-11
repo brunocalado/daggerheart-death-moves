@@ -1,3 +1,10 @@
+# 2.5
+
+- [Changed] The skull the character sheet draws over the portrait once every Hit Point is marked now sends this module's death move screen instead of opening the system's own Death Move dialog. It is the same screen the GM sends from the Daggerheart menu, so both ways into a death move now end in the same place.
+- [Changed] A player pressing that skull asks the GM's client to send the screen rather than opening it alone — the queue, the spectator view and the chat cards are all driven from the GM. With two GMs connected only the designated one acts, so the death move is never started twice.
+- [Changed] The skull is purple with a light rim instead of the system's desaturated beige, so it reads as this module's button rather than the system's.
+- [Added] A warning when the skull is pressed on a character that is not the one assigned to that player, and when no GM is connected to send the screen. A death move acts on the assigned character, so an unassigned sheet would otherwise resolve against the wrong one.
+
 # 2.4
 
 - [Changed] Every window the module opens now follows the Daggerheart system's theming rules. Each one carries the system's own dialog classes, so it inherits the parchment frame, inputs and buttons instead of rendering half Daggerheart and half core Foundry — which is what made the Trigger button come out in Foundry's orange.

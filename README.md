@@ -14,6 +14,7 @@
 ## 🌟 Key Features
 
 ### 🎭 Dramatic Interface
+* **Sheet Skull:** The skull the character sheet puts over the portrait once every Hit Point is marked sends this module's screen instead of the system's own Death Move dialog, and is painted purple to say so. The GM can press it, and so can the player the character belongs to.
 * **Selection Screen:** The dying player faces a compact interface to choose their fate: **Avoid Death**, **Blaze of Glory**, or **Risk it All**.
 * **Spectator Mode:** While the active player decides, all other players (and the GM) see a synchronized "Waiting..." screen, keeping the entire party focused on the moment.
 * **Dramatic Announcements:** Once a choice is made, a text banner appears for everyone, announcing the decision before the results are revealed.
@@ -36,10 +37,18 @@
 
 ## 🛠️ How to Use
 
-### 1. The GM Triggers the Move
-The Gamemaster initiates the scene when a character falls:
+### 1. Starting a Death Move
+There are four ways in, and all of them lead to the same screen:
+* **Character Sheet:** Press the purple skull over the portrait. It appears once every Hit Point is marked. A player pressing it asks the GM's client to run the scene, since that is where the queue and the chat cards live — so a GM has to be connected. A death move acts on the character assigned to the player, so the sheet has to be that character.
 * **Sidebar:** Open the Daggerheart Menu (sidebar) and click the **"Trigger Death Move"** button (skull icon). Select the player from the list.
 * **Macro:** Execute `DeathMoves.trigger()` via a script macro. You can use `DeathMoves.trigger("User Name")`.
+* **Automatically:** With **Max HP Trigger** configured, reaching maximum Hit Points starts the move on its own, or opens a confirmation dialog for the GM first.
+
+<p align="center">
+  <img width="200" src="docs/sheet-skull.webp">
+  &nbsp;&nbsp;
+  <img width="360" src="docs/trigger-dialog.webp">
+</p>
 
 <p align="center">
   <img width="400" src="docs/sidebar.webp">
@@ -56,11 +65,19 @@ Any carried item that can replace the death move gets its own button below the t
 ### 3. The Table Watches
 Everyone else is in **Spectator Mode**. They cannot interact, but they see the announcement banner in sync with the active player.
 
+<p align="center">
+  <img width="700" src="docs/spectator.webp">
+</p>
+
 ---
 
 ## ⚙️ Configuration
 
 Customize the experience in **Configure Settings > Daggerheart: Death Moves**:
+
+<p align="center">
+  <img width="520" src="docs/settings.webp">
+</p>
 
 * **Automation Mode:** Choose between **None**, **Core** (auto-apply scars and HP/Stress), or **Homebrew** (alternate scar picker).
 * **Max HP Trigger:** Set to **None**, **Open GM Dialog**, or **Trigger Automatically** when HP reaches maximum.
@@ -85,6 +102,8 @@ https://raw.githubusercontent.com/brunocalado/daggerheart-death-moves/main/modul
 * **Code License:** GPL-3.0.
 
 **Disclaimer:** This module is an independent creation and is not affiliated with Darrington Press.
+
+* thumbnail.webp https://www.pexels.com/license/ / https://www.pexels.com/photo/woman-wearing-a-scary-costume-with-horns-18424789/
 
 # 🧰 My Daggerheart Modules
 

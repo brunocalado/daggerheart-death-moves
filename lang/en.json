@@ -147,7 +147,8 @@
         "Player": "Select Player",
         "Hint": "This will send the Death Moves screen to the selected player.",
         "Submit": "Trigger",
-        "LastHp": "Last Hit Point marked!"
+        "LastHp": "Last Hit Point marked!",
+        "FromSheet": "Death Move requested from {character}'s sheet."
       },
       "Scar": {
         "Title": "Select a Scar",
@@ -159,6 +160,9 @@
         "Name": "Name",
         "Description": "Description"
       }
+    },
+    "Sheet": {
+      "SkullTooltip": "Send the Death Moves screen"
     },
     "Menu": {
       "Legend": "Death Moves",
@@ -172,7 +176,10 @@
       "NoPlayers": "Death Moves: no players connected.",
       "AutomationFailed": "Death Moves: automation failed. See the console for details.",
       "ItemFailed": "Death Moves: item automation failed. See the console for details.",
-      "SystemAutomationOff": "Death Moves: system death move automation disabled (Core mode active)."
+      "SystemAutomationOff": "Death Moves: system death move automation disabled (Core mode active).",
+      "NotAssigned": "Death Moves: this character is not the one assigned to you.",
+      "NoActiveGM": "Death Moves: no GM is connected to send the Death Moves screen.",
+      "Requested": "Death Moves: your request was sent to the GM."
     }
   }
 }

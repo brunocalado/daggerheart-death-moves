@@ -147,7 +147,8 @@
         "Player": "Selecione o Jogador",
         "Hint": "Isso envia a tela de Death Moves para o jogador selecionado.",
         "Submit": "Acionar",
-        "LastHp": "Último Ponto de Vida marcado!"
+        "LastHp": "Último Ponto de Vida marcado!",
+        "FromSheet": "Death Move solicitado pela ficha de {character}."
       },
       "Scar": {
         "Title": "Escolha uma Cicatriz",
@@ -159,6 +160,9 @@
         "Name": "Nome",
         "Description": "Descrição"
       }
+    },
+    "Sheet": {
+      "SkullTooltip": "Enviar a tela de Death Moves"
     },
     "Menu": {
       "Legend": "Death Moves",
@@ -172,7 +176,10 @@
       "NoPlayers": "Death Moves: nenhum jogador conectado.",
       "AutomationFailed": "Death Moves: a automação falhou. Veja o console para detalhes.",
       "ItemFailed": "Death Moves: a automação do item falhou. Veja o console para detalhes.",
-      "SystemAutomationOff": "Death Moves: automação de death move do sistema desativada (modo Core ativo)."
+      "SystemAutomationOff": "Death Moves: automação de death move do sistema desativada (modo Core ativo).",
+      "NotAssigned": "Death Moves: este personagem não é o que está atribuído a você.",
+      "NoActiveGM": "Death Moves: nenhum Mestre conectado para enviar a tela de Death Moves.",
+      "Requested": "Death Moves: seu pedido foi enviado ao Mestre."
     }
   }
 }

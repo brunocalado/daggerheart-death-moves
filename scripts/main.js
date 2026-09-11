@@ -10,6 +10,7 @@ import { DEATH_MOVES, SOCKET_NAME, SOCKET_TYPES, TEMPLATES } from './constants.j
 import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
 import { DeathLogic } from './logic.js';
+import { DeathSkull } from './character-skull.js';
 import { renderElement } from './helpers.js';
 
 /**
@@ -48,6 +49,9 @@ class DeathMovesController {
                     break;
                 case SOCKET_TYPES.FLOW_COMPLETE:
                     DeathMovesController._onFlowComplete();
+                    break;
+                case SOCKET_TYPES.REQUEST_TRIGGER:
+                    DeathMovesController._handleTriggerRequest(payload);
                     break;
             }
         });
@@ -103,6 +107,30 @@ class DeathMovesController {
                     }
                 }
             }
+        });
+    }
+
+    /**
+     * Runs a death move a player asked for from their own sheet's skull.
+     *
+     * Only the designated GM acts on it — every GM client receives the broadcast, and
+     * without that guard a table with two GMs would queue the same flow twice.
+     * @param {Object} payload - Socket payload with actorUuid and userId.
+     */
+    static async _handleTriggerRequest(payload) {
+        if (game.users.activeGM?.id !== game.user.id) return;
+
+        const actor = await foundry.utils.fromUuid(payload.actorUuid);
+        if (!actor) return;
+
+        const requester = game.users.get(payload.userId);
+        const target = requester?.character?.id === actor.id
+            ? requester
+            : DeathSkull.resolveTargetUser(actor);
+
+        DeathMovesController.gmTriggerFlow(target?.name ?? null, {
+            characterName: actor.name,
+            reason: game.i18n.format("DEATH_OPTIONS.Dialog.Trigger.FromSheet", { character: actor.name })
         });
     }
 
@@ -332,5 +360,8 @@ Hooks.on("renderDaggerheartMenu", async (app, element, data) => {
     if (existing) existing.after(fieldset);
     else element.appendChild(fieldset);
 });
+
+/** Rewires the skull the character sheet draws over the portrait. */
+DeathSkull.register(DeathMovesController.gmTriggerFlow);
 
 Hooks.once('ready', DeathMovesController.init);

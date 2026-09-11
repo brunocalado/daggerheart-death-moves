@@ -1,0 +1,37 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/*
+ * The skull the Daggerheart character sheet draws over the portrait once every Hit
+ * Point is marked. scripts/character-skull.js rewires what it does and tags it with the
+ * module class; this repaints it so it reads as this module's button, not the system's.
+ *
+ * The selector matches the depth of the system's own rule instead of undercutting it.
+ * `color` and `filter` still need !important: the system sets both again per theme from
+ * inside an @scope block, and that specificity cannot be matched portably from outside.
+ */
+.application.sheet.dh-style
+    .character-sidebar-sheet
+    .portrait.death-roll
+    .death-roll-btn.daggerheart-death-moves {
+    color: var(--dm-skull) !important;
+
+    /* The system's filter is grayscale(1), which would flatten the purple to grey. */
+    filter: drop-shadow(0 0 6px var(--dm-ink-deep)) !important;
+
+    &:hover {
+        text-shadow: 0 0 12px var(--dm-skull-rim);
+    }
+
+    /* The rim. paint-order keeps the stroke behind the fill, so it rings the skull
+       instead of eating half of it. */
+    .fa-skull {
+        -webkit-text-stroke: 3px var(--dm-skull-rim);
+        paint-order: stroke fill;
+    }
+}

@@ -43,6 +43,11 @@
     --dm-fear: #352ab2;
     --dm-fear-light: var(--chat-blue, #8f87ee);
 
+    /* The sheet skull this module takes over. Purple to echo the Fear die the death
+       moves roll, rimmed in the light beige so it still reads over a dark portrait. */
+    --dm-skull: #9900ff;
+    --dm-skull-rim: var(--dm-beige);
+
     /* One accent per death move, so a card, its glow and its dice agree. */
     --dm-accent-avoid: var(--dm-gold);
     --dm-accent-blaze: var(--dm-red);
