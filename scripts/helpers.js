@@ -51,3 +51,28 @@ export function readDragData(event) {
         return null;
     }
 }
+
+/**
+ * The Heroplate's "Blessed" action, when it is still usable this long rest.
+ * Lives here rather than in the logic module so the overlay can ask the same
+ * question without importing it, which would close an import cycle.
+ * @param {Item|null} armor - The equipped armor to inspect.
+ * @returns {Object|null} The Blessed action, or null when spent or absent.
+ */
+export function heroplateBlessedAction(armor) {
+    if (!armor) return null;
+
+    const features = armor.system?.armorFeatures ?? [];
+    const blessed = features.find(f => f.value === "blessed") ?? features.find(f => f.actionIds?.length);
+    const actionId = blessed?.actionIds?.[0];
+    const action = actionId ? armor.system?.actions?.get(actionId) : null;
+
+    if (!action) return null;
+
+    // uses.value counts upwards towards uses.max, matching the system's own check.
+    const max = Number(action.uses?.max) || 0;
+    const used = Number(action.uses?.value) || 0;
+    if (max && used + 1 > max) return null;
+
+    return action;
+}

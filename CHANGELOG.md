@@ -1,3 +1,11 @@
+# 2.3
+
+- [Changed] Sprite Bottle and Tears of the Undying Hero are no longer spent on their own. Each carried item gets its own button on the death move screen and one click uses it, so nothing is consumed unless the player asks for it. Ignoring the buttons leads to the normal death move.
+- [Changed] Item prompts no longer open separate dialog windows. The Hallowed Heroplate is a Hope slider inside the Risk It All button, and consumables are buttons below the three options, all on the death move screen itself.
+- [Fixed] The Hallowed Heroplate slider was hidden with no explanation when the armor was not equipped, when the Blessed use was already spent, or when there was no Hope left. The armor now names the rule that is in the way. An unequipped armor is the common case, since it arrives from the compendium unequipped and grants none of its features until worn.
+- [Fixed] The death move screen now scrolls when it is taller than the window. Centred content used to be clipped at the top with no way to reach it on a short screen.
+- [Changed] All source files use LF line endings. Three were still CRLF, which git was already normalizing to LF on commit anyway.
+
 # 2.2
 
 - [Added] Support for "Reliquary of the Sightless Saint": +1 to the Hope Die on Risk It All.

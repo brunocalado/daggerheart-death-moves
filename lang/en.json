@@ -54,13 +54,20 @@
         "ProbText": "DEATH: 50% | LIFE: 50%",
         "DistributeTitle": "Risk it All: Hope",
         "DistributeHint": "Distribute {total} points to reduce HP and/or Stress.",
-        "HeroplateTitle": "Blessed: Spend Hope",
-        "HeroplateHint": "Spend Hope to raise your Hope Die. The bonus equals the Hope spent. ({item})",
-        "HeroplateSpent": "Spend",
-        "HeroplateLeft": "Hope Left",
-        "HeroplateAvailable": "spend Hope"
+        "HeroplateSlider": "Spend Hope for a bigger Hope Die",
+        "HeroplateBlocked": {
+          "Unequipped": "Equip the armor to spend Hope",
+          "Spent": "Already used this long rest",
+          "NoHope": "No Hope to spend"
+        }
       },
-      "Apply": "Apply"
+      "Apply": "Apply",
+      "Items": {
+        "BarLabel": "Or use an item",
+        "sprite": "Clears all Hit Points. Spends the item.",
+        "tears": "One final action roll, then a slumber. Spends the item.",
+        "Gone": "Death Moves: that item is no longer available."
+      }
     },
     "Chat": {
       "Avoid": {

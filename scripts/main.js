@@ -174,14 +174,9 @@ class DeathMovesController {
      * @param {Object} options - Additional options.
      */
     static async _runFlow(targetUserName = null, options = {}) {
-        // Returns false when an item resolved the moment on its own, so the caller
-        // knows there is no player flow to wait on.
-        const executeTrigger = async (targetUserId) => {
+        const executeTrigger = (targetUserId) => {
             const targetUser = game.users.get(targetUserId);
             const targetActor = targetUser ? targetUser.character : null;
-
-            if (await DeathLogic.interceptDeathMove(targetActor)) return false;
-
             const probs = DeathUI.calculateProbabilitiesForActor(targetActor);
 
             const payload = {
@@ -192,14 +187,12 @@ class DeathMovesController {
             game.socket.emit(SOCKET_NAME, { ...payload, type: SOCKET_TYPES.SHOW_UI });
             game.socket.emit(SOCKET_NAME, { ...payload, type: SOCKET_TYPES.SHOW_SPECTATOR_UI });
             DeathMovesController._handleSpectatorUI(payload);
-            return true;
         };
 
         if (targetUserName && !options.showDialog) {
             const targetUser = game.users.getName(targetUserName);
             if (!targetUser) return ui.notifications.warn(`Death Moves: User "${targetUserName}" not found.`);
-            const shown = await executeTrigger(targetUser.id);
-            if (!shown) return;
+            executeTrigger(targetUser.id);
             return DeathMovesController._waitForFlowComplete();
         }
 
@@ -213,9 +206,8 @@ class DeathMovesController {
         }
 
         return new Promise((resolve) => {
-            DeathUI.createGMDialog(users, async (targetUserId) => {
-                const shown = await executeTrigger(targetUserId);
-                if (!shown) return resolve();
+            DeathUI.createGMDialog(users, (targetUserId) => {
+                executeTrigger(targetUserId);
                 DeathMovesController._waitForFlowComplete().then(resolve);
             }, preSelectedUserId, options.reason, options.characterName);
         });
@@ -248,9 +240,22 @@ class DeathMovesController {
                 await DeathLogic.handleBlazeOfGlory(() => {});
                 emitFlowComplete();
             },
-            onRisk: async (btnElement) => {
+            onRisk: async (btnElement, hopeSpent) => {
                 await DeathMovesController._handleSelectionSequence("Risk it All", btnElement);
-                await DeathLogic.handleRiskItAll();
+                await DeathLogic.handleRiskItAll(hopeSpent);
+                emitFlowComplete();
+            },
+            onUseItem: async (key) => {
+                // A consumable replaces the death move outright, so the overlay comes
+                // down everywhere instead of running the selection announcement.
+                const used = await DeathLogic.useConsumable(key);
+                if (!used) {
+                    document.getElementById('death-items-bar')?.classList.remove('is-busy');
+                    return;
+                }
+
+                DeathMovesController._cleanup();
+                game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_SPECTATOR_UI });
                 emitFlowComplete();
             }
         };

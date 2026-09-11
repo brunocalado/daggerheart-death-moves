@@ -27,9 +27,9 @@
 * **HP Trigger:** Optionally detects when a character's HP reaches maximum and triggers the Death Move automatically (or opens a GM confirmation dialog).
 * **Phoenix Feather Support:** Recognizes a configurable item that grants +1 bonus to Avoid Death rolls.
 * **Reliquary of the Sightless Saint Support:** Recognizes a configurable item that grants +1 bonus to the Hope Die on Risk It All.
-* **Hallowed Heroplate Support:** Before the Risk It All dice, the wearer of the equipped armor is offered a slider to spend Hope, raising the Hope Die by the amount spent. The once-per-long-rest limit uses the armor's own Blessed counter, so a Daggerheart long rest refreshes it.
-* **Tears of the Undying Hero Support:** Carrying the potion skips the death move. It is consumed, the character takes one final action roll, and is left unconscious until an ally uses Tend to Wounds.
-* **Sprite Bottle Support:** Carrying the bottle skips the death move entirely. Hit Points are cleared, the bottle is consumed, and a chat card explains what happened.
+* **Hallowed Heroplate Support:** A Hope slider appears inside the Risk It All button, raising the Hope Die by the amount spent. The armor has to be equipped, since an unworn armor grants none of its features. The once-per-long-rest limit uses the armor's own Blessed counter, so a Daggerheart long rest refreshes it. When the slider does not apply, the armor says why.
+* **Tears of the Undying Hero Support:** A button for the potion appears on the death move screen. One click skips the death move: the potion is consumed, the character takes one final action roll, and is left unconscious until an ally uses Tend to Wounds.
+* **Sprite Bottle Support:** A button for the bottle appears on the death move screen. One click skips the death move: Hit Points are cleared, the bottle is consumed, and a chat card explains what happened.
 * **Queue System:** Multiple simultaneous death triggers are queued and processed one at a time.
 
 ---
@@ -48,10 +48,10 @@ The Gamemaster initiates the scene when a character falls:
 ### 2. The Player Chooses
 The target player receives the interactive screen.
 * **Avoid Death:** Automatically rolls 1d12 against the character's Level, plus 1 with a Phoenix Feather.
-* **Risk it All:** Initiates the sequential Fear → Hope roll with border effects. With a Hallowed Heroplate equipped, the player is first asked how much Hope to spend.
+* **Risk it All:** Initiates the sequential Fear → Hope roll with border effects. With a Hallowed Heroplate equipped, a Hope slider sits inside the button.
 * **Blaze of Glory:** Posts a dramatic farewell message to chat.
 
-Some items resolve the moment on their own. A character carrying a Sprite Bottle or Tears of the Undying Hero never sees this screen — the item fires instead, and a chat card explains what happened.
+Any carried item that can replace the death move gets its own button below the three options, and one click uses it. Nothing is ever spent unless the player clicks it, so ignoring the buttons simply leads to the normal choice above.
 
 ### 3. The Table Watches
 Everyone else is in **Spectator Mode**. They cannot interact, but they see the announcement banner in sync with the active player.

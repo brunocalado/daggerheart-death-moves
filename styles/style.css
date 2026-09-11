@@ -67,8 +67,13 @@
     background-repeat: no-repeat;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    /* "safe" falls back to start-alignment when the content is taller than the
+       screen. Plain centring overflows equally in both directions and the top
+       half can never be scrolled back to — with the inline item controls the
+       content is tall enough for that to happen on a short laptop screen. */
+    justify-content: safe center;
+    align-items: safe center;
+    overflow-y: auto;
 }
 
 #risk-it-all-overlay::before {
@@ -148,6 +153,7 @@
     align-items: center;
     width: 100%;
     max-width: 1200px;
+    padding: 20px 0;
     animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -418,4 +424,139 @@
 @keyframes fadeInText {
     from { transform: translateY(-20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+}
+/* --- Inline item controls (consumables + Heroplate) --- */
+
+/* Hope slider, rendered inside the Risk It All button. Its own events are stopped
+   in JS so dragging it never counts as choosing the death move. */
+.heroplate-control {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 215, 0, 0.25);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 3;
+}
+
+.heroplate-control.is-blocked {
+    opacity: 0.6;
+}
+
+.heroplate-name {
+    font-family: "Signika", sans-serif;
+    font-size: 0.8rem;
+    color: #FFD700;
+    text-align: center;
+    text-shadow: 0 0 5px black;
+}
+
+.heroplate-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.heroplate-row input[type="range"] {
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.heroplate-value {
+    font-family: "Signika", sans-serif;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #FFD700;
+    min-width: 2.2em;
+    text-align: right;
+}
+
+.heroplate-hint {
+    font-family: "Signika", sans-serif;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Row of consumables, below the three death options. */
+.death-items-bar {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.death-items-bar.is-busy {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.death-items-label {
+    font-family: "Signika", sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.death-items-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.death-item-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    max-width: 340px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(80, 200, 160, 0.5);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.death-item-btn:hover {
+    transform: translateY(-4px);
+    border-color: #50c8a0;
+    box-shadow: 0 0 25px rgba(80, 200, 160, 0.4);
+}
+
+.death-item-img {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 6px;
+    object-fit: cover;
+    flex: 0 0 auto;
+}
+
+.death-item-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.death-item-name {
+    font-family: "Modesto Condensed", serif;
+    font-size: 1.3rem;
+    color: white;
+    text-transform: uppercase;
+    text-shadow: 0 2px 4px black;
+}
+
+.death-item-hint {
+    font-family: "Signika", sans-serif;
+    font-size: 0.8rem;
+    color: #ccc;
 }

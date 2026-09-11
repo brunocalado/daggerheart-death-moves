@@ -1,5 +1,5 @@
 import { DeathSettings } from './settings.js';
-import { findItemBySource } from './helpers.js';
+import { findItemBySource, heroplateBlessedAction } from './helpers.js';
 
 /**
  * Handles DOM manipulation and visual elements.
@@ -55,18 +55,8 @@ export class DeathUI {
             riskProbText += `<div style="color: #FFD700; font-size: 0.8em; margin-top: 15px; text-shadow: 0 0 5px black;">📿 ${reliquary.name} (+1)</div>`;
         }
 
-        // The Heroplate bonus is chosen at roll time, so it cannot be folded into the
-        // percentage above. Flag that it is available instead of guessing a number.
-        const heroplate = findItemBySource(
-            actor,
-            DeathSettings.getItemSource('heroplate'),
-            item => item.type === "armor" && item.system?.equipped === true
-        );
-
-        if (heroplate) {
-            const label = game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateAvailable");
-            riskProbText += `<div style="color: #FFD700; font-size: 0.8em; margin-top: ${hasReliquary ? '4px' : '15px'}; text-shadow: 0 0 5px black;">🛡 ${heroplate.name} (${label})</div>`;
-        }
+        // The Heroplate is not folded in here: its bonus is chosen at roll time on
+        // the slider inside the Risk button, which states it in place.
 
         return {
             avoid: avoidProb,
@@ -96,6 +86,74 @@ export class DeathUI {
     }
 
     /**
+     * Collects the item controls the dying player gets inside the overlay.
+     * Computed on the player's own client, because it needs live item references
+     * the GM's probability payload does not carry.
+     * @param {Actor|null} actor - The dying character.
+     * @returns {{consumables: Array<Object>, heroplate: Object|null}} Controls to render.
+     */
+    static getItemControls(actor) {
+        const empty = { consumables: [], heroplate: null };
+        if (!actor) return empty;
+
+        // "none" means the module keeps its hands off the sheet, so these are
+        // resolved by hand at the table and no controls are offered.
+        if (DeathSettings.get('automationMode') === 'none') return empty;
+
+        const carried = item => Number(item.system?.quantity ?? 1) > 0;
+        const consumables = [];
+
+        for (const key of ['sprite', 'tears']) {
+            const item = findItemBySource(actor, DeathSettings.getItemSource(key), carried);
+            if (!item) continue;
+
+            consumables.push({
+                key,
+                name: item.name,
+                img: item.img,
+                hint: game.i18n.localize(`DEATH_OPTIONS.UI.Items.${key}`)
+            });
+        }
+
+        // Matched without the equipped test, so an armor that is carried but not
+        // worn can still be reported instead of vanishing with no explanation.
+        const armor = findItemBySource(
+            actor,
+            DeathSettings.getItemSource('heroplate'),
+            item => item.type === "armor"
+        );
+
+        return { consumables, heroplate: this._describeHeroplate(actor, armor) };
+    }
+
+    /**
+     * Whether the Heroplate slider applies, and when it does not, why.
+     * Three separate rules can each block it, so a silently missing slider is
+     * indistinguishable from a broken module — the reason is shown instead.
+     * @param {Actor} actor - The dying character.
+     * @param {Item|null} armor - The Heroplate on the sheet, equipped or not.
+     * @returns {Object|null} Slider data, a blocked reason, or null when not carried.
+     */
+    static _describeHeroplate(actor, armor) {
+        if (!armor) return null;
+
+        const blocked = reason => ({
+            name: armor.name,
+            blocked: game.i18n.localize(`DEATH_OPTIONS.UI.Risk.HeroplateBlocked.${reason}`)
+        });
+
+        // The system itself defines the equipped armor as the one with this flag,
+        // and an unworn armor grants none of its features.
+        if (armor.system?.equipped !== true) return blocked('Unequipped');
+        if (!heroplateBlessedAction(armor)) return blocked('Spent');
+
+        const hope = foundry.utils.getProperty(actor, "system.resources.hope.value") || 0;
+        if (hope <= 0) return blocked('NoHope');
+
+        return { name: armor.name, maxHope: hope };
+    }
+
+    /**
      * Creates the death move overlay UI for both interactive and spectator modes.
      * Always renders in compact mode (minimal layout).
      * @param {Object} callbacks - Functions for button clicks (onAvoid, onBlaze, onRisk, onCancel).
@@ -111,6 +169,11 @@ export class DeathUI {
         if (!probs && !isSpectator) {
              probs = this.calculateProbabilitiesForActor(game.user.character);
         }
+
+        // Spectators can see the moment but never act in it, so they get no controls.
+        const controls = isSpectator
+            ? { consumables: [], heroplate: null }
+            : this.getItemControls(game.user.character);
 
         const overlay = document.createElement('div');
         overlay.id = 'risk-it-all-overlay';
@@ -146,8 +209,9 @@ export class DeathUI {
                 <div class="death-options-container" id="death-options-menu">
                     ${this._createOptionBtn('btn-avoid', 'avoid', btnAvoidTitle, btnAvoidSub, probs ? probs.avoid : null)}
                     ${this._createOptionBtn('btn-blaze', 'blaze', btnBlazeTitle, btnBlazeSub, probs ? probs.blaze : null)}
-                    ${this._createOptionBtn('btn-risk', 'risk', btnRiskTitle, btnRiskSub, probs ? probs.risk : null)}
+                    ${this._createOptionBtn('btn-risk', 'risk', btnRiskTitle, btnRiskSub, probs ? probs.risk : null, this._createHeroplateControl(controls.heroplate))}
                 </div>
+                ${this._createConsumableBar(controls.consumables)}
             </div>
         `;
 
@@ -191,9 +255,10 @@ export class DeathUI {
      * @param {string} title - Button title text.
      * @param {string} subtitle - Button subtitle text.
      * @param {string|null} probability - Probability text to display.
+     * @param {string} [extraHtml] - Extra markup rendered inside the button.
      * @returns {string} HTML string.
      */
-    static _createOptionBtn(id, type, title, subtitle, probability) {
+    static _createOptionBtn(id, type, title, subtitle, probability, extraHtml = '') {
         let probHtml = '';
         if (probability) {
             probHtml = `<div class="probability-text">${probability}</div>`;
@@ -205,7 +270,64 @@ export class DeathUI {
                     <h2>${title}</h2>
                     <p>${subtitle}</p>
                     ${probHtml}
+                    ${extraHtml}
                 </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Row of one-click buttons for consumables that replace the death move.
+     * @param {Array<Object>} consumables - Items from getItemControls().
+     * @returns {string} HTML string, empty when the character carries none.
+     */
+    static _createConsumableBar(consumables) {
+        if (!consumables.length) return '';
+
+        const buttons = consumables.map(item => `
+            <div class="death-item-btn" data-item-key="${item.key}">
+                <img class="death-item-img" src="${item.img}" alt="">
+                <div class="death-item-text">
+                    <span class="death-item-name">${item.name}</span>
+                    <span class="death-item-hint">${item.hint}</span>
+                </div>
+            </div>
+        `).join('');
+
+        return `
+            <div class="death-items-bar" id="death-items-bar">
+                <span class="death-items-label">${game.i18n.localize("DEATH_OPTIONS.UI.Items.BarLabel")}</span>
+                <div class="death-items-row">${buttons}</div>
+            </div>
+        `;
+    }
+
+    /**
+     * Hope slider for the Heroplate, rendered inside the Risk It All button.
+     * @param {Object|null} heroplate - Heroplate data from getItemControls().
+     * @returns {string} HTML string, empty when it does not apply.
+     */
+    static _createHeroplateControl(heroplate) {
+        if (!heroplate) return '';
+
+        // Carried but unusable: say which rule is in the way instead of nothing.
+        if (heroplate.blocked) {
+            return `
+            <div class="heroplate-control is-blocked" id="heroplate-control">
+                <span class="heroplate-name">🛡 ${heroplate.name}</span>
+                <span class="heroplate-hint">${heroplate.blocked}</span>
+            </div>
+        `;
+        }
+
+        return `
+            <div class="heroplate-control" id="heroplate-control">
+                <span class="heroplate-name">🛡 ${heroplate.name}</span>
+                <div class="heroplate-row">
+                    <input type="range" id="heroplate-slider" min="0" max="${heroplate.maxHope}" value="0">
+                    <span class="heroplate-value" id="heroplate-value">+0</span>
+                </div>
+                <span class="heroplate-hint">${game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateSlider")}</span>
             </div>
         `;
     }
@@ -224,17 +346,52 @@ export class DeathUI {
 
         if (isSpectator) return;
 
-        const setupBtn = (id, callbackName) => {
+        const setupBtn = (id, callbackName, getArg = () => undefined) => {
             const btn = overlay.querySelector(`#${id}`);
             btn.onclick = async () => {
+                // Read any inline control before hiding the overlay takes it away.
+                const arg = getArg();
                 this.hideOthers(id);
-                if (callbacks[callbackName]) await callbacks[callbackName](btn);
+                if (callbacks[callbackName]) await callbacks[callbackName](btn, arg);
             };
         };
 
         setupBtn('btn-avoid', 'onAvoid');
         setupBtn('btn-blaze', 'onBlaze');
-        setupBtn('btn-risk', 'onRisk');
+        setupBtn('btn-risk', 'onRisk', () => this.readHeroplateSlider(overlay));
+
+        // The slider lives inside the Risk button, so its own events must not
+        // bubble up and start the death move while the player is still choosing.
+        const slider = overlay.querySelector('#heroplate-slider');
+        if (slider) {
+            const readout = overlay.querySelector('#heroplate-value');
+            for (const type of ['click', 'pointerdown', 'mousedown', 'touchstart']) {
+                slider.addEventListener(type, ev => ev.stopPropagation());
+            }
+            slider.addEventListener('input', (ev) => {
+                ev.stopPropagation();
+                readout.textContent = `+${ev.target.value}`;
+            });
+        }
+
+        for (const btn of overlay.querySelectorAll('.death-item-btn')) {
+            btn.onclick = async () => {
+                // Lock the row so a second click cannot spend a second item while
+                // the first is still being written to the sheet.
+                overlay.querySelector('#death-items-bar')?.classList.add('is-busy');
+                if (callbacks.onUseItem) await callbacks.onUseItem(btn.dataset.itemKey);
+            };
+        }
+    }
+
+    /**
+     * Current value of the inline Heroplate slider.
+     * @param {HTMLElement} [root] - Element to search, defaults to the document.
+     * @returns {number} Hope the player chose to spend, 0 when absent.
+     */
+    static readHeroplateSlider(root = document) {
+        const slider = root.querySelector('#heroplate-slider');
+        return slider ? (parseInt(slider.value) || 0) : 0;
     }
 
     /**
@@ -334,79 +491,6 @@ export class DeathUI {
         if (result) {
             onTrigger(result);
         }
-    }
-
-    /**
-     * Asks how much Hope to burn on the Heroplate's Blessed feature.
-     * Closing the dialog spends nothing — the death move is already committed at this
-     * point, so there is no cancel path back out of it.
-     * @param {number} maxHope - The character's current Hope.
-     * @param {string} itemName - Name of the armor, shown in the dialog.
-     * @returns {Promise<number>} Hope spent, 0 if none.
-     */
-    static async showHeroplateHopeDialog(maxHope, itemName) {
-        const { DialogV2 } = foundry.applications.api;
-
-        class HeroplateDialog extends DialogV2 {
-            _onRender(context, options) {
-                const slider = this.element.querySelector("#heroplate-slider");
-                const spentSpan = this.element.querySelector("#heroplate-spent-val");
-                const leftSpan = this.element.querySelector("#heroplate-left-val");
-
-                if (slider && spentSpan && leftSpan) {
-                    slider.addEventListener("input", (ev) => {
-                        const val = parseInt(ev.target.value);
-                        spentSpan.textContent = val;
-                        leftSpan.textContent = maxHope - val;
-                    });
-                }
-            }
-        }
-
-        const content = `
-            <div class="death-moves-dialog-content">
-                <div class="death-form-group" style="text-align: center; padding: 10px;">
-                    <h3 style="margin-bottom: 20px; color: #FFD700; font-size: 1.4em;">
-                        ${game.i18n.format("DEATH_OPTIONS.UI.Risk.HeroplateHint", { item: itemName })}
-                    </h3>
-
-                    <div class="flexrow" style="align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
-                        <div style="text-align: center; width: 70px;">
-                            <label style="display: block; font-weight: bold; color: #FFD700; margin-bottom: 5px;">${game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateSpent")}</label>
-                            <span id="heroplate-spent-val" style="font-size: 1.8em; font-weight: bold; color: white;">0</span>
-                        </div>
-
-                        <input type="range" id="heroplate-slider" min="0" max="${maxHope}" value="0" style="flex: 1; margin: 0 10px; cursor: pointer;">
-
-                        <div style="text-align: center; width: 70px;">
-                            <label style="display: block; font-weight: bold; color: #ccc; margin-bottom: 5px;">${game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateLeft")}</label>
-                            <span id="heroplate-left-val" style="font-size: 1.8em; font-weight: bold; color: white;">${maxHope}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        const result = await HeroplateDialog.wait({
-            window: {
-                title: game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateTitle"),
-                icon: "fas fa-shield-halved"
-            },
-            content: content,
-            buttons: [{
-                action: "spend",
-                label: game.i18n.localize("DEATH_OPTIONS.UI.Apply"),
-                icon: "fas fa-check",
-                callback: (event, button, dialog) => {
-                    const slider = dialog.element.querySelector("#heroplate-slider");
-                    return slider ? parseInt(slider.value) : 0;
-                }
-            }],
-            close: () => 0,
-            classes: ["death-moves-dialog"]
-        });
-
-        return Number(result) || 0;
     }
 
     /**

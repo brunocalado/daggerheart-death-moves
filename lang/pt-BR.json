@@ -54,13 +54,20 @@
         "ProbText": "Padrão/Sequencial",
         "DistributeTitle": "Arriscar Tudo: Esperança",
         "DistributeHint": "Distribua {total} pontos para reduzir HP e/ou Estresse.",
-        "HeroplateTitle": "Abençoado: Gastar Esperança",
-        "HeroplateHint": "Gaste Esperança para aumentar seu Dado de Esperança. O bônus é igual à Esperança gasta. ({item})",
-        "HeroplateSpent": "Gastar",
-        "HeroplateLeft": "Esperança Restante",
-        "HeroplateAvailable": "gastar Esperança"
+        "HeroplateSlider": "Gaste Esperança para um Dado de Esperança maior",
+        "HeroplateBlocked": {
+          "Unequipped": "Equipe a armadura para gastar Esperança",
+          "Spent": "Já usado neste descanso longo",
+          "NoHope": "Sem Esperança para gastar"
+        }
       },
-      "Apply": "Aplicar"
+      "Apply": "Aplicar",
+      "Items": {
+        "BarLabel": "Ou use um item",
+        "sprite": "Limpa todos os Pontos de Vida. Gasta o item.",
+        "tears": "Uma última rolagem de ação, depois um sono profundo. Gasta o item.",
+        "Gone": "Death Moves: esse item não está mais disponível."
+      }
     },
     "Chat": {
       "Avoid": {

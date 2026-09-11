@@ -1,6 +1,6 @@
 import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
-import { findItemBySource } from './helpers.js';
+import { findItemBySource, heroplateBlessedAction } from './helpers.js';
 import { SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 
 /**
@@ -265,14 +265,14 @@ export class DeathLogic {
      * This is the sole Risk It All codepath.
      * Triggered after player selects "Risk it All" from the overlay.
      */
-    static async handleRiskItAll() {
+    static async handleRiskItAll(hopeSpent = 0) {
         const actor = game.user.character;
 
         // Every bonus here raises the Hope die itself, so it feeds both the Hope vs
         // Fear comparison and the amount of HP/Stress cleared on a Hope result.
         // Resolved before any dice because the Heroplate is spent "before you make
         // the Risk It All death move".
-        const bonus = await this._prepareRiskItAllBonus(actor);
+        const bonus = await this._prepareRiskItAllBonus(actor, hopeSpent);
 
         // Fear die first — purple border
         DeathUI.showBorderEffect('fear');
@@ -309,11 +309,11 @@ export class DeathLogic {
 
     /**
      * Collects every item bonus that applies to the Risk It All Hope die.
-     * Runs before the dice so the Heroplate prompt lands where the rules put it.
      * @param {Actor|null} actor - The acting character, if one is assigned.
+     * @param {number} hopeSpent - Hope the player set on the overlay's Heroplate slider.
      * @returns {Promise<{total: number, entries: Array<{label: string, value: number}>}>}
      */
-    static async _prepareRiskItAllBonus(actor) {
+    static async _prepareRiskItAllBonus(actor, hopeSpent = 0) {
         const entries = [];
 
         if (!actor) return { total: 0, entries };
@@ -324,19 +324,17 @@ export class DeathLogic {
             entries.push({ label: reliquary.name, value: 1 });
         }
 
-        // --- HALLOWED HEROPLATE --- player chooses how much Hope to burn
+        // --- HALLOWED HEROPLATE --- the player already chose on the overlay slider
         const heroplate = this._findHeroplateFeature(actor);
-        if (heroplate) {
+        if (heroplate && hopeSpent > 0) {
             const hope = foundry.utils.getProperty(actor, "system.resources.hope.value") || 0;
+            // Clamp: the sheet may have changed between rendering the slider and now.
+            const spent = Math.min(hopeSpent, hope);
 
-            if (hope > 0) {
-                const spent = await DeathUI.showHeroplateHopeDialog(hope, heroplate.armor.name);
-
-                if (spent > 0) {
-                    await actor.update({ "system.resources.hope.value": Math.max(0, hope - spent) });
-                    await this._consumeHeroplateUse(heroplate);
-                    entries.push({ label: heroplate.armor.name, value: spent });
-                }
+            if (spent > 0) {
+                await actor.update({ "system.resources.hope.value": hope - spent });
+                await this._consumeHeroplateUse(heroplate);
+                entries.push({ label: heroplate.armor.name, value: spent });
             }
         }
 
@@ -359,21 +357,8 @@ export class DeathLogic {
             item => item.type === "armor" && item.system?.equipped === true
         );
 
-        if (!armor) return null;
-
-        const features = armor.system.armorFeatures ?? [];
-        const blessed = features.find(f => f.value === "blessed") ?? features.find(f => f.actionIds?.length);
-        const actionId = blessed?.actionIds?.[0];
-        const action = actionId ? armor.system.actions?.get(actionId) : null;
-
-        if (!action) return null;
-
-        // uses.value counts upwards towards uses.max, matching UsesField.hasUses().
-        const max = Number(action.uses?.max) || 0;
-        const used = Number(action.uses?.value) || 0;
-        if (max && used + 1 > max) return null;
-
-        return { armor, action };
+        const action = heroplateBlessedAction(armor);
+        return action ? { armor, action } : null;
     }
 
     /**
@@ -465,46 +450,49 @@ export class DeathLogic {
     }
 
     /**
-     * Resolves items that replace the death move before it is ever shown.
-     * Runs GM-side, because it edits the player's sheet and inventory.
-     * @param {Actor|null} actor - The character that would take the death move.
-     * @returns {Promise<boolean>} True when the death move must be skipped.
+     * Spends a consumable the player picked from the overlay, replacing the death move.
+     * Runs on the dying player's own client: they own the sheet it writes to.
+     * @param {string} key - Supported item key, "sprite" or "tears".
+     * @returns {Promise<boolean>} True when the item was spent.
      */
-    static async interceptDeathMove(actor) {
+    static async useConsumable(key) {
+        const actor = game.user.character;
         if (!actor) return false;
 
-        // "none" means the module keeps its hands off the sheet, so the GM resolves
-        // these items by hand and the normal death move still appears.
+        // "none" means the module keeps its hands off the sheet, so nothing is spent.
         if (DeathSettings.get('automationMode') === 'none') return false;
 
         try {
-            // The Sprite Bottle comes first: it prevents the situation outright, while
-            // the Tears only swap the death move for a final action roll.
-            if (await this._resolveSpriteBottle(actor)) return true;
-            if (await this._resolveUndyingHero(actor)) return true;
-        } catch (err) {
-            console.error("Death Moves | Item interception failed:", err);
-            ui.notifications.error("Death Moves: item automation failed. See console for details.");
-        }
+            const item = findItemBySource(
+                actor,
+                DeathSettings.getItemSource(key),
+                candidate => Number(candidate.system?.quantity ?? 1) > 0
+            );
 
-        return false;
+            if (!item) {
+                ui.notifications.warn(game.i18n.localize("DEATH_OPTIONS.UI.Items.Gone"));
+                return false;
+            }
+
+            if (key === 'sprite') await this._resolveSpriteBottle(actor, item);
+            else await this._resolveUndyingHero(actor, item);
+
+            return true;
+        } catch (err) {
+            console.error("Death Moves | Item automation failed:", err);
+            ui.notifications.error("Death Moves: item automation failed. See console for details.");
+            return false;
+        }
     }
 
     /**
      * Sprite Bottle: shatters on the last Hit Point, clears them all, and is gone.
-     * @param {Actor} actor - The character that would take the death move.
-     * @returns {Promise<boolean>} True when the bottle fired.
+     * @param {Actor} actor - The dying character.
+     * @param {Item} bottle - The bottle the player chose to use.
      */
-    static async _resolveSpriteBottle(actor) {
-        const bottle = findItemBySource(
-            actor,
-            DeathSettings.getItemSource('sprite'),
-            item => Number(item.system?.quantity ?? 1) > 0
-        );
-
-        if (!bottle) return false;
-
+    static async _resolveSpriteBottle(actor, bottle) {
         const bottleName = bottle.name;
+
         await actor.update({ "system.resources.hitPoints.value": 0 });
         await this._consumeOne(bottle);
 
@@ -516,27 +504,17 @@ export class DeathLogic {
             ),
             style: CONST.CHAT_MESSAGE_STYLES.OTHER
         });
-
-        return true;
     }
 
     /**
-     * Tears of the Undying Hero: carried, not drunk in advance. The potion is spent
-     * at the moment it is needed, the character takes one final action roll, then
-     * sleeps until an ally spends Tend to Wounds.
-     * @param {Actor} actor - The character that would take the death move.
-     * @returns {Promise<boolean>} True when the potion fired.
+     * Tears of the Undying Hero: the potion is spent, the character takes one final
+     * action roll, then sleeps until an ally spends Tend to Wounds.
+     * @param {Actor} actor - The dying character.
+     * @param {Item} potion - The potion the player chose to use.
      */
-    static async _resolveUndyingHero(actor) {
-        const potion = findItemBySource(
-            actor,
-            DeathSettings.getItemSource('tears'),
-            item => Number(item.system?.quantity ?? 1) > 0
-        );
-
-        if (!potion) return false;
-
+    static async _resolveUndyingHero(actor, potion) {
         const potionName = potion.name;
+
         await this._consumeOne(potion);
 
         ChatMessage.create({
@@ -554,8 +532,6 @@ export class DeathLogic {
         if (unconscious && typeof actor.setDeathMoveDefeated === 'function') {
             await actor.setDeathMoveDefeated(unconscious);
         }
-
-        return true;
     }
 
     /**
