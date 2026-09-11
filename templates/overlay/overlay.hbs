@@ -1,0 +1,71 @@
+{{!--
+    The death move overlay. It is parked directly on document.body rather than inside
+    an Application, so it carries the module scoping class itself instead of picking
+    one up from DEFAULT_OPTIONS.classes.
+--}}
+<div id="{{id}}" class="daggerheart-death-moves dm-overlay{{#if isSpectator}} dm-overlay--spectator{{/if}}">
+    <div class="dm-overlay__panel">
+        <button type="button" class="dm-overlay__close" data-dm-action="close">
+            <i class="fa-solid {{closeIcon}}" inert></i>
+            <span>{{closeLabel}}</span>
+        </button>
+
+        <h1 class="dm-overlay__title">{{title}}</h1>
+
+        <div class="dm-overlay__options">
+            {{#each options}}
+            <div class="dm-option dm-option--{{this.key}}" data-dm-option="{{this.key}}"
+                 role="button" tabindex="{{#if ../isSpectator}}-1{{else}}0{{/if}}">
+                <i class="dm-option__glyph fa-solid {{this.icon}}" inert></i>
+                <h2 class="dm-option__title">{{this.title}}</h2>
+                <p class="dm-option__subtitle">{{this.subtitle}}</p>
+
+                {{#with this.probability}}
+                <p class="dm-option__odds">{{this.text}}</p>
+                {{#with this.bonus}}
+                <p class="dm-option__bonus">{{this.icon}} {{this.name}} (+{{this.value}})</p>
+                {{/with}}
+                {{/with}}
+
+                {{#with this.heroplate}}
+                {{!-- Lives inside the option because the Hope is spent on this move.
+                      Its pointer events are stopped in JS so dragging the slider never
+                      counts as choosing the move. --}}
+                <div class="dm-heroplate{{#if this.blocked}} dm-heroplate--blocked{{/if}}">
+                    <span class="dm-heroplate__name">
+                        <i class="fa-solid fa-shield-halved" inert></i> {{this.name}}
+                    </span>
+                    {{#if this.blocked}}
+                    <span class="dm-heroplate__hint">{{this.blocked}}</span>
+                    {{else}}
+                    <div class="dm-heroplate__row">
+                        <input type="range" class="dm-heroplate__slider" data-dm-heroplate-slider
+                               min="0" max="{{this.maxHope}}" value="0" aria-label="{{this.hint}}">
+                        <output class="dm-heroplate__value" data-dm-heroplate-value>+0</output>
+                    </div>
+                    <span class="dm-heroplate__hint">{{this.hint}}</span>
+                    {{/if}}
+                </div>
+                {{/with}}
+            </div>
+            {{/each}}
+        </div>
+
+        {{#with items}}
+        <div id="{{this.id}}" class="dm-items">
+            <span class="dm-items__label">{{this.label}}</span>
+            <div class="dm-items__row">
+                {{#each this.entries}}
+                <button type="button" class="dm-item" data-dm-item="{{this.key}}">
+                    <img class="dm-item__img" src="{{this.img}}" alt="">
+                    <span class="dm-item__text">
+                        <span class="dm-item__name">{{this.name}}</span>
+                        <span class="dm-item__hint">{{this.hint}}</span>
+                    </span>
+                </button>
+                {{/each}}
+            </div>
+        </div>
+        {{/with}}
+    </div>
+</div>

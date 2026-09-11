@@ -1,0 +1,27 @@
+{{!-- GM picks which player receives the death move screen. --}}
+<div class="dm-dialog dm-dialog--trigger">
+    <header class="dialog-header">
+        <h1>{{title}}</h1>
+    </header>
+
+    {{#if reason}}
+    <p class="dm-dialog__alert">
+        <i class="fa-solid fa-triangle-exclamation" inert></i>
+        <span class="dm-dialog__alert-text">{{reason}}</span>
+        {{#if characterName}}<span class="dm-dialog__alert-actor">{{characterName}}</span>{{/if}}
+    </p>
+    {{/if}}
+
+    <div class="form-group">
+        <label for="{{selectId}}">{{playerLabel}}</label>
+        <div class="form-fields">
+            <select id="{{selectId}}" name="userId" data-dm-user-select>
+                {{#each users}}
+                <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+
+    {{#unless reason}}<p class="hint">{{hint}}</p>{{/unless}}
+</div>

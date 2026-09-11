@@ -1,0 +1,17 @@
+{{!--
+    Shell every Death Moves chat message is wrapped in. `body` is already-rendered
+    markup from one of the sibling templates, so it is emitted unescaped.
+
+    Chat messages sit outside any Application, where the system's light-dark() theming
+    does not resolve; the card styles itself from the raw palette instead and flips on
+    an ancestor .theme-light.
+--}}
+<div class="daggerheart-death-moves dm-card dm-card--{{variant}}">
+    <header class="dm-card__header">
+        <i class="dm-card__icon fa-solid {{icon}}" inert></i>
+        <h3 class="dm-card__title">{{title}}</h3>
+    </header>
+    <div class="dm-card__body">
+        {{{body}}}
+    </div>
+</div>

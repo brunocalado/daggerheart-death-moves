@@ -1,0 +1,19 @@
+{{!-- Homebrew automation: the player picks which scar the survival cost them. --}}
+<div class="dm-dialog dm-dialog--scars">
+    <header class="dialog-header">
+        <h1>{{title}}</h1>
+    </header>
+
+    <p class="dm-dialog__hint">{{hint}}</p>
+
+    <ul class="dm-scars">
+        {{#each scars}}
+        <li class="dm-scars__item">
+            <button type="button" class="dm-scars__btn" data-dm-scar="{{@index}}">
+                <i class="fa-solid fa-droplet" inert></i>
+                <span class="dm-scars__name">{{this.name}}</span>
+            </button>
+        </li>
+        {{/each}}
+    </ul>
+</div>

@@ -1,0 +1,195 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/*
+ * The module's DialogV2 windows: trigger, Hope distribution, scar picker and the
+ * Negative Experience form.
+ *
+ * Each one carries `daggerheart dh-style dialog` alongside the module id, so the
+ * system's own parchment frame, inputs and buttons apply first and these rules only
+ * cover what the system has no opinion about. That is what stops a dialog rendering
+ * half Daggerheart and half core Foundry.
+ */
+.daggerheart-death-moves {
+    .dm-dialog {
+        display: flex;
+        flex-direction: column;
+        gap: var(--dm-gap);
+        font-family: var(--dm-font-body);
+    }
+
+    /* Why the dialog opened, when it opened by itself. */
+    .dm-dialog__alert {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px;
+        margin: 0;
+        padding: var(--dm-gap) 10px;
+        border: 1px solid color-mix(in srgb, var(--dm-red) 55%, transparent);
+        border-radius: var(--dm-radius);
+        background: color-mix(in srgb, var(--dm-red) 12%, transparent);
+        font-size: var(--font-size-13, 0.8125rem);
+
+        i {
+            color: var(--dm-red);
+        }
+
+        .dm-dialog__alert-text {
+            font-weight: 700;
+            color: var(--color-text-emphatic, var(--dm-gold));
+        }
+
+        .dm-dialog__alert-actor {
+            color: var(--color-text-subtle, var(--dm-beige-50));
+        }
+    }
+
+    /* Buttons in the window footer. Foundry paints its default submit button in the
+       core accent, which is the one thing that reads as "not Daggerheart" here. */
+    .form-footer button,
+    .dialog-buttons button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: 38px;
+        font-family: var(--dm-font-body);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+
+        &[type='submit'],
+        &.default {
+            background: var(--dh-button-color-bg, var(--dm-gold));
+            border: 1px solid var(--dh-button-color-border, var(--dm-ink));
+            color: var(--dh-button-color-text, var(--dm-ink));
+
+            &:hover {
+                background: color-mix(in srgb, var(--dm-gold) 80%, #fff);
+                color: var(--dm-ink);
+            }
+        }
+    }
+}
+
+/* --- Hope distribution ---------------------------------------------------- */
+
+.daggerheart-death-moves .dm-split {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dm-gap-lg);
+    padding: var(--dm-gap) 0 var(--dm-gap-lg);
+
+    .dm-split__pool {
+        display: flex;
+        flex: 0 0 auto;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        min-width: 64px;
+
+        &.dm-split__pool--hp {
+            --dm-pool: var(--dm-red);
+        }
+
+        &.dm-split__pool--stress {
+            --dm-pool: var(--chat-purple, #a778b1);
+        }
+    }
+
+    .dm-split__label {
+        font-family: var(--dm-font-heading);
+        font-size: var(--font-size-13, 0.8125rem);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--dm-pool);
+    }
+
+    .dm-split__value {
+        font-family: var(--dm-font-heading);
+        font-size: var(--font-size-28, 1.75rem);
+        font-weight: 700;
+        line-height: 1;
+        color: var(--color-text-emphatic, var(--dm-gold));
+    }
+
+    .dm-split__slider {
+        flex: 1;
+        min-width: 0;
+        accent-color: var(--dm-gold);
+        cursor: pointer;
+    }
+}
+
+/* --- Scar picker ---------------------------------------------------------- */
+
+.daggerheart-death-moves .dm-scars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    .dm-scars__item {
+        margin: 0;
+    }
+
+    .dm-scars__btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        height: 38px;
+        font-family: var(--dm-font-body);
+        font-size: var(--font-size-14, 0.875rem);
+        text-align: left;
+
+        i {
+            flex: 0 0 auto;
+            width: 1.2em;
+            text-align: center;
+            color: var(--dm-red);
+        }
+
+        .dm-scars__name {
+            flex: 1;
+        }
+    }
+}
+
+/* --- Negative Experience form --------------------------------------------- */
+
+.daggerheart-death-moves .dm-dialog--experience {
+    textarea {
+        resize: vertical;
+        font-family: var(--dm-font-body);
+    }
+}
+
+/* --- Trigger button in the system's Daggerheart menu ----------------------- */
+
+/*
+ * Lives inside the system's own menu application, which already styles fieldsets
+ * and buttons, so this only asks the button to fill its group.
+ */
+.daggerheart-death-moves.dm-menu {
+    margin-top: var(--dm-gap);
+
+    .dm-menu__btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        font-family: var(--dm-font-body);
+        font-weight: 600;
+    }
+}

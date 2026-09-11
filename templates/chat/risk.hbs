@@ -1,0 +1,35 @@
+{{!-- Card body for Risk It All: the two dice, what lifted the Hope die, the outcome. --}}
+<div class="dm-duality">
+    <div class="dm-duality__die dm-duality__die--hope">
+        <span class="dm-duality__label">{{hopeLabel}}</span>
+        <span class="dm-duality__value">{{hope}}</span>
+    </div>
+    <div class="dm-duality__die dm-duality__die--fear">
+        <span class="dm-duality__label">{{fearLabel}}</span>
+        <span class="dm-duality__value">{{fear}}</span>
+    </div>
+</div>
+
+{{#if bonuses.length}}
+<dl class="dm-tally">
+    <div class="dm-tally__row">
+        <dt>{{hopeDieLabel}}</dt>
+        <dd>{{rawHope}}</dd>
+    </div>
+    {{#each bonuses}}
+    <div class="dm-tally__row dm-tally__row--bonus">
+        <dt>{{this.label}}</dt>
+        <dd>+{{this.value}}</dd>
+    </div>
+    {{/each}}
+</dl>
+{{/if}}
+
+<p class="dm-card__text">{{text}}</p>
+
+{{#with recovered}}
+<p class="dm-card__note dm-card__note--recovered">
+    <span class="dm-card__note-label">{{this.label}}</span>
+    <span>{{this.value}}</span>
+</p>
+{{/with}}

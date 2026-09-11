@@ -1,3 +1,11 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
 import { MODULE_ID, SUPPORTED_ITEMS, ITEM_SOURCES_SETTING } from './constants.js';
 import { SupportedItemsConfig } from './supported-items-config.js';
 
@@ -104,7 +112,7 @@ export class DeathSettings {
                         riskItAll: false
                     }
                 });
-                ui.notifications.info("Daggerheart Death Moves: System automation disabled (Core Mode active).");
+                ui.notifications.info(game.i18n.localize("DEATH_OPTIONS.Notifications.SystemAutomationOff"));
             }
         }
     }

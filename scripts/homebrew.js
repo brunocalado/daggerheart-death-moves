@@ -1,7 +1,22 @@
-import { DeathLogic } from './logic.js';
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
 
+import { DeathChat } from './chat.js';
+import { DIALOG_CLASSES, MODULE_ID, TEMPLATES } from './constants.js';
+
+const NEGATIVE_EXPERIENCE_SCAR = "Scar (Negative Experience)";
+
+/**
+ * The homebrew scar table: the player picks which permanent cost their survival
+ * carried, and the matching Active Effect is written onto the sheet.
+ */
 export class DeathHomebrew {
-    
+
     static get itemTemplate() {
         return {
             "name": "Feature",
@@ -25,7 +40,7 @@ export class DeathHomebrew {
             { name: "Scar (Evasion)", description: "<p>Permanently take -1 to your Evasion.</p><blockquote><p>Once you gain five scars, you must end your character’s journey.</p></blockquote>" },
             { name: "Scar (Hit Point)", description: "<p>Permanently mark one Hit Point.</p><blockquote><p>Once you gain five scars, you must end your character’s journey.</p></blockquote>" },
             { name: "Scar (Hope)", description: "<p>Permanently cross-out one Hope slot.</p><blockquote><p>Once you gain five scars, you must end your character’s journey.</p></blockquote>" },
-            { name: "Scar (Negative Experience)", description: "<p>Gain a Negative Experience at -2. The GM may spend a Fear to apply a Negative. Experience in the same way PCs apply Experiences.</p><blockquote><p>Once you gain five scars, you must end your character’s journey.</p></blockquote>" },
+            { name: NEGATIVE_EXPERIENCE_SCAR, description: "<p>Gain a Negative Experience at -2. The GM may spend a Fear to apply a Negative. Experience in the same way PCs apply Experiences.</p><blockquote><p>Once you gain five scars, you must end your character’s journey.</p></blockquote>" },
             { name: "Scar (Stress)", description: "<p>Permanently mark one Stress.</p><blockquote><p>Once you gain five scars, you must end your character’s journey.</p></blockquote>" },
             { name: "Scar (Thresholds)", description: "<p>Permanently take -2 your Minor and Major thresholds.</p><blockquote><p>Once you gain five scars, you must end your character’s journey.</p></blockquote>" }
         ];
@@ -84,154 +99,140 @@ export class DeathHomebrew {
         };
     }
 
+    /**
+     * Asks which scar was taken, then applies it and reports the roll.
+     * @param {Actor} actor - The character that survived.
+     * @param {Object} rollData - The Avoid Death roll: rawRoll, rollTotal, level, bonuses.
+     */
     static async handleAvoidDeathScar(actor, rollData) {
-        const { DialogV2 } = foundry.applications.api;
+        const index = await this._promptForScar();
+        if (index === null) return;
 
-        const content = `
-            <div class="death-homebrew-scars" style="display: flex; flex-direction: column; gap: 5px;">
-                ${this.scars.map((scar, index) => `
-                    <button type="button" data-idx="${index}" class="scar-btn">
-                        ${scar.name}
-                    </button>
-                `).join('')}
-            </div>
-        `;
-
-        return new Promise((resolve) => {
-            class ScarPicker extends DialogV2 {
-                _onRender(context, options) {
-                    this.element.querySelectorAll('.scar-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            const idx = parseInt(e.currentTarget.dataset.idx);
-                            resolve(idx);
-                            this.close();
-                        });
-                    });
-                }
-                
-                close(options) {
-                    resolve(null);
-                    return super.close(options);
-                }
-            }
-
-            new ScarPicker({
-                window: { title: "Select Scar", icon: "fas fa-skull", width: 300 },
-                content: content,
-                buttons: [{
-                    action: "cancel",
-                    label: "Cancel",
-                    icon: "fas fa-times",
-                    callback: (event, button, dialog) => dialog.close()
-                }]
-            }).render(true);
-        }).then(async (result) => {
-            if (result !== null) {
-                const scar = this.scars[result];
-                await this.applyScar(actor, scar, rollData);
-            }
-        });
+        await this.applyScar(actor, this.scars[index], rollData);
     }
 
-    static async applyScar(actor, scar, rollData) {
-        if (scar.name === "Scar (Negative Experience)") {
-            const { DialogV2 } = foundry.applications.api;
-            const content = `
-                <div style="margin-bottom: 10px;">
-                    <p>Enter details for the Negative Experience:</p>
-                </div>
-                <div class="form-group">
-                    <label>Name (Max 80):</label>
-                    <input type="text" name="expName" maxlength="80" style="width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid #555; padding: 5px;">
-                </div>
-                <div class="form-group" style="margin-top: 10px;">
-                    <label>Description (Max 160):</label>
-                    <textarea name="expDesc" maxlength="160" style="width: 100%; height: 60px; background: rgba(0,0,0,0.3); color: white; border: 1px solid #555; padding: 5px;"></textarea>
-                </div>
-            `;
+    /**
+     * Shows the scar list and waits for a pick.
+     * @returns {Promise<number|null>} Index into `scars`, or null when dismissed.
+     */
+    static async _promptForScar() {
+        const { DialogV2 } = foundry.applications.api;
 
-            const result = await DialogV2.wait({
-                window: { title: "Negative Experience", icon: "fas fa-frown", width: 400 },
-                content: content,
-                buttons: [{
-                    action: "apply",
-                    label: "Apply",
-                    icon: "fas fa-check",
-                    callback: (event, button, dialog) => {
-                        const name = dialog.element.querySelector('[name="expName"]').value;
-                        const desc = dialog.element.querySelector('[name="expDesc"]').value;
-                        return { name, desc };
-                    }
-                }],
-                close: () => null
-            });
+        const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.dialogScarPicker, {
+            title: game.i18n.localize("DEATH_OPTIONS.Dialog.Scar.Title"),
+            hint: game.i18n.localize("DEATH_OPTIONS.Dialog.Scar.Hint"),
+            scars: this.scars
+        });
 
-            if (result && result.name) {
-                const expId = foundry.utils.randomID();
-                await actor.update({
-                    [`system.experiences.${expId}`]: {
-                        name: result.name,
-                        value: -2,
-                        core: true,
-                        description: result.desc
-                    }
-                });
+        let chosen = null;
+
+        /** Each scar is its own button, so the pick is read on click rather than on submit. */
+        class ScarPicker extends DialogV2 {
+            _onRender(context, options) {
+                super._onRender(context, options);
+
+                for (const button of this.element.querySelectorAll('[data-dm-scar]')) {
+                    button.addEventListener('click', () => {
+                        chosen = Number(button.dataset.dmScar);
+                        this.close();
+                    });
+                }
             }
         }
+
+        await ScarPicker.wait({
+            window: { title: "DEATH_OPTIONS.Dialog.Scar.Title", icon: "fa-solid fa-droplet" },
+            classes: DIALOG_CLASSES,
+            position: { width: 360 },
+            content,
+            buttons: [{
+                action: "cancel",
+                label: game.i18n.localize("Cancel"),
+                icon: "fa-solid fa-xmark",
+                callback: () => null
+            }],
+            close: () => null,
+            rejectClose: false
+        });
+
+        return chosen;
+    }
+
+    /**
+     * Writes the chosen scar onto the sheet and posts the result card.
+     * @param {Actor} actor - The character that survived.
+     * @param {{name: string, description: string}} scar - The scar that was picked.
+     * @param {Object} rollData - The Avoid Death roll: rawRoll, rollTotal, level, bonuses.
+     */
+    static async applyScar(actor, scar, rollData) {
+        if (scar.name === NEGATIVE_EXPERIENCE_SCAR) await this._addNegativeExperience(actor);
 
         const itemData = foundry.utils.deepClone(this.itemTemplate);
         itemData.name = scar.name;
         itemData.system.description = scar.description;
-        
+
         const effects = this.scarEffects[scar.name];
-        if (effects) {
-            itemData.effects = effects;
-        }
-        
+        if (effects) itemData.effects = effects;
+
         await actor.createEmbeddedDocuments("Item", [itemData]);
-        
-        const title = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.ResultScar");
 
-        let mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.MsgScar");
+        return DeathChat.avoid({
+            title: game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.ResultScar"),
+            text: game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.MsgScar"),
+            rawRoll: rollData.rawRoll,
+            total: rollData.rollTotal,
+            level: rollData.level,
+            bonuses: rollData.bonuses ?? [],
+            scarName: scar.name
+        });
+    }
 
-        // Rebuild details HTML (Standard Format)
-        let detailsHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); width: 100%; font-size: 0.9em;">`;
-        
-        // Line 1: The Raw Roll
-        detailsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <span style="color: #ccc;">Roll (d12):</span>
-                            <span style="font-weight: bold; color: white;">${rollData.rawRoll}</span>
-                        </div>`;
+    /**
+     * Prompts for the Negative Experience this scar grants and writes it to the sheet.
+     * @param {Actor} actor - The character that survived.
+     */
+    static async _addNegativeExperience(actor) {
+        const { DialogV2 } = foundry.applications.api;
 
-        // Line 2: Bonus (Conditional)
-        if (rollData.hasPhoenix) {
-                detailsHtml += `<div style="display: flex; justify-content: space-between; color: #FFD700; margin-bottom: 4px;">
-                                <span>${rollData.phoenixName}:</span>
-                                <span>+1</span>
-                            </div>`;
-        }
-        
-        // Line 3: Final Total
-        detailsHtml += `<div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; padding-top: 4px; font-weight: bold;">
-                            <span style="color: #fff;">TOTAL:</span>
-                            <span style="font-size: 1.2em; color: #FFD700;">${rollData.rollTotal}</span>
-                        </div>`;
-        
-        // Target Level Info
-        detailsHtml += `<div style="text-align: center; font-size: 0.8em; color: #888; margin-top: 8px;">(Level Threshold: ${rollData.level})</div>`;
-        detailsHtml += `</div>`;
+        const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.dialogNegativeExperience, {
+            title: game.i18n.localize("DEATH_OPTIONS.Dialog.Experience.Title"),
+            hint: game.i18n.localize("DEATH_OPTIONS.Dialog.Experience.Hint"),
+            nameId: `${MODULE_ID}-experience-name`,
+            descId: `${MODULE_ID}-experience-desc`,
+            nameLabel: game.i18n.localize("DEATH_OPTIONS.Dialog.Experience.Name"),
+            descLabel: game.i18n.localize("DEATH_OPTIONS.Dialog.Experience.Description"),
+            nameMaxLength: 80,
+            descMaxLength: 160
+        });
 
-        mainText += detailsHtml;
+        const result = await DialogV2.wait({
+            window: { title: "DEATH_OPTIONS.Dialog.Experience.Title", icon: "fa-solid fa-face-frown" },
+            classes: DIALOG_CLASSES,
+            position: { width: 420 },
+            content,
+            buttons: [{
+                action: "apply",
+                label: game.i18n.localize("DEATH_OPTIONS.UI.Apply"),
+                icon: "fa-solid fa-check",
+                default: true,
+                callback: (event, button, dialog) => ({
+                    name: dialog.element.querySelector('[name="expName"]').value,
+                    desc: dialog.element.querySelector('[name="expDesc"]').value
+                })
+            }],
+            close: () => null,
+            rejectClose: false
+        });
 
-        // Add Scar info in small font
-        mainText += `<div style="margin-top: 15px; font-size: 0.8em; color: #aaa; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">
-            Scar Chosen: <span style="color: #FFD700;">${scar.name}</span>
-        </div>`;
+        if (!result?.name) return;
 
-        ChatMessage.create({
-            content: DeathLogic._createStyledChatContent(title, mainText),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER
+        await actor.update({
+            [`system.experiences.${foundry.utils.randomID()}`]: {
+                name: result.name,
+                value: -2,
+                core: true,
+                description: result.desc
+            }
         });
     }
 }

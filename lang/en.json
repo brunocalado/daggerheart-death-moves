@@ -51,7 +51,6 @@
       "Risk": {
         "Title": "Risk it All",
         "Subtitle": "Death or Legend",
-        "ProbText": "DEATH: 50% | LIFE: 50%",
         "DistributeTitle": "Risk it All: Hope",
         "DistributeHint": "Distribute {total} points to reduce HP and/or Stress.",
         "HeroplateSlider": "Spend Hope for a bigger Hope Die",
@@ -59,7 +58,8 @@
           "Unequipped": "Equip the armor to spend Hope",
           "Spent": "Already used this long rest",
           "NoHope": "No Hope to spend"
-        }
+        },
+        "Odds": "LIFE: {life}% | DEATH: {death}%"
       },
       "Apply": "Apply",
       "Items": {
@@ -67,6 +67,15 @@
         "sprite": "Clears all Hit Points. Spends the item.",
         "tears": "One final action roll, then a slumber. Spends the item.",
         "Gone": "Death Moves: that item is no longer available."
+      },
+      "CloseView": "Close View",
+      "Duality": {
+        "hope": "Hope",
+        "fear": "Fear"
+      },
+      "Resources": {
+        "HitPoints": "HP",
+        "Stress": "Stress"
       }
     },
     "Chat": {
@@ -76,8 +85,10 @@
         "ResultSafe": "Avoid Death Result: SAFE",
         "MsgScar": "You got a Scar!",
         "MsgSafe": "You can rest for now.",
-        "RollDetails": "(Roll: {roll} vs Level: {level})",
-        "NoActor": "Rolled: <strong>{roll}</strong> (No actor assigned)"
+        "NoActor": "Rolled: <strong>{roll}</strong> (No actor assigned)",
+        "RollLabel": "Roll (d12)",
+        "Threshold": "Level threshold: {level}",
+        "ScarChosen": "Scar chosen:"
       },
       "Risk": {
         "Speaker": "Risk It All",
@@ -89,7 +100,10 @@
         "CriticalDesc": "You stand and clear all Hit Points and Stress.",
         "Recovered": "Recovered",
         "AllRecovered": "All HP & Stress",
-        "HopeDie": "Hope Die"
+        "HopeDie": "Hope Die",
+        "Hope": "Hope",
+        "Fear": "Fear",
+        "RecoveredSplit": "{hp} HP · {stress} Stress"
       },
       "Blaze": {
         "Title": "BLAZE OF GLORY!"
@@ -101,7 +115,9 @@
       "Tears": {
         "Title": "DEATH CANNOT TOUCH YOU",
         "Desc": "{actor} takes one final action roll, then falls into a dreamless slumber. Only an ally's Tend to Wounds downtime move will clear those Hit Points."
-      }
+      },
+      "Speaker": "Death Moves",
+      "Total": "Total"
     },
     "Items": {
       "phoenix": {
@@ -124,6 +140,39 @@
         "Label": "Sprite Bottle",
         "Hint": "Shatters on the last Hit Point, clears them all, and is consumed. No death move happens."
       }
+    },
+    "Dialog": {
+      "Trigger": {
+        "Title": "Trigger Death Moves",
+        "Player": "Select Player",
+        "Hint": "This will send the Death Moves screen to the selected player.",
+        "Submit": "Trigger",
+        "LastHp": "Last Hit Point marked!"
+      },
+      "Scar": {
+        "Title": "Select a Scar",
+        "Hint": "Choose the permanent cost this survival carried."
+      },
+      "Experience": {
+        "Title": "Negative Experience",
+        "Hint": "Describe the Negative Experience this scar leaves behind.",
+        "Name": "Name",
+        "Description": "Description"
+      }
+    },
+    "Menu": {
+      "Legend": "Death Moves",
+      "Trigger": "Trigger Death Move"
+    },
+    "Notifications": {
+      "GmOnly": "Death Moves: only the GM can trigger this.",
+      "Queued": "Death Moves queued: {target} ({pending} pending).",
+      "UnknownTarget": "Unknown",
+      "UserNotFound": "Death Moves: user \"{user}\" not found.",
+      "NoPlayers": "Death Moves: no players connected.",
+      "AutomationFailed": "Death Moves: automation failed. See the console for details.",
+      "ItemFailed": "Death Moves: item automation failed. See the console for details.",
+      "SystemAutomationOff": "Death Moves: system death move automation disabled (Core mode active)."
     }
   }
 }

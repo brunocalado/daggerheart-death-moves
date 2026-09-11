@@ -1,0 +1,368 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/*
+ * The death move overlay: the panel a dying player chooses from, and the read-only
+ * copy every other client sees.
+ *
+ * It sits on document.body, outside any Application, so the system's light-dark()
+ * theming never resolves here. The overlay commits to the dark half of the palette
+ * on purpose — it is a moment staged over the canvas, not a window.
+ */
+.daggerheart-death-moves.dm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: flex;
+    /* "safe" falls back to start-alignment when the panel is taller than the screen.
+       Plain centring overflows equally in both directions and the top can never be
+       scrolled back to. */
+    align-items: safe center;
+    justify-content: safe center;
+    overflow-y: auto;
+    /* The layer only positions; the canvas underneath stays clickable. */
+    pointer-events: none;
+    font-family: var(--dm-font-body);
+    color: var(--dm-beige);
+
+    .dm-overlay__panel {
+        pointer-events: auto;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--dm-gap-lg);
+        width: min(1040px, 94vw);
+        max-height: 92vh;
+        overflow-y: auto;
+        padding: 40px 32px 32px;
+        border: 1px solid var(--dm-gold-40);
+        border-radius: var(--dm-radius);
+        background:
+            radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--dm-gold) 8%, transparent), transparent 60%),
+            linear-gradient(180deg, var(--dm-ink) 0%, var(--dm-ink-deep) 100%);
+        box-shadow:
+            inset 0 1px 0 var(--dm-gold-10),
+            0 24px 60px rgb(0 0 0 / 65%);
+        animation: dm-panel-in 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .dm-overlay__close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: auto;
+        padding: 4px 10px;
+        border: 1px solid var(--dm-gold-40);
+        border-radius: var(--dm-radius);
+        background: transparent;
+        color: var(--dm-beige-50);
+        font-family: var(--dm-font-body);
+        font-size: var(--font-size-12, 0.75rem);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+
+        &:hover {
+            border-color: var(--dm-red);
+            background: color-mix(in srgb, var(--dm-red) 18%, transparent);
+            color: var(--dm-beige);
+        }
+    }
+
+    .dm-overlay__title {
+        margin: 0;
+        padding-bottom: var(--dm-gap);
+        border: none;
+        border-bottom: var(--dm-rule);
+        font-family: var(--dm-font-title);
+        font-size: clamp(1.75rem, 4vw, var(--font-size-32, 2rem));
+        font-weight: 700;
+        line-height: 1.2;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--dm-gold);
+        text-shadow: 0 2px 12px rgb(0 0 0 / 70%);
+    }
+
+    .dm-overlay__options {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--dm-gap-lg);
+        width: 100%;
+    }
+}
+
+/* --- One death move ------------------------------------------------------- */
+
+.daggerheart-death-moves .dm-option {
+    --dm-accent: var(--dm-gold);
+
+    display: flex;
+    flex: 1 1 220px;
+    flex-direction: column;
+    align-items: center;
+    /* Centred, so a move with no odds and no slider is not a mostly empty card. */
+    justify-content: center;
+    gap: 6px;
+    min-height: 240px;
+    padding: 24px 18px;
+    border: 1px solid color-mix(in srgb, var(--dm-accent) 45%, transparent);
+    border-radius: var(--dm-radius);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--dm-accent) 12%, transparent) 0%, rgb(0 0 0 / 35%) 70%);
+    box-shadow: inset 0 2px 0 var(--dm-accent), 0 0 16px color-mix(in srgb, var(--dm-accent) 18%, transparent);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.4s ease;
+
+    &.dm-option--avoid { --dm-accent: var(--dm-accent-avoid); }
+    &.dm-option--blaze { --dm-accent: var(--dm-accent-blaze); }
+    &.dm-option--risk  { --dm-accent: var(--dm-accent-risk); }
+
+    &:hover,
+    &:focus-visible {
+        transform: translateY(-6px);
+        border-color: var(--dm-accent);
+        box-shadow: inset 0 2px 0 var(--dm-accent), 0 0 36px color-mix(in srgb, var(--dm-accent) 45%, transparent);
+        outline: none;
+    }
+
+    .dm-option__glyph {
+        font-size: 1.75rem;
+        color: var(--dm-accent);
+        text-shadow: 0 0 14px color-mix(in srgb, var(--dm-accent) 60%, transparent);
+    }
+
+    .dm-option__title {
+        margin: 0;
+        border: none;
+        font-family: var(--dm-font-heading);
+        font-size: var(--font-size-22, 1.375rem);
+        font-weight: 700;
+        line-height: 1.15;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--dm-beige);
+    }
+
+    .dm-option__subtitle {
+        margin: 0;
+        font-size: var(--font-size-14, 0.875rem);
+        line-height: 1.35;
+        color: color-mix(in srgb, var(--dm-beige) 75%, transparent);
+    }
+
+    .dm-option__odds {
+        margin: var(--dm-gap) 0 0;
+        font-size: var(--font-size-12, 0.75rem);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--dm-beige-50);
+    }
+
+    .dm-option__bonus {
+        margin: 2px 0 0;
+        font-size: var(--font-size-12, 0.75rem);
+        color: var(--dm-gold);
+        text-shadow: 0 1px 4px rgb(0 0 0 / 80%);
+    }
+
+    /* Set while another move is being resolved. */
+    &.dm-option--dimmed {
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
+    }
+
+    &.dm-option--chosen {
+        pointer-events: none;
+    }
+}
+
+/* --- Heroplate slider, inside the Risk It All option ---------------------- */
+
+.daggerheart-death-moves .dm-heroplate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    margin-top: auto;
+    padding-top: var(--dm-gap);
+    border-top: var(--dm-rule);
+
+    &.dm-heroplate--blocked {
+        opacity: 0.6;
+    }
+
+    .dm-heroplate__name {
+        font-size: var(--font-size-13, 0.8125rem);
+        color: var(--dm-gold);
+        text-shadow: 0 1px 4px rgb(0 0 0 / 80%);
+    }
+
+    .dm-heroplate__row {
+        display: flex;
+        align-items: center;
+        gap: var(--dm-gap);
+        width: 100%;
+    }
+
+    .dm-heroplate__slider {
+        flex: 1;
+        min-width: 0;
+        accent-color: var(--dm-gold);
+        cursor: pointer;
+    }
+
+    .dm-heroplate__value {
+        min-width: 2.2em;
+        font-weight: 700;
+        font-size: var(--font-size-16, 1rem);
+        text-align: right;
+        color: var(--dm-gold);
+    }
+
+    .dm-heroplate__hint {
+        font-size: var(--font-size-11, 0.6875rem);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--dm-beige-50);
+    }
+}
+
+/* --- Consumables that replace the death move ------------------------------ */
+
+.daggerheart-death-moves .dm-items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dm-gap);
+    width: 100%;
+    padding-top: var(--dm-gap-lg);
+    border-top: var(--dm-rule);
+    transition: opacity 0.2s ease;
+
+    /* Locked while the first pick is still being written to the sheet. */
+    &.dm-items--busy {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .dm-items__label {
+        font-size: var(--font-size-12, 0.75rem);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--dm-beige-50);
+    }
+
+    .dm-items__row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--dm-gap-lg);
+    }
+}
+
+.daggerheart-death-moves .dm-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    /* Core gives every button a fixed height; a two-line item name spills out of it. */
+    height: auto;
+    max-width: 320px;
+    padding: 8px 14px;
+    border: 1px solid color-mix(in srgb, var(--dm-accent-item) 50%, transparent);
+    border-radius: var(--dm-radius);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--dm-accent-item) 12%, transparent), rgb(0 0 0 / 35%));
+    color: var(--dm-beige);
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+        border-color: var(--dm-accent-item);
+        box-shadow: 0 0 22px color-mix(in srgb, var(--dm-accent-item) 40%, transparent);
+    }
+
+    .dm-item__img {
+        flex: 0 0 auto;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 4px;
+        object-fit: cover;
+    }
+
+    .dm-item__text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .dm-item__name {
+        font-family: var(--dm-font-heading);
+        font-size: var(--font-size-14, 0.875rem);
+        font-weight: 700;
+        line-height: 1.2;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .dm-item__hint {
+        font-size: var(--font-size-12, 0.75rem);
+        line-height: 1.3;
+        color: color-mix(in srgb, var(--dm-beige) 70%, transparent);
+    }
+}
+
+/* --- Spectator copy: the moment is visible, the choice is not ------------- */
+
+.daggerheart-death-moves.dm-overlay--spectator {
+    .dm-option {
+        filter: grayscale(0.45);
+        opacity: 0.8;
+        cursor: default;
+        pointer-events: none;
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
+@keyframes dm-panel-in {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Narrow screens: one column, and let the panel use the full width. */
+@media (max-width: 720px) {
+    .daggerheart-death-moves.dm-overlay .dm-overlay__panel {
+        padding: 36px 16px 20px;
+    }
+
+    .daggerheart-death-moves .dm-option {
+        flex-basis: 100%;
+        min-height: 0;
+    }
+}

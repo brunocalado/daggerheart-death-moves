@@ -1,0 +1,148 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/*
+ * The two full-screen effects that punctuate a death move: the banner naming the
+ * chosen move, and the pulsing screen edge that colours the wait for a die.
+ * Both are parked on document.body and never take pointer events.
+ */
+
+/* --- Announcement banner -------------------------------------------------- */
+
+.daggerheart-death-moves.dm-announcement {
+    position: fixed;
+    top: 37.5vh;
+    right: 0;
+    left: 0;
+    height: 25vh;
+    z-index: 11000;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--dm-ink-deep) 92%, transparent) 18%,
+        color-mix(in srgb, var(--dm-ink-deep) 92%, transparent) 82%,
+        transparent 100%
+    );
+    opacity: 1;
+    /* Deliberately not `forwards`: a filled animation holding opacity would outrank
+       the fade-out class below and the banner would vanish instead of fading. */
+    animation: dm-banner-in 0.5s ease-out;
+    transition: opacity 0.5s ease;
+
+    /* Set by JS once the banner has been read, to start the fade before removal. */
+    &.dm-announcement--out {
+        opacity: 0;
+    }
+
+    .dm-announcement__text {
+        margin: 0;
+        padding: 0 16px;
+        border: none;
+        font-family: var(--dm-font-title);
+        font-size: clamp(2rem, 7vw, 4.5rem);
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--dm-gold);
+        text-shadow:
+            0 0 28px color-mix(in srgb, var(--dm-gold) 55%, transparent),
+            0 2px 10px rgb(0 0 0 / 90%);
+    }
+}
+
+@keyframes dm-banner-in {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* --- Pulsing screen edge -------------------------------------------------- */
+
+/*
+ * The frame is not a border: it is an enormous outward box-shadow on an inset
+ * element, which is what lets the inner corners keep a radius while the outside
+ * floods to the screen edge. `currentColor` carries the die's colour so one
+ * animation serves both Hope and Fear.
+ */
+.daggerheart-death-moves.dm-border {
+    position: fixed;
+    inset: 20px;
+    z-index: 10500;
+    box-sizing: border-box;
+    border: none;
+    /* Generous enough that the curve survives the shadow's blur. */
+    border-radius: 60px;
+    pointer-events: none;
+    animation: dm-border-pulse 2s infinite ease-in-out;
+
+    &.dm-border--hope {
+        color: var(--dm-hope);
+    }
+
+    &.dm-border--fear {
+        color: var(--dm-fear);
+    }
+
+    .dm-border__label {
+        position: absolute;
+        top: 30px;
+        right: 0;
+        left: 0;
+        z-index: 1;
+        font-family: var(--dm-font-title);
+        font-size: clamp(2.5rem, 8vw, 6rem);
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0;
+        animation: dm-label-in 0.5s ease-out forwards;
+    }
+
+    &.dm-border--hope .dm-border__label {
+        color: var(--dm-hope);
+        text-shadow: 0 0 24px var(--dm-hope), 0 0 48px #000;
+    }
+
+    &.dm-border--fear .dm-border__label {
+        color: var(--dm-fear-light);
+        text-shadow: 0 0 24px var(--dm-fear), 0 0 48px #000;
+    }
+}
+
+@keyframes dm-border-pulse {
+    0%,
+    100% {
+        /* Never fully transparent, or the rounded corner reads as a square. */
+        opacity: 0.8;
+        box-shadow: 0 0 0 100vmax currentcolor, inset 0 0 20px currentcolor;
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 0 100vmax currentcolor, inset 0 0 50px currentcolor;
+    }
+}
+
+@keyframes dm-label-in {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

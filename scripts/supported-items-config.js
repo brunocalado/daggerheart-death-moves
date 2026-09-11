@@ -1,4 +1,12 @@
-import { MODULE_ID, SUPPORTED_ITEMS, ITEM_SOURCES_SETTING, SUPPORTED_ITEMS_TEMPLATE, MISSING_ITEM_IMG } from './constants.js';
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+import { MODULE_ID, SUPPORTED_ITEMS, ITEM_SOURCES_SETTING, DIALOG_CLASSES, TEMPLATES, MISSING_ITEM_IMG } from './constants.js';
 import { readDragData } from './helpers.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -12,7 +20,7 @@ export class SupportedItemsConfig extends HandlebarsApplicationMixin(Application
 
     static DEFAULT_OPTIONS = {
         id: `${MODULE_ID}-supported-items`,
-        classes: [MODULE_ID, 'death-moves-supported-items'],
+        classes: [...DIALOG_CLASSES, 'setting'],
         window: {
             title: "DEATH_OPTIONS.Settings.ItemSources.Title",
             icon: 'fas fa-scroll',
@@ -26,7 +34,7 @@ export class SupportedItemsConfig extends HandlebarsApplicationMixin(Application
     };
 
     static PARTS = {
-        form: { template: SUPPORTED_ITEMS_TEMPLATE }
+        form: { template: TEMPLATES.supportedItems }
     };
 
     /**

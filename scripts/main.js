@@ -1,12 +1,20 @@
-/**
- * Daggerheart Death Moves
- * Refactored Entry Point - V13 Compatible
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
  */
-import { MODULE_ID, SOCKET_NAME, SOCKET_TYPES } from './constants.js';
+
+import { DEATH_MOVES, SOCKET_NAME, SOCKET_TYPES, TEMPLATES } from './constants.js';
 import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
 import { DeathLogic } from './logic.js';
+import { renderElement } from './helpers.js';
 
+/**
+ * Entry point: settings, sockets, the GM trigger queue, and the death move flow.
+ */
 class DeathMovesController {
     static _deathMoveQueue = [];
     static _isProcessing = false;
@@ -36,7 +44,7 @@ class DeathMovesController {
                     DeathUI.removeBorderEffect();
                     break;
                 case SOCKET_TYPES.HIDE_UNSELECTED:
-                    DeathUI.hideOthers(payload.buttonId);
+                    DeathUI.hideOthers(payload.optionKey);
                     break;
                 case SOCKET_TYPES.FLOW_COMPLETE:
                     DeathMovesController._onFlowComplete();
@@ -86,7 +94,7 @@ class DeathMovesController {
                 if (triggerMode === 'dialog') {
                     DeathMovesController.gmTriggerFlow(targetName, {
                         showDialog: true,
-                        reason: "Last HP Marked!",
+                        reason: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.LastHp"),
                         characterName: actor.name
                     });
                 } else if (triggerMode === 'auto') {
@@ -104,14 +112,15 @@ class DeathMovesController {
      * @param {Object} options - Additional options (showDialog, reason, characterName).
      */
     static gmTriggerFlow(targetUserName = null, options = {}) {
-        if (!game.user.isGM) return ui.notifications.warn("Only the GM can trigger this.");
+        if (!game.user.isGM) return ui.notifications.warn(game.i18n.localize("DEATH_OPTIONS.Notifications.GmOnly"));
 
         DeathMovesController._deathMoveQueue.push({ targetUserName, options });
 
         if (DeathMovesController._isProcessing) {
-            const label = options.characterName || targetUserName || "Unknown";
-            const pending = DeathMovesController._deathMoveQueue.length;
-            ui.notifications.info(`Death Move queued: ${label} (${pending} pending)`);
+            ui.notifications.info(game.i18n.format("DEATH_OPTIONS.Notifications.Queued", {
+                target: options.characterName || targetUserName || game.i18n.localize("DEATH_OPTIONS.Notifications.UnknownTarget"),
+                pending: DeathMovesController._deathMoveQueue.length
+            }));
             return;
         }
 
@@ -191,13 +200,15 @@ class DeathMovesController {
 
         if (targetUserName && !options.showDialog) {
             const targetUser = game.users.getName(targetUserName);
-            if (!targetUser) return ui.notifications.warn(`Death Moves: User "${targetUserName}" not found.`);
+            if (!targetUser) {
+                return ui.notifications.warn(game.i18n.format("DEATH_OPTIONS.Notifications.UserNotFound", { user: targetUserName }));
+            }
             executeTrigger(targetUser.id);
             return DeathMovesController._waitForFlowComplete();
         }
 
         const users = game.users.filter(u => u.active && !u.isGM);
-        if (users.length === 0) return ui.notifications.warn("No players connected.");
+        if (users.length === 0) return ui.notifications.warn(game.i18n.localize("DEATH_OPTIONS.Notifications.NoPlayers"));
 
         let preSelectedUserId = null;
         if (targetUserName) {
@@ -230,73 +241,60 @@ class DeathMovesController {
                 game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_SPECTATOR_UI });
                 emitFlowComplete();
             },
-            onAvoid: async (btnElement) => {
-                await DeathMovesController._handleSelectionSequence("Avoid Death", btnElement);
-                await DeathLogic.handleAvoidDeath();
-                emitFlowComplete();
-            },
-            onBlaze: async (btnElement) => {
-                await DeathMovesController._handleSelectionSequence("Blaze of Glory", btnElement);
-                await DeathLogic.handleBlazeOfGlory(() => {});
-                emitFlowComplete();
-            },
-            onRisk: async (btnElement, hopeSpent) => {
-                await DeathMovesController._handleSelectionSequence("Risk it All", btnElement);
-                await DeathLogic.handleRiskItAll(hopeSpent);
+            onChoose: async (key, hopeSpent) => {
+                await DeathMovesController._handleSelectionSequence(key);
+
+                if (key === 'avoid') await DeathLogic.handleAvoidDeath();
+                else if (key === 'blaze') await DeathLogic.handleBlazeOfGlory();
+                else await DeathLogic.handleRiskItAll(hopeSpent);
+
                 emitFlowComplete();
             },
             onUseItem: async (key) => {
                 // A consumable replaces the death move outright, so the overlay comes
                 // down everywhere instead of running the selection announcement.
                 const used = await DeathLogic.useConsumable(key);
-                if (!used) {
-                    document.getElementById('death-items-bar')?.classList.remove('is-busy');
-                    return;
-                }
+                if (!used) return DeathUI.releaseItemsBar();
 
-                DeathMovesController._cleanup();
+                DeathUI.removeOverlay();
                 game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_SPECTATOR_UI });
                 emitFlowComplete();
             }
         };
 
-        DeathUI.createOverlay(callbacks, false, payload.probs);
+        await DeathUI.createOverlay(callbacks, false, payload.probs);
     }
 
     /**
      * Handles displaying the PASSIVE UI for spectators.
      * @param {Object} payload - Socket payload with targetUserId and probs.
      */
-    static _handleSpectatorUI(payload) {
+    static async _handleSpectatorUI(payload) {
         if (game.user.id === payload.targetUserId) return;
-        DeathUI.createOverlay({}, true, payload.probs);
+        await DeathUI.createOverlay({}, true, payload.probs);
     }
 
     /**
      * Sequence after a player selects a death move option:
      * Hide other buttons -> Remove UI -> Show announcement -> Wait.
-     * @param {string} optionName - The name of the selected option.
-     * @param {HTMLElement} btnElement - The button element that was clicked.
+     * @param {string} optionKey - Key of the selected move.
      */
-    static async _handleSelectionSequence(optionName, btnElement) {
-        // 0. Hide other buttons for everyone
-        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.HIDE_UNSELECTED, buttonId: btnElement.id });
+    static async _handleSelectionSequence(optionKey) {
+        const name = game.i18n.localize(`DEATH_OPTIONS.UI.${DEATH_MOVES[optionKey].i18n}.Title`);
+
+        // 0. Fade the moves that were not taken, for everyone
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.HIDE_UNSELECTED, optionKey });
 
         // 1. Remove UI for EVERYONE
-        DeathMovesController._cleanup();
+        DeathUI.removeOverlay();
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_SPECTATOR_UI });
 
         // 2. Show Announcement to EVERYONE
-        const announcementPayload = { type: SOCKET_TYPES.SHOW_ANNOUNCEMENT, text: optionName };
-        game.socket.emit(SOCKET_NAME, announcementPayload);
-        DeathUI.showAnnouncement(optionName);
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_ANNOUNCEMENT, text: name });
+        await DeathUI.showAnnouncement(name);
 
         // 3. Wait 4 seconds (3s reading + 1s fade buffer)
         await new Promise(resolve => setTimeout(resolve, 4000));
-    }
-
-    static _cleanup() {
-        document.getElementById('risk-it-all-overlay')?.remove();
     }
 
     /**
@@ -313,28 +311,26 @@ class DeathMovesController {
     }
 }
 
-// Hook to add button to Daggerheart Menu (sidebar)
-Hooks.on("renderDaggerheartMenu", (app, element, data) => {
-    const myButton = document.createElement("button");
-    myButton.type = "button";
-    myButton.innerHTML = `<i class="fas fa-skull"></i> Trigger Death Move`;
-    myButton.classList.add("dh-custom-btn");
-    myButton.style.marginTop = "10px";
-    myButton.style.width = "100%";
+/** Compile every template up front, so nothing renders mid-flow over the network. */
+Hooks.once('init', () => {
+    foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES));
+});
 
-    myButton.onclick = () => DeathMovesController.gmTriggerFlow();
+/** Adds the module's trigger button to the system's own Daggerheart menu. */
+Hooks.on("renderDaggerheartMenu", async (app, element, data) => {
+    const fieldset = await renderElement(TEMPLATES.menuButton, {
+        legend: game.i18n.localize("DEATH_OPTIONS.Menu.Legend"),
+        label: game.i18n.localize("DEATH_OPTIONS.Menu.Trigger")
+    });
 
-    const fieldset = element.querySelector("fieldset");
-    if (fieldset) {
-        const newFieldset = document.createElement("fieldset");
-        const legend = document.createElement("legend");
-        legend.innerText = "Death Moves";
-        newFieldset.appendChild(legend);
-        newFieldset.appendChild(myButton);
-        fieldset.after(newFieldset);
-    } else {
-        element.appendChild(myButton);
-    }
+    fieldset.querySelector('[data-dm-action="trigger"]')
+        .addEventListener('click', () => DeathMovesController.gmTriggerFlow());
+
+    // Slot it after the menu's existing group when there is one, so it reads as
+    // another section rather than something appended to the bottom of the window.
+    const existing = element.querySelector("fieldset");
+    if (existing) existing.after(fieldset);
+    else element.appendChild(fieldset);
 });
 
 Hooks.once('ready', DeathMovesController.init);

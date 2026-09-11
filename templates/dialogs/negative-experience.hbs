@@ -1,0 +1,22 @@
+{{!-- Names the Negative Experience that the matching homebrew scar writes onto the sheet. --}}
+<div class="dm-dialog dm-dialog--experience">
+    <header class="dialog-header">
+        <h1>{{title}}</h1>
+    </header>
+
+    <p class="dm-dialog__hint">{{hint}}</p>
+
+    <div class="form-group">
+        <label for="{{nameId}}">{{nameLabel}}</label>
+        <div class="form-fields">
+            <input type="text" id="{{nameId}}" name="expName" maxlength="{{nameMaxLength}}" autofocus>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="{{descId}}">{{descLabel}}</label>
+        <div class="form-fields">
+            <textarea id="{{descId}}" name="expDesc" maxlength="{{descMaxLength}}" rows="3"></textarea>
+        </div>
+    </div>
+</div>

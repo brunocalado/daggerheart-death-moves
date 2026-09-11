@@ -1,67 +1,74 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
 import { DeathSettings } from './settings.js';
-import { findItemBySource, heroplateBlessedAction } from './helpers.js';
+import { findItemBySource, heroplateBlessedAction, renderElement } from './helpers.js';
+import { DEATH_MOVES, DIALOG_CLASSES, ELEMENT_IDS, MODULE_ID, TEMPLATES } from './constants.js';
 
 /**
- * Handles DOM manipulation and visual elements.
+ * Everything the module puts on screen.
+ *
+ * No markup is written here: each surface renders a template and this class only
+ * decides what values go into it and what happens when it is clicked.
  */
 export class DeathUI {
 
     /**
-     * Calculates probability strings based on a specific actor.
-     * @param {Actor} actor - The Foundry Actor object (can be null).
-     * @returns {Object|null} - The probability strings or null if disabled.
+     * Generation counters for the two elements that live on document.body.
+     *
+     * Rendering a template is asynchronous, so a socket telling us to take an element
+     * down can arrive between "start rendering" and "append". Each show claims a
+     * number and drops its element if that number has moved on since.
+     */
+    static _overlayRequest = 0;
+    static _borderRequest = 0;
+
+    /**
+     * Odds shown under each death move, for a specific actor.
+     * @param {Actor|null} actor - The Foundry Actor object (can be null).
+     * @returns {Object|null} One entry per move, or null when the setting is off.
      */
     static calculateProbabilitiesForActor(actor) {
-        const showProbs = DeathSettings.get('showProbabilities');
-        if (!showProbs) return null;
+        if (!DeathSettings.get('showProbabilities')) return null;
 
-        let avoidProb = "";
         const scarLabel = game.i18n.localize("DEATH_OPTIONS.UI.Avoid.ScarLabel");
+        const deathLabel = game.i18n.localize("DEATH_OPTIONS.UI.Blaze.DeathLabel");
 
         // --- PHOENIX FEATHER CHECK ---
         const phoenix = findItemBySource(actor, DeathSettings.getItemSource('phoenix'));
-        const hasPhoenix = !!phoenix;
-        const phoenixName = phoenix?.name ?? "";
 
+        let avoid;
         if (actor) {
             const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
-
-            const bonus = hasPhoenix ? 1 : 0;
-            const effectiveLevelThreshold = level - bonus;
-
+            const effectiveLevelThreshold = level - (phoenix ? 1 : 0);
             const outcomeCount = Math.min(12, Math.max(0, effectiveLevelThreshold));
-            const percent = Math.round((outcomeCount / 12) * 100);
 
-            avoidProb = `${scarLabel}: ${percent}%`;
-
-            if (hasPhoenix) {
-                avoidProb += `<div style="color: #FFD700; font-size: 0.8em; margin-top: 15px; text-shadow: 0 0 5px black;">🪶 ${phoenixName} (+1)</div>`;
-            }
-
+            avoid = {
+                text: `${scarLabel}: ${Math.round((outcomeCount / 12) * 100)}%`,
+                bonus: phoenix ? { icon: '🪶', name: phoenix.name, value: 1 } : null
+            };
         } else {
-            avoidProb = `${scarLabel}: ?`;
+            avoid = { text: `${scarLabel}: ?`, bonus: null };
         }
-
-        const deathLabel = game.i18n.localize("DEATH_OPTIONS.UI.Blaze.DeathLabel");
 
         // --- RELIQUARY CHECK ---
         const reliquary = findItemBySource(actor, DeathSettings.getItemSource('reliquary'));
-        const hasReliquary = !!reliquary;
-
-        const riskOdds = this._calculateRiskOdds(hasReliquary ? 1 : 0);
-        let riskProbText = `LIFE: ${riskOdds.life}% | DEATH: ${riskOdds.death}%`;
-
-        if (hasReliquary) {
-            riskProbText += `<div style="color: #FFD700; font-size: 0.8em; margin-top: 15px; text-shadow: 0 0 5px black;">📿 ${reliquary.name} (+1)</div>`;
-        }
+        const riskOdds = this._calculateRiskOdds(reliquary ? 1 : 0);
 
         // The Heroplate is not folded in here: its bonus is chosen at roll time on
-        // the slider inside the Risk button, which states it in place.
-
+        // the slider inside the Risk option, which states it in place.
         return {
-            avoid: avoidProb,
-            blaze: `${deathLabel}: 100%`,
-            risk: riskProbText
+            avoid,
+            blaze: { text: `${deathLabel}: 100%`, bonus: null },
+            risk: {
+                text: game.i18n.format("DEATH_OPTIONS.UI.Risk.Odds", riskOdds),
+                bonus: reliquary ? { icon: '📿', name: reliquary.name, value: 1 } : null
+            }
         };
     }
 
@@ -150,431 +157,335 @@ export class DeathUI {
         const hope = foundry.utils.getProperty(actor, "system.resources.hope.value") || 0;
         if (hope <= 0) return blocked('NoHope');
 
-        return { name: armor.name, maxHope: hope };
+        return {
+            name: armor.name,
+            maxHope: hope,
+            hint: game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateSlider")
+        };
     }
 
     /**
-     * Creates the death move overlay UI for both interactive and spectator modes.
-     * Always renders in compact mode (minimal layout).
-     * @param {Object} callbacks - Functions for button clicks (onAvoid, onBlaze, onRisk, onCancel).
-     * @param {boolean} isSpectator - If true, buttons are disabled and title reflects spectator mode.
-     * @param {Object} forceProbs - Optional probability object passed from GM to ensure sync.
-     * @returns {HTMLElement} The overlay element.
+     * Builds the three death move options in the order the overlay lays them out.
+     * @param {Object|null} probs - Odds from calculateProbabilitiesForActor().
+     * @param {Object} controls - Item controls from getItemControls().
+     * @returns {Array<Object>} Render context for each option.
      */
-    static createOverlay(callbacks, isSpectator = false, forceProbs = null) {
-        const existing = document.getElementById('risk-it-all-overlay');
-        if (existing) existing.remove();
+    static _buildOptions(probs, controls) {
+        return Object.entries(DEATH_MOVES).map(([key, move]) => ({
+            key,
+            icon: move.icon,
+            title: game.i18n.localize(`DEATH_OPTIONS.UI.${move.i18n}.Title`),
+            subtitle: game.i18n.localize(`DEATH_OPTIONS.UI.${move.i18n}.Subtitle`),
+            probability: probs?.[key] ?? null,
+            // Only Risk It All spends Hope, so only it carries the slider.
+            heroplate: key === 'risk' ? controls.heroplate : null
+        }));
+    }
 
-        let probs = forceProbs;
-        if (!probs && !isSpectator) {
-             probs = this.calculateProbabilitiesForActor(game.user.character);
-        }
+    /**
+     * Shows the death move overlay, for the dying player or for a spectator.
+     * @param {Object} callbacks - onCancel, onChoose(key, hopeSpent), onUseItem(key).
+     * @param {boolean} isSpectator - If true, the moves are visible but not clickable.
+     * @param {Object} [forceProbs] - Odds computed by the GM, so every client agrees.
+     * @returns {Promise<HTMLElement|null>} The overlay, or null if it was cancelled mid-render.
+     */
+    static async createOverlay(callbacks, isSpectator = false, forceProbs = null) {
+        this.removeOverlay();
+        const request = ++this._overlayRequest;
+
+        const probs = forceProbs ?? (isSpectator ? null : this.calculateProbabilitiesForActor(game.user.character));
 
         // Spectators can see the moment but never act in it, so they get no controls.
         const controls = isSpectator
             ? { consumables: [], heroplate: null }
             : this.getItemControls(game.user.character);
 
-        const overlay = document.createElement('div');
-        overlay.id = 'risk-it-all-overlay';
-        overlay.classList.add('compact-mode');
+        const overlay = await renderElement(TEMPLATES.overlay, {
+            id: ELEMENT_IDS.overlay,
+            isSpectator,
+            title: isSpectator
+                ? game.i18n.localize("DEATH_OPTIONS.UI.MainTitleSpectator")
+                : game.i18n.localize("DEATH_OPTIONS.UI.MainTitle"),
+            closeIcon: isSpectator ? 'fa-eye-slash' : 'fa-xmark',
+            closeLabel: game.i18n.localize(isSpectator ? "DEATH_OPTIONS.UI.CloseView" : "DEATH_OPTIONS.UI.Close"),
+            options: this._buildOptions(probs, controls),
+            items: controls.consumables.length
+                ? {
+                    id: ELEMENT_IDS.itemsBar,
+                    label: game.i18n.localize("DEATH_OPTIONS.UI.Items.BarLabel"),
+                    entries: controls.consumables
+                }
+                : null
+        });
 
-        if (isSpectator) {
-            overlay.classList.add('spectator-mode');
-        }
-
-        const title = isSpectator
-            ? game.i18n.localize("DEATH_OPTIONS.UI.MainTitleSpectator") || "Waiting for Player Choice..."
-            : game.i18n.localize("DEATH_OPTIONS.UI.MainTitle");
-
-        const closeText = game.i18n.localize("DEATH_OPTIONS.UI.Close");
-
-        const btnAvoidTitle = game.i18n.localize("DEATH_OPTIONS.UI.Avoid.Title");
-        const btnAvoidSub = game.i18n.localize("DEATH_OPTIONS.UI.Avoid.Subtitle");
-
-        const btnBlazeTitle = game.i18n.localize("DEATH_OPTIONS.UI.Blaze.Title");
-        const btnBlazeSub = game.i18n.localize("DEATH_OPTIONS.UI.Blaze.Subtitle");
-
-        const btnRiskTitle = game.i18n.localize("DEATH_OPTIONS.UI.Risk.Title");
-        const btnRiskSub = game.i18n.localize("DEATH_OPTIONS.UI.Risk.Subtitle");
-
-        const closeBtnHtml = isSpectator
-            ? `<button class="roll-close-btn" id="risk-cancel-btn"><i class="fas fa-eye-slash"></i> Close View</button>`
-            : `<button class="roll-close-btn" id="risk-cancel-btn"><i class="fas fa-times"></i> ${closeText}</button>`;
-
-        overlay.innerHTML = `
-            ${closeBtnHtml}
-            <div class="risk-content-wrapper">
-                <h1 class="risk-title" id="main-title">${title}</h1>
-                <div class="death-options-container" id="death-options-menu">
-                    ${this._createOptionBtn('btn-avoid', 'avoid', btnAvoidTitle, btnAvoidSub, probs ? probs.avoid : null)}
-                    ${this._createOptionBtn('btn-blaze', 'blaze', btnBlazeTitle, btnBlazeSub, probs ? probs.blaze : null)}
-                    ${this._createOptionBtn('btn-risk', 'risk', btnRiskTitle, btnRiskSub, probs ? probs.risk : null, this._createHeroplateControl(controls.heroplate))}
-                </div>
-                ${this._createConsumableBar(controls.consumables)}
-            </div>
-        `;
+        // Taken down again while the template was rendering.
+        if (request !== this._overlayRequest) return null;
 
         document.body.appendChild(overlay);
-
         this._attachListeners(overlay, callbacks, isSpectator);
 
         return overlay;
     }
 
     /**
-     * Removes spectator overlay if present.
+     * Removes the overlay, whichever mode it is in.
+     */
+    static removeOverlay() {
+        this._overlayRequest++;
+        document.getElementById(ELEMENT_IDS.overlay)?.remove();
+    }
+
+    /**
+     * Removes the overlay only when this client is watching rather than choosing.
      */
     static removeSpectatorOverlay() {
-        const overlay = document.getElementById('risk-it-all-overlay');
-        if (overlay && overlay.classList.contains('spectator-mode')) {
-            overlay.remove();
-        }
+        const overlay = document.getElementById(ELEMENT_IDS.overlay);
+        if (overlay?.classList.contains('dm-overlay--spectator')) this.removeOverlay();
     }
 
     /**
-     * Displays a full-screen announcement banner that fades after 3 seconds.
-     * @param {string} text - The announcement text to display.
-     */
-    static showAnnouncement(text) {
-        const banner = document.createElement('div');
-        banner.id = 'death-announcement-banner';
-        banner.innerHTML = `<h1>${text}</h1>`;
-        document.body.appendChild(banner);
-
-        setTimeout(() => {
-            banner.style.opacity = '0';
-            setTimeout(() => banner.remove(), 500);
-        }, 3000);
-    }
-
-    /**
-     * Generates HTML for a single death move option button.
-     * @param {string} id - Element ID for the button.
-     * @param {string} type - Button type class (avoid, blaze, risk).
-     * @param {string} title - Button title text.
-     * @param {string} subtitle - Button subtitle text.
-     * @param {string|null} probability - Probability text to display.
-     * @param {string} [extraHtml] - Extra markup rendered inside the button.
-     * @returns {string} HTML string.
-     */
-    static _createOptionBtn(id, type, title, subtitle, probability, extraHtml = '') {
-        let probHtml = '';
-        if (probability) {
-            probHtml = `<div class="probability-text">${probability}</div>`;
-        }
-
-        return `
-            <div class="option-btn btn-${type}" id="${id}">
-                <div class="btn-content">
-                    <h2>${title}</h2>
-                    <p>${subtitle}</p>
-                    ${probHtml}
-                    ${extraHtml}
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Row of one-click buttons for consumables that replace the death move.
-     * @param {Array<Object>} consumables - Items from getItemControls().
-     * @returns {string} HTML string, empty when the character carries none.
-     */
-    static _createConsumableBar(consumables) {
-        if (!consumables.length) return '';
-
-        const buttons = consumables.map(item => `
-            <div class="death-item-btn" data-item-key="${item.key}">
-                <img class="death-item-img" src="${item.img}" alt="">
-                <div class="death-item-text">
-                    <span class="death-item-name">${item.name}</span>
-                    <span class="death-item-hint">${item.hint}</span>
-                </div>
-            </div>
-        `).join('');
-
-        return `
-            <div class="death-items-bar" id="death-items-bar">
-                <span class="death-items-label">${game.i18n.localize("DEATH_OPTIONS.UI.Items.BarLabel")}</span>
-                <div class="death-items-row">${buttons}</div>
-            </div>
-        `;
-    }
-
-    /**
-     * Hope slider for the Heroplate, rendered inside the Risk It All button.
-     * @param {Object|null} heroplate - Heroplate data from getItemControls().
-     * @returns {string} HTML string, empty when it does not apply.
-     */
-    static _createHeroplateControl(heroplate) {
-        if (!heroplate) return '';
-
-        // Carried but unusable: say which rule is in the way instead of nothing.
-        if (heroplate.blocked) {
-            return `
-            <div class="heroplate-control is-blocked" id="heroplate-control">
-                <span class="heroplate-name">🛡 ${heroplate.name}</span>
-                <span class="heroplate-hint">${heroplate.blocked}</span>
-            </div>
-        `;
-        }
-
-        return `
-            <div class="heroplate-control" id="heroplate-control">
-                <span class="heroplate-name">🛡 ${heroplate.name}</span>
-                <div class="heroplate-row">
-                    <input type="range" id="heroplate-slider" min="0" max="${heroplate.maxHope}" value="0">
-                    <span class="heroplate-value" id="heroplate-value">+0</span>
-                </div>
-                <span class="heroplate-hint">${game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateSlider")}</span>
-            </div>
-        `;
-    }
-
-    /**
-     * Attaches click listeners to overlay buttons.
+     * Wires up the overlay. Clicks are bound here rather than through an actions map
+     * because the overlay is a plain element, not an ApplicationV2.
      * @param {HTMLElement} overlay - The overlay element.
-     * @param {Object} callbacks - Callback functions for each button.
+     * @param {Object} callbacks - Callback functions for each control.
      * @param {boolean} isSpectator - Whether the overlay is in spectator mode.
      */
     static _attachListeners(overlay, callbacks, isSpectator) {
-        overlay.querySelector('#risk-cancel-btn').onclick = () => {
-            if (callbacks.onCancel) callbacks.onCancel();
-            overlay.remove();
-        };
+        overlay.querySelector('[data-dm-action="close"]')?.addEventListener('click', () => {
+            callbacks.onCancel?.();
+            this.removeOverlay();
+        });
 
         if (isSpectator) return;
 
-        const setupBtn = (id, callbackName, getArg = () => undefined) => {
-            const btn = overlay.querySelector(`#${id}`);
-            btn.onclick = async () => {
-                // Read any inline control before hiding the overlay takes it away.
-                const arg = getArg();
-                this.hideOthers(id);
-                if (callbacks[callbackName]) await callbacks[callbackName](btn, arg);
-            };
+        const choose = async (option) => {
+            const key = option.dataset.dmOption;
+
+            // Read the inline control before hiding the overlay takes it away.
+            const hopeSpent = key === 'risk' ? this.readHeroplateSlider(overlay) : 0;
+
+            this.hideOthers(key);
+            await callbacks.onChoose?.(key, hopeSpent);
         };
 
-        setupBtn('btn-avoid', 'onAvoid');
-        setupBtn('btn-blaze', 'onBlaze');
-        setupBtn('btn-risk', 'onRisk', () => this.readHeroplateSlider(overlay));
-
-        // The slider lives inside the Risk button, so its own events must not
-        // bubble up and start the death move while the player is still choosing.
-        const slider = overlay.querySelector('#heroplate-slider');
-        if (slider) {
-            const readout = overlay.querySelector('#heroplate-value');
-            for (const type of ['click', 'pointerdown', 'mousedown', 'touchstart']) {
-                slider.addEventListener(type, ev => ev.stopPropagation());
-            }
-            slider.addEventListener('input', (ev) => {
-                ev.stopPropagation();
-                readout.textContent = `+${ev.target.value}`;
+        for (const option of overlay.querySelectorAll('.dm-option')) {
+            option.addEventListener('click', () => choose(option));
+            option.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                choose(option);
             });
         }
 
-        for (const btn of overlay.querySelectorAll('.death-item-btn')) {
-            btn.onclick = async () => {
+        // The slider lives inside the Risk option, so its own events must not bubble
+        // up and start the death move while the player is still choosing.
+        const slider = overlay.querySelector('[data-dm-heroplate-slider]');
+        if (slider) {
+            const readout = overlay.querySelector('[data-dm-heroplate-value]');
+
+            for (const type of ['click', 'pointerdown', 'mousedown', 'touchstart', 'keydown']) {
+                slider.addEventListener(type, event => event.stopPropagation());
+            }
+
+            slider.addEventListener('input', (event) => {
+                event.stopPropagation();
+                readout.textContent = `+${event.target.value}`;
+            });
+        }
+
+        for (const button of overlay.querySelectorAll('[data-dm-item]')) {
+            button.addEventListener('click', async () => {
                 // Lock the row so a second click cannot spend a second item while
                 // the first is still being written to the sheet.
-                overlay.querySelector('#death-items-bar')?.classList.add('is-busy');
-                if (callbacks.onUseItem) await callbacks.onUseItem(btn.dataset.itemKey);
-            };
+                overlay.querySelector(`#${ELEMENT_IDS.itemsBar}`)?.classList.add('dm-items--busy');
+                await callbacks.onUseItem?.(button.dataset.dmItem);
+            });
         }
     }
 
     /**
      * Current value of the inline Heroplate slider.
-     * @param {HTMLElement} [root] - Element to search, defaults to the document.
+     * @param {HTMLElement|Document} [root] - Element to search, defaults to the document.
      * @returns {number} Hope the player chose to spend, 0 when absent.
      */
     static readHeroplateSlider(root = document) {
-        const slider = root.querySelector('#heroplate-slider');
+        const slider = root.querySelector('[data-dm-heroplate-slider]');
         return slider ? (parseInt(slider.value) || 0) : 0;
     }
 
     /**
-     * Hides all option buttons except the selected one.
-     * @param {string} selectedId - The ID of the selected button.
+     * Fades out every move except the one that was chosen.
+     * @param {string} optionKey - Key of the chosen move.
      */
-    static hideOthers(selectedId) {
-        const buttons = document.querySelectorAll('.option-btn');
-        buttons.forEach(btn => {
-            if (btn.id !== selectedId) {
-                btn.classList.add('hidden-btn');
-            } else {
-                btn.style.pointerEvents = 'none';
-            }
-        });
-        const closeBtn = document.getElementById('risk-cancel-btn');
-        if (closeBtn) closeBtn.remove();
-    }
+    static hideOthers(optionKey) {
+        const overlay = document.getElementById(ELEMENT_IDS.overlay);
+        if (!overlay) return;
 
-    /**
-     * Shows a colored border effect overlay for dramatic tension.
-     * Used during sequential Risk It All rolls.
-     * @param {string} type - Border type ('hope' or 'fear').
-     */
-    static showBorderEffect(type) {
-        this.removeBorderEffect();
-        const div = document.createElement('div');
-        div.id = 'risk-border-overlay';
-        if (type) div.classList.add(`border-${type}`);
-
-        if (type) {
-            const label = document.createElement('div');
-            label.classList.add('border-label');
-            label.innerText = type.toUpperCase();
-            div.appendChild(label);
+        for (const option of overlay.querySelectorAll('.dm-option')) {
+            const chosen = option.dataset.dmOption === optionKey;
+            option.classList.toggle('dm-option--dimmed', !chosen);
+            option.classList.toggle('dm-option--chosen', chosen);
         }
 
-        document.body.appendChild(div);
+        // Past this point the choice is made; there is nothing left to back out of.
+        overlay.querySelector('[data-dm-action="close"]')?.remove();
     }
 
     /**
-     * Removes the border effect overlay if present.
+     * Unlocks the consumable row after a pick that did not go through.
+     */
+    static releaseItemsBar() {
+        document.getElementById(ELEMENT_IDS.itemsBar)?.classList.remove('dm-items--busy');
+    }
+
+    /**
+     * Shows a full-width banner naming the chosen move, then fades it out.
+     * @param {string} text - The announcement text to display.
+     */
+    static async showAnnouncement(text) {
+        document.getElementById(ELEMENT_IDS.announcement)?.remove();
+
+        const banner = await renderElement(TEMPLATES.announcement, { id: ELEMENT_IDS.announcement, text });
+        document.body.appendChild(banner);
+
+        setTimeout(() => {
+            banner.classList.add('dm-announcement--out');
+            setTimeout(() => banner.remove(), 500);
+        }, 3000);
+    }
+
+    /**
+     * Colours the screen edge while a die is in the air.
+     * @param {"hope"|"fear"} type - Which die is being rolled.
+     */
+    static async showBorderEffect(type) {
+        this.removeBorderEffect();
+        const request = ++this._borderRequest;
+
+        const border = await renderElement(TEMPLATES.border, {
+            id: ELEMENT_IDS.border,
+            type,
+            label: type ? game.i18n.localize(`DEATH_OPTIONS.UI.Duality.${type}`) : null
+        });
+
+        // Taken down, or replaced by the other die, while the template was rendering.
+        if (request !== this._borderRequest) return;
+
+        document.body.appendChild(border);
+    }
+
+    /**
+     * Removes the screen edge effect if present.
      */
     static removeBorderEffect() {
-        const existing = document.getElementById('risk-border-overlay');
-        if (existing) existing.remove();
+        this._borderRequest++;
+        document.getElementById(ELEMENT_IDS.border)?.remove();
     }
 
     /**
-     * Creates the GM dialog for selecting which player receives the death move.
-     * Uses DialogV2 from the Foundry V13 API.
-     * @param {User[]} users - Array of active non-GM users.
-     * @param {Function} onTrigger - Callback when a player is selected.
-     * @param {string|null} selectedUserId - Pre-selected user ID.
-     * @param {string|null} reason - Reason text for automatic triggers.
+     * Asks the GM which player receives the death move screen.
+     * @param {User[]} users - Active non-GM users.
+     * @param {Function} onTrigger - Called with the chosen user id.
+     * @param {string|null} selectedUserId - Pre-selected user id.
+     * @param {string|null} reason - Why the dialog opened, for automatic triggers.
      * @param {string|null} characterName - Character name for display.
      */
     static async createGMDialog(users, onTrigger, selectedUserId = null, reason = null, characterName = null) {
         const { DialogV2 } = foundry.applications.api;
+        const selectId = `${MODULE_ID}-user-select`;
 
-        const infoText = reason
-            ? `<p style="color: #ff4500; font-weight: bold; margin-top: 20px;">${reason}<br><span style="color: #ccc; font-weight: normal;">(${characterName || 'Unknown'})</span></p>`
-            : `<p>This will send the Death Moves screen to the selected player.</p>`;
-
-        const content = `
-            <div class="death-form-group">
-                <label>Select Player:</label>
-                <select id="death-player-select" class="death-select">
-                    ${users.map(u => {
-                        const isSelected = (selectedUserId && u.id === selectedUserId) ? "selected" : "";
-                        return `<option value="${u.id}" ${isSelected}>${u.name}</option>`;
-                    }).join('')}
-                </select>
-                ${infoText}
-            </div>
-        `;
-
-        const result = await DialogV2.wait({
-            window: {
-                title: "Trigger Death Moves",
-                icon: "fas fa-skull"
-            },
-            content: content,
-            buttons: [{
-                action: "trigger",
-                label: "Trigger",
-                icon: "fas fa-skull",
-                callback: (event, button, dialog) => {
-                    const select = dialog.element.querySelector('#death-player-select');
-                    return select ? select.value : null;
-                }
-            }],
-            close: () => null,
-            classes: ["death-moves-dialog"]
+        const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.dialogTrigger, {
+            title: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.Title"),
+            playerLabel: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.Player"),
+            hint: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.Hint"),
+            selectId,
+            reason,
+            characterName,
+            users: users.map(user => ({
+                id: user.id,
+                name: user.name,
+                selected: !!selectedUserId && user.id === selectedUserId
+            }))
         });
 
-        if (result) {
-            onTrigger(result);
-        }
+        const result = await DialogV2.wait({
+            window: { title: "DEATH_OPTIONS.Dialog.Trigger.Title", icon: "fa-solid fa-skull" },
+            classes: DIALOG_CLASSES,
+            content,
+            buttons: [{
+                action: "trigger",
+                label: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.Submit"),
+                icon: "fa-solid fa-skull",
+                default: true,
+                callback: (event, button, dialog) => dialog.element.querySelector('[data-dm-user-select]')?.value ?? null
+            }],
+            close: () => null
+        });
+
+        if (result) onTrigger(result);
     }
 
     /**
-     * Shows a dialog to distribute Hope die value between HP and Stress.
-     * Used after a Hope result in Risk It All.
+     * Splits the Hope die total between Hit Points and Stress, then applies it.
      * @param {Actor} actor - The actor to update.
      * @param {number} total - Total points to distribute.
-     * @returns {Promise<Object|null>} Distribution result or null if cancelled.
+     * @returns {Promise<{hp: number, stress: number}|null>} What was cleared, or null.
      */
     static async showRiskDistributionDialog(actor, total) {
         const { DialogV2 } = foundry.applications.api;
 
-        // Custom class to attach slider listeners after render
-        class RiskDialog extends DialogV2 {
-            _onRender(context, options) {
-                const slider = this.element.querySelector("#risk-slider");
-                const hpSpan = this.element.querySelector("#risk-hp-val");
-                const stressSpan = this.element.querySelector("#risk-stress-val");
+        const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.dialogRiskDistribution, {
+            title: game.i18n.localize("DEATH_OPTIONS.UI.Risk.DistributeTitle"),
+            hint: game.i18n.format("DEATH_OPTIONS.UI.Risk.DistributeHint", { total }),
+            hpLabel: game.i18n.localize("DEATH_OPTIONS.UI.Resources.HitPoints"),
+            stressLabel: game.i18n.localize("DEATH_OPTIONS.UI.Resources.Stress"),
+            total
+        });
 
-                if (slider && hpSpan && stressSpan) {
-                    slider.addEventListener("input", (ev) => {
-                        const val = parseInt(ev.target.value);
-                        hpSpan.textContent = val;
-                        stressSpan.textContent = total - val;
-                    });
-                }
+        /** One slider drives both readouts, so they are kept in step after every render. */
+        class RiskDistributionDialog extends DialogV2 {
+            _onRender(context, options) {
+                super._onRender(context, options);
+
+                const slider = this.element.querySelector('[data-dm-split-slider]');
+                const hp = this.element.querySelector('[data-dm-readout="hp"]');
+                const stress = this.element.querySelector('[data-dm-readout="stress"]');
+                if (!slider || !hp || !stress) return;
+
+                slider.addEventListener('input', (event) => {
+                    const value = Number(event.target.value);
+                    hp.textContent = value;
+                    stress.textContent = total - value;
+                });
             }
         }
 
-        const content = `
-            <div class="death-moves-dialog-content">
-                <div class="death-form-group" style="text-align: center; padding: 10px;">
-                    <h3 style="margin-bottom: 20px; color: #FFD700; font-size: 1.4em;">
-                        ${game.i18n.format("DEATH_OPTIONS.UI.Risk.DistributeHint", {total})}
-                    </h3>
-
-                    <div class="flexrow" style="align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
-                        <div style="text-align: center; width: 60px;">
-                            <label style="display: block; font-weight: bold; color: #ff6666; margin-bottom: 5px;">HP</label>
-                            <span id="risk-hp-val" style="font-size: 1.8em; font-weight: bold; color: white;">0</span>
-                        </div>
-
-                        <input type="range" id="risk-slider" min="0" max="${total}" value="0" style="flex: 1; margin: 0 10px; cursor: pointer;">
-
-                        <div style="text-align: center; width: 60px;">
-                            <label style="display: block; font-weight: bold; color: #da70d6; margin-bottom: 5px;">Stress</label>
-                            <span id="risk-stress-val" style="font-size: 1.8em; font-weight: bold; color: white;">${total}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        return await RiskDialog.wait({
-            window: {
-                title: game.i18n.localize("DEATH_OPTIONS.UI.Risk.DistributeTitle"),
-                icon: "fas fa-heart-broken"
-            },
-            content: content,
+        return RiskDistributionDialog.wait({
+            window: { title: "DEATH_OPTIONS.UI.Risk.DistributeTitle", icon: "fa-solid fa-heart-crack" },
+            classes: DIALOG_CLASSES,
+            content,
             buttons: [{
                 action: "apply",
                 label: game.i18n.localize("DEATH_OPTIONS.UI.Apply"),
-                icon: "fas fa-check",
+                icon: "fa-solid fa-check",
+                default: true,
                 callback: async (event, button, dialog) => {
-                    const slider = dialog.element.querySelector("#risk-slider");
-                    const hpVal = parseInt(slider.value);
+                    const slider = dialog.element.querySelector('[data-dm-split-slider]');
+                    const hpVal = parseInt(slider.value) || 0;
                     const stressVal = total - hpVal;
 
                     const currentHP = foundry.utils.getProperty(actor, "system.resources.hitPoints.value") || 0;
                     const currentStress = foundry.utils.getProperty(actor, "system.resources.stress.value") || 0;
 
-                    const newHP = Math.max(0, currentHP - hpVal);
-                    const newStress = Math.max(0, currentStress - stressVal);
-
                     await actor.update({
-                        "system.resources.hitPoints.value": newHP,
-                        "system.resources.stress.value": newStress
+                        "system.resources.hitPoints.value": Math.max(0, currentHP - hpVal),
+                        "system.resources.stress.value": Math.max(0, currentStress - stressVal)
                     });
 
                     return { hp: hpVal, stress: stressVal };
                 }
             }],
-            close: () => null,
-            classes: ["death-moves-dialog"]
+            close: () => null
         });
     }
 }

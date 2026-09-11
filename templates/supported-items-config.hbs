@@ -1,24 +1,27 @@
 {{!-- An ApplicationV2 Handlebars part must render exactly one root element. --}}
-<section class="death-moves-supported-items__body">
-    <p class="death-moves-supported-items__intro">{{localize "DEATH_OPTIONS.Settings.ItemSources.Intro"}}</p>
+<section class="dm-slots">
+    <header class="dialog-header">
+        <h1>{{localize "DEATH_OPTIONS.Settings.ItemSources.Title"}}</h1>
+    </header>
+
+    <p class="dm-dialog__hint">{{localize "DEATH_OPTIONS.Settings.ItemSources.Intro"}}</p>
 
     {{#each fields}}
     <div class="form-group">
         <label>{{this.label}}</label>
         <div class="form-fields">
-            <div class="death-moves-supported-items__slot {{#unless this.resolved}}is-missing{{/unless}}"
-                 data-drop-key="{{this.key}}">
-                <img class="death-moves-supported-items__img" src="{{this.img}}" alt="">
-                <div class="death-moves-supported-items__info">
-                    <span class="death-moves-supported-items__name">{{this.name}}</span>
-                    <span class="death-moves-supported-items__uuid">
+            <div class="dm-slot {{#unless this.resolved}}dm-slot--missing{{/unless}}" data-drop-key="{{this.key}}">
+                <img class="dm-slot__img" src="{{this.img}}" alt="">
+                <div class="dm-slot__info">
+                    <span class="dm-slot__name">{{this.name}}</span>
+                    <span class="dm-slot__uuid">
                         {{#if this.resolved}}{{this.uuid}}{{else}}{{localize "DEATH_OPTIONS.Settings.ItemSources.Missing"}}{{/if}}
                     </span>
                 </div>
                 {{#unless this.isDefault}}
-                <button type="button" class="death-moves-supported-items__reset" data-action="resetSlot" data-key="{{this.key}}"
+                <button type="button" class="dm-slot__reset" data-action="resetSlot" data-key="{{this.key}}"
                         data-tooltip="{{localize "DEATH_OPTIONS.Settings.ItemSources.ResetSlot"}}">
-                    <i class="fas fa-rotate-left"></i>
+                    <i class="fa-solid fa-rotate-left" inert></i>
                 </button>
                 {{/unless}}
             </div>
@@ -29,7 +32,8 @@
 
     <footer class="form-footer">
         <button type="button" data-action="resetAll">
-            <i class="fas fa-rotate-left"></i> {{localize "DEATH_OPTIONS.Settings.ItemSources.ResetAll"}}
+            <i class="fa-solid fa-rotate-left" inert></i>
+            {{localize "DEATH_OPTIONS.Settings.ItemSources.ResetAll"}}
         </button>
     </footer>
 </section>

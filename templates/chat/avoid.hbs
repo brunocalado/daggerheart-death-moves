@@ -1,0 +1,29 @@
+{{!-- Card body for an Avoid Death roll: the outcome, then how the total was reached. --}}
+<p class="dm-card__text">{{text}}</p>
+
+<dl class="dm-tally">
+    <div class="dm-tally__row">
+        <dt>{{rollLabel}}</dt>
+        <dd>{{rawRoll}}</dd>
+    </div>
+    {{#each bonuses}}
+    <div class="dm-tally__row dm-tally__row--bonus">
+        <dt>{{this.label}}</dt>
+        <dd>+{{this.value}}</dd>
+    </div>
+    {{/each}}
+    <div class="dm-tally__row dm-tally__row--total">
+        <dt>{{totalLabel}}</dt>
+        <dd>{{total}}</dd>
+    </div>
+</dl>
+
+<p class="dm-card__note">{{thresholdNote}}</p>
+
+{{#if scarName}}
+<p class="dm-card__note dm-card__note--scar">{{scarChosenLabel}} <strong>{{scarName}}</strong></p>
+{{/if}}
+
+{{#if scarCount}}
+<p class="dm-card__note dm-card__note--scar">{{scarCountLabel}}: <strong>{{scarCount}}</strong></p>
+{{/if}}

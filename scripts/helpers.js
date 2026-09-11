@@ -1,6 +1,60 @@
-/**
- * Shared helpers. Imports nothing from the rest of the module so anything can use it.
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
  */
+
+import { FALLBACK_DICE_APPEARANCE } from './constants.js';
+
+/**
+ * Shared helpers. Imports nothing but the constants leaf, so anything can use it
+ * without risking an import cycle.
+ */
+
+/**
+ * Renders a template and hands back the element it describes.
+ *
+ * Every piece of markup in this module lives in a .hbs file, including the parts that
+ * are parked on document.body rather than owned by an Application. Those still need a
+ * real element to append, which is what this produces.
+ * @param {string} template - Path to the Handlebars template.
+ * @param {Object} [context] - Render context.
+ * @returns {Promise<HTMLElement|null>} The template's root element.
+ */
+export async function renderElement(template, context = {}) {
+    const html = await foundry.applications.handlebars.renderTemplate(template, context);
+
+    // <template> parses the markup without running it or touching the live document.
+    const holder = document.createElement('template');
+    holder.innerHTML = html.trim();
+
+    return holder.content.firstElementChild;
+}
+
+/**
+ * Dice So Nice styling for one of the duality dice.
+ *
+ * Read from the Daggerheart system's own appearance settings so this module's dice
+ * match the ones the table already rolls, including any styling the world changed.
+ * @param {"hope"|"fear"} type - Which die is being dressed.
+ * @returns {Object} A Dice So Nice appearance object.
+ */
+export function dualityDiceAppearance(type) {
+    const fallback = FALLBACK_DICE_APPEARANCE[type];
+
+    try {
+        const key = CONFIG.DH?.SETTINGS?.gameSettings?.appearance;
+        if (!key) return fallback;
+
+        const configured = game.settings.get(CONFIG.DH.id, key)?.diceSoNiceData?.[type];
+        return configured ? { ...fallback, ...configured } : fallback;
+    } catch (err) {
+        // A system build that moved the setting should still roll Daggerheart dice.
+        return fallback;
+    }
+}
 
 /**
  * Every uuid that can identify where an item on a sheet came from.

@@ -1,0 +1,161 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/*
+ * Chat cards. The system's wiki calls out that light-dark() does not resolve in the
+ * chat log the way it does inside an application, so the card is written dark-first
+ * — matching the system's own dark parchment chat — and the few colours that must
+ * change are flipped under an ancestor .theme-light, the same hook the system uses.
+ */
+.daggerheart-death-moves.dm-card {
+    --dm-card-accent: var(--dm-gold);
+
+    overflow: hidden;
+    border: 1px solid var(--dm-gold-40);
+    border-radius: var(--dm-radius);
+    font-family: var(--dm-font-body);
+
+    &.dm-card--avoid  { --dm-card-accent: var(--dm-accent-avoid); }
+    &.dm-card--blaze  { --dm-card-accent: var(--dm-accent-blaze); }
+    &.dm-card--risk   { --dm-card-accent: var(--dm-accent-risk); }
+    &.dm-card--item   { --dm-card-accent: var(--dm-accent-item); }
+
+    .dm-card__header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--dm-gap);
+        padding: 6px var(--dm-gap);
+        border-bottom: 1px solid var(--dm-card-accent);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--dm-card-accent) 16%, transparent), transparent);
+    }
+
+    .dm-card__icon {
+        color: var(--dm-card-accent);
+    }
+
+    .dm-card__title {
+        margin: 0;
+        border: none;
+        font-family: var(--dm-font-heading);
+        font-size: var(--font-size-16, 1rem);
+        font-weight: 700;
+        line-height: 1.2;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--dm-card-accent);
+    }
+
+    .dm-card__body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: var(--dm-gap-lg) var(--dm-gap-lg) var(--dm-gap);
+        text-align: center;
+    }
+
+    .dm-card__text {
+        margin: 0;
+        font-size: var(--font-size-14, 0.875rem);
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--dm-beige);
+    }
+
+    .dm-card__note {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        margin: var(--dm-gap) 0 0;
+        font-size: var(--font-size-12, 0.75rem);
+        color: var(--dm-beige-50);
+
+        &.dm-card__note--scar,
+        &.dm-card__note--recovered {
+            padding-top: var(--dm-gap);
+            border-top: 1px solid var(--dm-gold-10);
+        }
+
+        strong {
+            color: var(--dm-gold);
+        }
+
+        .dm-card__note-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--dm-beige);
+        }
+    }
+}
+
+/* --- The two duality dice ------------------------------------------------- */
+
+.daggerheart-death-moves .dm-duality {
+    display: flex;
+    justify-content: center;
+    gap: var(--dm-gap-lg);
+    width: 100%;
+    margin-bottom: var(--dm-gap);
+
+    .dm-duality__die {
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        max-width: 120px;
+        padding: 6px var(--dm-gap);
+        border: 1px solid color-mix(in srgb, var(--dm-die) 60%, transparent);
+        border-radius: var(--dm-radius);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--dm-die) 22%, transparent), transparent);
+
+        &.dm-duality__die--hope {
+            --dm-die: var(--dm-hope);
+        }
+
+        &.dm-duality__die--fear {
+            --dm-die: var(--dm-fear-light);
+        }
+    }
+
+    .dm-duality__label {
+        font-size: var(--font-size-11, 0.6875rem);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--dm-die);
+    }
+
+    .dm-duality__value {
+        font-family: var(--dm-font-heading);
+        font-size: var(--font-size-24, 1.5rem);
+        font-weight: 700;
+        line-height: 1;
+        color: var(--dm-beige);
+    }
+}
+
+/*
+ * Light theme. The chat log paints itself on a light parchment, so the text tones
+ * that were chosen against near-black have to come back down.
+ */
+.theme-light .daggerheart-death-moves.dm-card,
+#interface.theme-light .daggerheart-death-moves.dm-card {
+    --dm-beige: var(--dark, #222222);
+    --dm-beige-50: color-mix(in srgb, var(--dark, #222222) 65%, transparent);
+    --dm-gold: var(--dark-blue, #18162e);
+    --dm-gold-10: color-mix(in srgb, var(--dark-blue, #18162e) 12%, transparent);
+    --dm-gold-40: color-mix(in srgb, var(--dark-blue, #18162e) 35%, transparent);
+    --dm-fear-light: var(--dm-fear);
+    /* Hope's golden is designed to sit on near-black; on the light parchment it has
+       to come down to the darker end of the system's own gold before it is legible. */
+    --dm-hope: color-mix(in srgb, var(--golden, #f3c267) 40%, var(--dark-golden, #2b1d03));
+}

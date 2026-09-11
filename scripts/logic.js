@@ -1,6 +1,15 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
 import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
-import { findItemBySource, heroplateBlessedAction } from './helpers.js';
+import { DeathChat } from './chat.js';
+import { findItemBySource, heroplateBlessedAction, dualityDiceAppearance } from './helpers.js';
 import { SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 
 /**
@@ -9,65 +18,44 @@ import { SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 export class DeathLogic {
 
     /**
-     * Generates the standardized HTML content for chat messages.
-     * Uses the Daggerheart-styled card layout.
-     * @param {string} title - The card header title.
-     * @param {string} text - The card body content (HTML allowed).
-     * @returns {string} Complete HTML string for the chat card.
+     * Lights the screen edge on every client at once.
+     * @param {"hope"|"fear"} type - Which die is about to be rolled.
      */
-    static _createStyledChatContent(title, text) {
-        return `
-        <div class="chat-card" style="border: 2px solid #C9A060; border-radius: 8px; overflow: hidden;">
+    static async _raiseBorder(type) {
+        await DeathUI.showBorderEffect(type);
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: type });
+    }
 
-            <!-- Header: Dark Background with Gold Text (Daggerheart Style) -->
-            <header class="card-header flexrow" style="
-                background: #191919 !important;
-                padding: 8px;
-                border-bottom: 2px solid #C9A060;
-            ">
-                <h3 class="noborder" style="
-                    margin: 0;
-                    font-weight: bold;
-                    color: #C9A060 !important;
-                    font-family: 'Aleo', serif;
-                    text-align: center;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    width: 100%;
-                ">
-                    ${title}
-                </h3>
-            </header>
+    /**
+     * Clears the screen edge on every client at once.
+     */
+    static _lowerBorder() {
+        DeathUI.removeBorderEffect();
+        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
+    }
 
-            <!-- Content Body -->
-            <div class="card-content" style="
-                padding: 20px;
-                min-height: 150px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                position: relative;
-                background: rgba(0, 0, 0, 0.6);
-            ">
-                <!-- The Text -->
-                <span style="
-                    color: #ffffff !important;
-                    font-size: 1.3em;
-                    font-weight: bold;
-                    text-shadow: 0px 0px 8px #000000;
-                    position: relative;
-                    z-index: 1;
-                    font-family: 'Lato', sans-serif;
-                    line-height: 1.4;
-                    width: 100%;
-                ">
-                    ${text}
-                </span>
-            </div>
-        </div>
-        `;
+    /**
+     * Rolls one duality die and shows it, dressed in the world's own dice styling.
+     * @param {string} formula - The roll formula.
+     * @param {"hope"|"fear"} type - Which die this is, for its appearance.
+     * @returns {Promise<Roll>} The evaluated roll.
+     */
+    static async _rollDualityDie(formula, type) {
+        const roll = new Roll(formula);
+        await roll.evaluate();
+
+        if (roll.terms[0]) roll.terms[0].options.appearance = dualityDiceAppearance(type);
+
+        if (game.dice3d) {
+            try {
+                await game.dice3d.showForRoll(roll, game.user, true);
+            } catch (err) {
+                // A Dice So Nice that cannot draw must not stop the death move.
+                console.warn("Death Moves | Dice So Nice could not show the roll:", err);
+            }
+        }
+
+        return roll;
     }
 
     /**
@@ -76,118 +64,59 @@ export class DeathLogic {
      * Triggered after player selects "Avoid Death" from the overlay.
      */
     static async handleAvoidDeath() {
-        // Show Gold Border Effect (Local + Network)
-        DeathUI.showBorderEffect('hope');
-        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'hope' });
+        await this._raiseBorder('hope');
 
         // --- PHOENIX FEATHER CHECK ---
         const actor = game.user.character;
         const phoenix = findItemBySource(actor, DeathSettings.getItemSource('phoenix'));
-        const hasPhoenix = !!phoenix;
-        const phoenixName = phoenix?.name ?? "";
+        const bonuses = phoenix ? [{ label: phoenix.name, value: 1 }] : [];
 
-        const formula = hasPhoenix ? '1d12 + 1' : '1d12';
+        const roll = await this._rollDualityDie(phoenix ? '1d12 + 1' : '1d12', 'hope');
 
-        const roll = new Roll(formula);
-        await roll.evaluate();
-
-        // Dice So Nice styling (Custom Gold/Black)
-        if (roll.terms[0]) {
-            roll.terms[0].options.appearance = { colorset: "custom", foreground: "#000000", background: "#FFD700", outline: "#000000", texture: "none" };
-        }
-
-        if (game.dice3d) {
-            try { await game.dice3d.showForRoll(roll, game.user, true); } catch (e) {}
-        }
-
-        // Delay to allow seeing the dice
+        // Long enough to read the dice before the screen goes quiet again.
         await new Promise(resolve => setTimeout(resolve, 3000));
-
-        // Remove Border Effect
-        DeathUI.removeBorderEffect();
-        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
+        this._lowerBorder();
 
         const rollTotal = roll.total;
         const rawRoll = roll.terms[0].total;
 
-        let mainTitle = "";
-        let mainText = "";
-        let isScar = false;
-        let level = 0;
-
-        if (actor) {
-            level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
-
-            if (rollTotal <= level) {
-                // SCAR
-                mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.ResultScar");
-                mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.MsgScar");
-                isScar = true;
-            } else {
-                // SAFE
-                mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.ResultSafe");
-                mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.MsgSafe");
-            }
-
-            // --- Roll Details for Chat ---
-            let detailsHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); width: 100%; font-size: 0.9em;">`;
-
-            detailsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                <span style="color: #ccc;">Roll (d12):</span>
-                                <span style="font-weight: bold; color: white;">${rawRoll}</span>
-                            </div>`;
-
-            if (hasPhoenix) {
-                 detailsHtml += `<div style="display: flex; justify-content: space-between; color: #FFD700; margin-bottom: 4px;">
-                                    <span>${phoenixName}:</span>
-                                    <span>+1</span>
-                                </div>`;
-            }
-
-            detailsHtml += `<div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; padding-top: 4px; font-weight: bold;">
-                                <span style="color: #fff;">TOTAL:</span>
-                                <span style="font-size: 1.2em; color: #FFD700;">${rollTotal}</span>
-                            </div>`;
-
-            detailsHtml += `<div style="text-align: center; font-size: 0.8em; color: #888; margin-top: 8px;">(Level Threshold: ${level})</div>`;
-            detailsHtml += `</div>`;
-
-            mainText += detailsHtml;
-        } else {
-            mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.Flavor");
-            mainText = game.i18n.format("DEATH_OPTIONS.Chat.Avoid.NoActor", {roll: rollTotal});
+        if (!actor) {
+            return DeathChat.simple({
+                title: game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.Flavor"),
+                text: game.i18n.format("DEATH_OPTIONS.Chat.Avoid.NoActor", { roll: rollTotal }),
+                icon: 'fa-shield-heart'
+            });
         }
 
-        // --- AUTOMATION: Core ---
+        const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
+        const isScar = rollTotal <= level;
+
+        let title = game.i18n.localize(`DEATH_OPTIONS.Chat.Avoid.Result${isScar ? 'Scar' : 'Safe'}`);
+        let text = game.i18n.localize(`DEATH_OPTIONS.Chat.Avoid.Msg${isScar ? 'Scar' : 'Safe'}`);
+        let scarCount = null;
+
+        // --- AUTOMATION ---
         const automation = DeathSettings.get('automationMode');
-        if (automation === 'core' && isScar && actor) {
-            await DeathLogic._applyCoreScar(actor);
 
-            // Re-read scars after AE application to check threshold
-            const newScars = foundry.utils.getProperty(actor, "system.scars") || 0;
-            if (newScars >= 6) {
-                mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearTitle");
-                mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearDesc");
-                mainText += `<br><br><em>(${game.i18n.localize("DEATH_OPTIONS.UI.Avoid.ScarLabel")}: ${newScars})</em>`;
-            }
-        } else if (automation === 'homebrew' && isScar && actor) {
+        if (automation === 'homebrew' && isScar) {
+            // The homebrew flow asks which scar was taken and posts its own card.
             const { DeathHomebrew } = await import('./homebrew.js');
-            const rollData = {
-                rawRoll,
-                rollTotal,
-                level,
-                hasPhoenix,
-                phoenixName
-            };
-            await DeathHomebrew.handleAvoidDeathScar(actor, rollData);
-            return;
+            return DeathHomebrew.handleAvoidDeathScar(actor, { rawRoll, rollTotal, level, bonuses });
         }
 
-        ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ alias: "Death Moves" }),
-            content: this._createStyledChatContent(mainTitle, mainText),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER
-        });
+        if (automation === 'core' && isScar) {
+            await this._applyCoreScar(actor);
+
+            // Re-read scars after the effect applies, to check the threshold.
+            const scars = foundry.utils.getProperty(actor, "system.scars") || 0;
+            if (scars >= 6) {
+                title = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearTitle");
+                text = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearDesc");
+                scarCount = scars;
+            }
+        }
+
+        return DeathChat.avoid({ title, text, rawRoll, total: rollTotal, level, bonuses, scarCount });
     }
 
     /**
@@ -264,6 +193,7 @@ export class DeathLogic {
      * Sequential Risk It All — rolls Fear first, then Hope with dramatic delay.
      * This is the sole Risk It All codepath.
      * Triggered after player selects "Risk it All" from the overlay.
+     * @param {number} hopeSpent - Hope the player set on the overlay's Heroplate slider.
      */
     static async handleRiskItAll(hopeSpent = 0) {
         const actor = game.user.character;
@@ -274,32 +204,15 @@ export class DeathLogic {
         // the Risk It All death move".
         const bonus = await this._prepareRiskItAllBonus(actor, hopeSpent);
 
-        // Fear die first — purple border
-        DeathUI.showBorderEffect('fear');
-        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'fear' });
-
-        const fearRoll = new Roll('1d12');
-        await fearRoll.evaluate();
-
-        if (fearRoll.terms[0]) fearRoll.terms[0].options.appearance = { colorset: "custom", foreground: "#FFFFFF", background: "#2c003e", texture: "none" };
-        if (game.dice3d) await game.dice3d.showForRoll(fearRoll, game.user, true);
-
+        await this._raiseBorder('fear');
+        const fearRoll = await this._rollDualityDie('1d12', 'fear');
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        // Hope die second — gold border
-        DeathUI.showBorderEffect('hope');
-        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'hope' });
-
-        const hopeRoll = new Roll(bonus.total > 0 ? `1d12 + ${bonus.total}` : '1d12');
-        await hopeRoll.evaluate();
-
-        if (hopeRoll.terms[0]) hopeRoll.terms[0].options.appearance = { colorset: "custom", foreground: "#000000", background: "#FFD700", texture: "none" };
-        if (game.dice3d) await game.dice3d.showForRoll(hopeRoll, game.user, true);
-
+        await this._raiseBorder('hope');
+        const hopeRoll = await this._rollDualityDie(bonus.total > 0 ? `1d12 + ${bonus.total}` : '1d12', 'hope');
         await new Promise(resolve => setTimeout(resolve, 4000));
 
-        DeathUI.removeBorderEffect();
-        game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
+        this._lowerBorder();
 
         await this._processRiskResult(hopeRoll.total, fearRoll.total, {
             raw: hopeRoll.terms[0].total,
@@ -377,75 +290,55 @@ export class DeathLogic {
      * @param {Object|null} hopeDetails - Hope die breakdown ({raw, entries}).
      */
     static async _processRiskResult(hopeVal, fearVal, hopeDetails = null) {
-        let mainTitle, mainText;
+        let outcome;
+        if (hopeVal > fearVal) outcome = 'Hope';
+        else if (fearVal > hopeVal) outcome = 'Fear';
+        else outcome = 'Critical';
 
-        if (hopeVal > fearVal) {
-            mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeTitle");
-            mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeDesc");
-        } else if (fearVal > hopeVal) {
-            mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearTitle");
-            mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.FearDesc");
-        } else {
-            mainTitle = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.CriticalTitle");
-            mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.CriticalDesc");
-        }
+        const title = game.i18n.localize(`DEATH_OPTIONS.Chat.Risk.${outcome}Title`);
+        const text = game.i18n.localize(`DEATH_OPTIONS.Chat.Risk.${outcome}Desc`);
 
-        const bonusEntries = hopeDetails?.entries ?? [];
-
-        const hopeBonusText = bonusEntries.length
-            ? `<div style="color: #FFD700; font-size: 0.85em; margin-bottom: 10px; text-shadow: 1px 1px 2px black;">
-                   <div>${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeDie")}: ${hopeDetails.raw}</div>
-                   ${bonusEntries.map(e => `<div>✦ ${e.label}: +${e.value}</div>`).join('')}
-               </div>`
-            : "";
-
-        const diceText = `
-            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; font-weight: bold; width: 100%;">
-                <span style="color: #FFD700; text-shadow: 1px 1px 2px black;">Hope: ${hopeVal}</span>
-                <span style="color: #da70d6; text-shadow: 1px 1px 2px black;">Fear: ${fearVal}</span>
-            </div>
-            ${hopeBonusText}`;
-
-        let distributionMsg = "";
+        let recovered = null;
 
         // --- AUTOMATION: Core / Homebrew ---
         const automation = DeathSettings.get('automationMode');
         if (automation === 'core' || automation === 'homebrew') {
             try {
                 const actor = game.user.character;
+                const label = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Recovered");
 
-                if (actor) {
-                    if (hopeVal > fearVal) {
-                        const dist = await DeathUI.showRiskDistributionDialog(actor, hopeVal);
-                        if (dist) {
-                            distributionMsg = `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.9em;">
-                                <strong>${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Recovered")}:</strong><br>
-                                <span style="color: #ff6666;">${dist.hp} HP</span>, <span style="color: #da70d6;">${dist.stress} Stress</span>
-                            </div>`;
-                        }
-                    } else if (hopeVal === fearVal) {
-                        await actor.update({
-                            "system.resources.hitPoints.value": 0,
-                            "system.resources.stress.value": 0
-                        });
-                        distributionMsg = `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.9em;">
-                            <strong>${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Recovered")}:</strong><br>
-                            ${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.AllRecovered")}
-                        </div>`;
+                if (actor && outcome === 'Hope') {
+                    const dist = await DeathUI.showRiskDistributionDialog(actor, hopeVal);
+                    if (dist) {
+                        recovered = {
+                            label,
+                            value: game.i18n.format("DEATH_OPTIONS.Chat.Risk.RecoveredSplit", {
+                                hp: dist.hp,
+                                stress: dist.stress
+                            })
+                        };
                     }
+                } else if (actor && outcome === 'Critical') {
+                    await actor.update({
+                        "system.resources.hitPoints.value": 0,
+                        "system.resources.stress.value": 0
+                    });
+                    recovered = { label, value: game.i18n.localize("DEATH_OPTIONS.Chat.Risk.AllRecovered") };
                 }
             } catch (err) {
                 console.error("Death Moves | Automation Error:", err);
-                ui.notifications.error("Death Moves Automation failed. See console for details.");
+                ui.notifications.error(game.i18n.localize("DEATH_OPTIONS.Notifications.AutomationFailed"));
             }
         }
 
-        const fullText = diceText + mainText + distributionMsg;
-
-        ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ alias: game.i18n.localize("DEATH_OPTIONS.Chat.Risk.Speaker") }),
-            content: this._createStyledChatContent(mainTitle, fullText),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER
+        return DeathChat.risk({
+            title,
+            text,
+            hope: hopeVal,
+            fear: fearVal,
+            rawHope: hopeDetails?.raw ?? hopeVal,
+            bonuses: hopeDetails?.entries ?? [],
+            recovered
         });
     }
 
@@ -480,7 +373,7 @@ export class DeathLogic {
             return true;
         } catch (err) {
             console.error("Death Moves | Item automation failed:", err);
-            ui.notifications.error("Death Moves: item automation failed. See console for details.");
+            ui.notifications.error(game.i18n.localize("DEATH_OPTIONS.Notifications.ItemFailed"));
             return false;
         }
     }
@@ -496,13 +389,12 @@ export class DeathLogic {
         await actor.update({ "system.resources.hitPoints.value": 0 });
         await this._consumeOne(bottle);
 
-        ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ alias: bottleName }),
-            content: this._createStyledChatContent(
-                game.i18n.localize("DEATH_OPTIONS.Chat.Sprite.Title"),
-                game.i18n.format("DEATH_OPTIONS.Chat.Sprite.Desc", { actor: actor.name })
-            ),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER
+        return DeathChat.simple({
+            title: game.i18n.localize("DEATH_OPTIONS.Chat.Sprite.Title"),
+            text: game.i18n.format("DEATH_OPTIONS.Chat.Sprite.Desc", { actor: actor.name }),
+            icon: 'fa-flask',
+            variant: 'item',
+            alias: bottleName
         });
     }
 
@@ -517,13 +409,12 @@ export class DeathLogic {
 
         await this._consumeOne(potion);
 
-        ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ alias: potionName }),
-            content: this._createStyledChatContent(
-                game.i18n.localize("DEATH_OPTIONS.Chat.Tears.Title"),
-                game.i18n.format("DEATH_OPTIONS.Chat.Tears.Desc", { actor: actor.name })
-            ),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER
+        await DeathChat.simple({
+            title: game.i18n.localize("DEATH_OPTIONS.Chat.Tears.Title"),
+            text: game.i18n.format("DEATH_OPTIONS.Chat.Tears.Desc", { actor: actor.name }),
+            icon: 'fa-flask',
+            variant: 'item',
+            alias: potionName
         });
 
         // The slumber lasts until an ally spends Tend to Wounds, which is a downtime
@@ -549,18 +440,13 @@ export class DeathLogic {
      * Logic for "Blaze of Glory".
      * Posts a dramatic farewell message to chat.
      * Triggered after player selects "Blaze of Glory" from the overlay.
-     * @param {Function} overlayRemoveCallback - Callback to remove overlay after completion.
      */
-    static handleBlazeOfGlory(overlayRemoveCallback) {
-        const blazeMsg = DeathSettings.get('blazeChatMessage');
-        const title = game.i18n.localize("DEATH_OPTIONS.Chat.Blaze.Title");
-
-        ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ alias: "Death Moves" }),
-            content: this._createStyledChatContent(title, blazeMsg),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER
+    static handleBlazeOfGlory() {
+        return DeathChat.simple({
+            title: game.i18n.localize("DEATH_OPTIONS.Chat.Blaze.Title"),
+            text: DeathSettings.get('blazeChatMessage'),
+            icon: 'fa-fire',
+            variant: 'blaze'
         });
-
-        if (overlayRemoveCallback) overlayRemoveCallback();
     }
 }

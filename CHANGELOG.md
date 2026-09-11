@@ -1,3 +1,18 @@
+# 2.4
+
+- [Changed] Every window the module opens now follows the Daggerheart system's theming rules. Each one carries the system's own dialog classes, so it inherits the parchment frame, inputs and buttons instead of rendering half Daggerheart and half core Foundry — which is what made the Trigger button come out in Foundry's orange.
+- [Changed] Typography follows the system's three tiers: Cinzel Decorative for titles, Cinzel for headings, Montserrat for body text. The module was using Modesto Condensed and Signika, which are core Foundry fonts and belong to no part of Daggerheart.
+- [Changed] Every colour resolves to a Daggerheart token — golden, dark blue, beige, red, chat blue — instead of hand-picked hex values, so the module tracks the system's palette rather than re-deciding it. Hope keeps the system's golden and Fear its blue; Risk It All's purple is now the system's chat blue.
+- [Changed] Dice So Nice styling for the Hope and Fear dice is read from the Daggerheart appearance settings, so the death move dice match the duality dice the table already rolls, including any styling the world has customised.
+- [Fixed] The announcement banner never faded out — it vanished. Its entry animation was holding the opacity and outranking the fade.
+- [Fixed] The consumable buttons spilled their text outside their own border whenever an item name wrapped to two lines, because core gives every button a fixed height.
+- [Fixed] The three death moves wrapped to two rows on a wide screen instead of sitting side by side.
+- [Fixed] The Hope label on the Risk It All chat card was pale gold on the light parchment chat log, effectively unreadable. Chat messages sit outside any application, where the system's `light-dark()` theming does not resolve, so the card now flips its own colours under a light theme.
+- [Fixed] The screen edge effect and the death move screen could be left stuck on a client. Rendering a template is asynchronous, so a socket telling a client to take one down could arrive before it was even on screen.
+- [Changed] All markup moved out of the scripts and into template files. Nothing is assembled by string concatenation any more, including the chat cards, which used to carry about sixty lines of inline styling.
+- [Changed] The single stylesheet was split into one file per concern — tokens, the death move screen, the screen effects, the dialogs, the chat cards, the Supported Items window — using CSS nesting and custom properties.
+- [Added] Portuguese and English text for the strings that were hardcoded in English: the trigger dialog, the scar picker, the Negative Experience form, the roll breakdown in chat, and every notification.
+
 # 2.3
 
 - [Changed] Sprite Bottle and Tears of the Undying Hero are no longer spent on their own. Each carried item gets its own button on the death move screen and one click uses it, so nothing is consumed unless the player asks for it. Ignoring the buttons leads to the normal death move.

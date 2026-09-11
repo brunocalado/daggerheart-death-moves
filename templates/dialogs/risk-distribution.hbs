@@ -1,0 +1,26 @@
+{{!--
+    Splits the Hope die total between Hit Points and Stress. One slider drives both
+    readouts: whatever is not spent on one goes to the other.
+--}}
+<div class="dm-dialog dm-dialog--distribution">
+    <header class="dialog-header">
+        <h1>{{title}}</h1>
+    </header>
+
+    <p class="dm-dialog__hint">{{hint}}</p>
+
+    <div class="dm-split">
+        <div class="dm-split__pool dm-split__pool--hp">
+            <span class="dm-split__label">{{hpLabel}}</span>
+            <output class="dm-split__value" data-dm-readout="hp">0</output>
+        </div>
+
+        <input type="range" class="dm-split__slider" data-dm-split-slider
+               min="0" max="{{total}}" value="0" aria-label="{{hint}}">
+
+        <div class="dm-split__pool dm-split__pool--stress">
+            <span class="dm-split__label">{{stressLabel}}</span>
+            <output class="dm-split__value" data-dm-readout="stress">{{total}}</output>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,150 @@
+/*!
+ * Daggerheart: Death Moves
+ * Copyright (c) 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/*
+ * Module-wide design tokens and the primitives more than one surface reuses.
+ *
+ * Every colour and font here resolves to a Daggerheart system token first and only
+ * falls back to a literal if that token is ever renamed, so the module tracks the
+ * system's theme instead of re-deciding it.
+ * https://github.com/Foundryborne/daggerheart/wiki/Theming-and-Style-Rules
+ *
+ * The scoping class is the module id verbatim. Every element the module renders
+ * carries it — Applications through DEFAULT_OPTIONS.classes, and the pieces parked
+ * on document.body through their own template root.
+ */
+.daggerheart-death-moves {
+    /* Typography: the system's three tiers — display, heading, body. */
+    --dm-font-title: var(--dh-font-title, 'Cinzel Decorative'), serif;
+    --dm-font-heading: var(--dh-font-subtitle, 'Cinzel'), serif;
+    --dm-font-body: var(--dh-font-body, 'Montserrat'), sans-serif;
+
+    /* Core palette. */
+    --dm-gold: var(--golden, #f3c267);
+    --dm-gold-dim: var(--golden-secondary, #eaaf42);
+    --dm-gold-10: var(--golden-10, #f3c26710);
+    --dm-gold-40: var(--golden-40, #f3c26740);
+    --dm-beige: var(--beige, #efe6d8);
+    --dm-beige-50: var(--beige-50, #efe6d850);
+    --dm-ink: var(--dark-blue, #18162e);
+    --dm-ink-deep: var(--deep-black, #0e0d15);
+    --dm-red: var(--red, #e54e4e);
+    --dm-red-deep: var(--dark-red, #3c0000);
+    --dm-green: var(--green, #40a640);
+
+    /* Duality. Hope is the system's golden; Fear is the head of the system's own
+       fear-die gradient, with the lighter chat blue for text that sits on top. */
+    --dm-hope: var(--golden, #f3c267);
+    --dm-fear: #352ab2;
+    --dm-fear-light: var(--chat-blue, #8f87ee);
+
+    /* One accent per death move, so a card, its glow and its dice agree. */
+    --dm-accent-avoid: var(--dm-gold);
+    --dm-accent-blaze: var(--dm-red);
+    --dm-accent-risk: var(--dm-fear-light);
+    --dm-accent-item: var(--dm-green);
+
+    /* Geometry, matching the system's LESS spacing scale. */
+    --dm-radius: 6px;
+    --dm-gap: 8px;
+    --dm-gap-lg: 16px;
+
+    /* A section rule drawn the way the system draws them. */
+    --dm-rule: 1px solid var(--dm-gold-40);
+}
+
+/* --- Shared primitives ---------------------------------------------------- */
+
+.daggerheart-death-moves {
+    /* The system asks every dialog to open with a titled header block. */
+    .dialog-header {
+        width: 100%;
+        padding-bottom: var(--dm-gap-lg);
+
+        h1 {
+            margin: 0;
+            border: none;
+            font-family: var(--dm-font-heading);
+            font-size: var(--font-size-24, 1.5rem);
+            font-weight: 700;
+            text-align: center;
+            color: var(--color-text-emphatic, var(--dm-gold));
+        }
+    }
+
+    .dm-dialog__hint {
+        margin: 0 0 var(--dm-gap);
+        font-family: var(--dm-font-body);
+        font-size: var(--font-size-13, 0.8125rem);
+        line-height: 1.4;
+        color: var(--color-text-subtle, var(--dm-beige-50));
+    }
+
+    /* Label/value rows used by both the Avoid tally and the Risk breakdown. */
+    .dm-tally {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        width: 100%;
+        margin: var(--dm-gap-lg) 0 0;
+        padding-top: var(--dm-gap);
+        border-top: var(--dm-rule);
+        font-size: var(--font-size-13, 0.8125rem);
+
+        .dm-tally__row {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--dm-gap-lg);
+
+            dt {
+                color: var(--dm-beige-50);
+            }
+
+            dd {
+                margin: 0;
+                font-weight: 600;
+                color: var(--dm-beige);
+            }
+
+            &.dm-tally__row--bonus {
+                dt,
+                dd {
+                    color: var(--dm-gold);
+                }
+            }
+
+            &.dm-tally__row--total {
+                margin-top: 2px;
+                padding-top: 4px;
+                border-top: 1px solid var(--dm-gold-10);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+
+                dt {
+                    color: var(--dm-beige);
+                    font-weight: 600;
+                }
+
+                dd {
+                    font-size: var(--font-size-16, 1rem);
+                    color: var(--dm-gold);
+                }
+            }
+        }
+    }
+}
+
+/* Respect a reduced-motion preference across every animated surface. */
+@media (prefers-reduced-motion: reduce) {
+    .daggerheart-death-moves,
+    .daggerheart-death-moves * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

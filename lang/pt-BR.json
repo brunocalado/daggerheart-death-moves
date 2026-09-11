@@ -51,7 +51,6 @@
       "Risk": {
         "Title": "Arriscar Tudo",
         "Subtitle": "Role os dados pela sua vida.",
-        "ProbText": "Padrão/Sequencial",
         "DistributeTitle": "Arriscar Tudo: Esperança",
         "DistributeHint": "Distribua {total} pontos para reduzir HP e/ou Estresse.",
         "HeroplateSlider": "Gaste Esperança para um Dado de Esperança maior",
@@ -59,7 +58,8 @@
           "Unequipped": "Equipe a armadura para gastar Esperança",
           "Spent": "Já usado neste descanso longo",
           "NoHope": "Sem Esperança para gastar"
-        }
+        },
+        "Odds": "VIDA: {life}% | MORTE: {death}%"
       },
       "Apply": "Aplicar",
       "Items": {
@@ -67,6 +67,15 @@
         "sprite": "Limpa todos os Pontos de Vida. Gasta o item.",
         "tears": "Uma última rolagem de ação, depois um sono profundo. Gasta o item.",
         "Gone": "Death Moves: esse item não está mais disponível."
+      },
+      "CloseView": "Fechar Visualização",
+      "Duality": {
+        "hope": "Esperança",
+        "fear": "Medo"
+      },
+      "Resources": {
+        "HitPoints": "PV",
+        "Stress": "Estresse"
       }
     },
     "Chat": {
@@ -75,9 +84,11 @@
         "MsgScar": "Você sobreviveu, mas não sem custo. Marque uma Cicatriz.",
         "ResultSafe": "MORTE EVITADA",
         "MsgSafe": "Você conseguiu se agarrar à vida. Limpe todo o Estresse.",
-        "RollDetails": "Rolagem: {roll} vs Nível: {level}",
         "Flavor": "Luta contra a luz que se apaga...",
-        "NoActor": "Rolagem: {roll} (Sem Ator Atribuído)"
+        "NoActor": "Rolagem: {roll} (Sem Ator Atribuído)",
+        "RollLabel": "Rolagem (d12)",
+        "Threshold": "Limiar de nível: {level}",
+        "ScarChosen": "Cicatriz escolhida:"
       },
       "Blaze": {
         "Title": "UM HERÓI CAI"
@@ -92,7 +103,10 @@
         "CriticalDesc": "Você retorna com vida cheia e um ponto de Esperança!",
         "Recovered": "Recuperado",
         "AllRecovered": "Todo HP e Estresse",
-        "HopeDie": "Dado de Esperança"
+        "HopeDie": "Dado de Esperança",
+        "Hope": "Esperança",
+        "Fear": "Medo",
+        "RecoveredSplit": "{hp} PV · {stress} Estresse"
       },
       "Sprite": {
         "Title": "A GARRAFA SE ESTILHAÇA",
@@ -101,7 +115,9 @@
       "Tears": {
         "Title": "A MORTE NÃO TE ALCANÇA",
         "Desc": "{actor} faz uma última rolagem de ação e cai em um sono profundo. Só o movimento de descanso Cuidar dos Ferimentos de um aliado vai limpar esses Pontos de Vida."
-      }
+      },
+      "Speaker": "Death Moves",
+      "Total": "Total"
     },
     "Items": {
       "phoenix": {
@@ -124,6 +140,39 @@
         "Label": "Garrafa de Sprite",
         "Hint": "Estilhaça no último Ponto de Vida, limpa todos eles e é consumida. Nenhum movimento de morte acontece."
       }
+    },
+    "Dialog": {
+      "Trigger": {
+        "Title": "Acionar Death Moves",
+        "Player": "Selecione o Jogador",
+        "Hint": "Isso envia a tela de Death Moves para o jogador selecionado.",
+        "Submit": "Acionar",
+        "LastHp": "Último Ponto de Vida marcado!"
+      },
+      "Scar": {
+        "Title": "Escolha uma Cicatriz",
+        "Hint": "Escolha o custo permanente que essa sobrevivência cobrou."
+      },
+      "Experience": {
+        "Title": "Experiência Negativa",
+        "Hint": "Descreva a Experiência Negativa que essa cicatriz deixa.",
+        "Name": "Nome",
+        "Description": "Descrição"
+      }
+    },
+    "Menu": {
+      "Legend": "Death Moves",
+      "Trigger": "Acionar Death Move"
+    },
+    "Notifications": {
+      "GmOnly": "Death Moves: apenas o Mestre pode acionar isso.",
+      "Queued": "Death Move na fila: {target} ({pending} pendente(s)).",
+      "UnknownTarget": "Desconhecido",
+      "UserNotFound": "Death Moves: usuário \"{user}\" não encontrado.",
+      "NoPlayers": "Death Moves: nenhum jogador conectado.",
+      "AutomationFailed": "Death Moves: a automação falhou. Veja o console para detalhes.",
+      "ItemFailed": "Death Moves: a automação do item falhou. Veja o console para detalhes.",
+      "SystemAutomationOff": "Death Moves: automação de death move do sistema desativada (modo Core ativo)."
     }
   }
 }
