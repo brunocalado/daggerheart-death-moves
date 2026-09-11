@@ -6,11 +6,9 @@
  * it under the terms of the GNU General Public License version 3.
  */
 
-import { FALLBACK_DICE_APPEARANCE } from './constants.js';
-
 /**
- * Shared helpers. Imports nothing but the constants leaf, so anything can use it
- * without risking an import cycle.
+ * Shared helpers. Imports nothing, so anything can use it without risking an
+ * import cycle.
  */
 
 /**
@@ -31,29 +29,6 @@ export async function renderElement(template, context = {}) {
     holder.innerHTML = html.trim();
 
     return holder.content.firstElementChild;
-}
-
-/**
- * Dice So Nice styling for one of the duality dice.
- *
- * Read from the Daggerheart system's own appearance settings so this module's dice
- * match the ones the table already rolls, including any styling the world changed.
- * @param {"hope"|"fear"} type - Which die is being dressed.
- * @returns {Object} A Dice So Nice appearance object.
- */
-export function dualityDiceAppearance(type) {
-    const fallback = FALLBACK_DICE_APPEARANCE[type];
-
-    try {
-        const key = CONFIG.DH?.SETTINGS?.gameSettings?.appearance;
-        if (!key) return fallback;
-
-        const configured = game.settings.get(CONFIG.DH.id, key)?.diceSoNiceData?.[type];
-        return configured ? { ...fallback, ...configured } : fallback;
-    } catch (err) {
-        // A system build that moved the setting should still roll Daggerheart dice.
-        return fallback;
-    }
 }
 
 /**

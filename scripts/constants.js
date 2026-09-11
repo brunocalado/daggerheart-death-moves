@@ -121,12 +121,36 @@ export const ITEM_SOURCES_SETTING = 'itemSources';
 export const MISSING_ITEM_IMG = 'icons/svg/hazard.svg';
 
 /**
- * Dice So Nice appearance for the Hope and Fear dice, used when the Daggerheart
- * system cannot be asked for the world's own configured styling. The values are
- * the system's own defaults, so an unconfigured world still rolls dice that look
- * like everyone else's duality dice.
+ * Dice So Nice appearance for the two death move dice.
+ *
+ * Deliberately fixed rather than read from the Daggerheart appearance settings: a
+ * death move is not an ordinary duality roll, so its dice are meant to read as their
+ * own thing at the table — Hope in yellow, Fear in purple. Field names are Dice So
+ * Nice's, not the editor's labels: `foreground` is the Label Color, `background` the
+ * Dice Color. `colorset` must stay "custom" or Dice So Nice loads a named theme's
+ * palette over these four colours.
  */
-export const FALLBACK_DICE_APPEARANCE = {
-    hope: { foreground: '#ffffff', background: '#ffe760', outline: '#000000', edge: '#ffffff' },
-    fear: { foreground: '#000000', background: '#0032b1', outline: '#ffffff', edge: '#000000' }
+export const DEATH_DICE_APPEARANCE = {
+    hope: {
+        foreground: '#000000',
+        background: '#ffff00',
+        outline: '#ffff00',
+        edge: '#ffff00',
+        colorset: 'custom',
+        texture: 'none',
+        material: 'metal',
+        system: 'standard',
+        font: 'Signika'
+    },
+    fear: {
+        foreground: '#ffffff',
+        background: '#9900ff',
+        outline: '#9900ff',
+        edge: '#9900ff',
+        colorset: 'custom',
+        texture: 'none',
+        material: 'metal',
+        system: 'standard',
+        font: 'Signika'
+    }
 };

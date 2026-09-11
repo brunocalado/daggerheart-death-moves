@@ -9,8 +9,8 @@
 import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
 import { DeathChat } from './chat.js';
-import { findItemBySource, heroplateBlessedAction, dualityDiceAppearance } from './helpers.js';
-import { SOCKET_NAME, SOCKET_TYPES } from './constants.js';
+import { findItemBySource, heroplateBlessedAction } from './helpers.js';
+import { DEATH_DICE_APPEARANCE, SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 
 /**
  * Handles game rules, dice rolls, and chat messages.
@@ -35,7 +35,7 @@ export class DeathLogic {
     }
 
     /**
-     * Rolls one duality die and shows it, dressed in the world's own dice styling.
+     * Rolls one duality die and shows it in the death move's own dice styling.
      * @param {string} formula - The roll formula.
      * @param {"hope"|"fear"} type - Which die this is, for its appearance.
      * @returns {Promise<Roll>} The evaluated roll.
@@ -44,7 +44,7 @@ export class DeathLogic {
         const roll = new Roll(formula);
         await roll.evaluate();
 
-        if (roll.terms[0]) roll.terms[0].options.appearance = dualityDiceAppearance(type);
+        if (roll.terms[0]) roll.terms[0].options.appearance = DEATH_DICE_APPEARANCE[type];
 
         if (game.dice3d) {
             try {
