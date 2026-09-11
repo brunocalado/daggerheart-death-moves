@@ -1,4 +1,5 @@
 import { DeathSettings } from './settings.js';
+import { findItemBySource } from './helpers.js';
 
 /**
  * Handles DOM manipulation and visual elements.
@@ -18,8 +19,9 @@ export class DeathUI {
         const scarLabel = game.i18n.localize("DEATH_OPTIONS.UI.Avoid.ScarLabel");
 
         // --- PHOENIX FEATHER CHECK ---
-        const phoenixName = DeathSettings.get('phoenixItemName');
-        const hasPhoenix = actor ? actor.items.some(i => i.name === phoenixName) : false;
+        const phoenix = findItemBySource(actor, DeathSettings.getItemSource('phoenix'));
+        const hasPhoenix = !!phoenix;
+        const phoenixName = phoenix?.name ?? "";
 
         if (actor) {
             const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
@@ -42,13 +44,55 @@ export class DeathUI {
 
         const deathLabel = game.i18n.localize("DEATH_OPTIONS.UI.Blaze.DeathLabel");
 
-        const riskProbText = `LIFE: 54% | DEATH: 46%`;
+        // --- RELIQUARY CHECK ---
+        const reliquary = findItemBySource(actor, DeathSettings.getItemSource('reliquary'));
+        const hasReliquary = !!reliquary;
+
+        const riskOdds = this._calculateRiskOdds(hasReliquary ? 1 : 0);
+        let riskProbText = `LIFE: ${riskOdds.life}% | DEATH: ${riskOdds.death}%`;
+
+        if (hasReliquary) {
+            riskProbText += `<div style="color: #FFD700; font-size: 0.8em; margin-top: 15px; text-shadow: 0 0 5px black;">📿 ${reliquary.name} (+1)</div>`;
+        }
+
+        // The Heroplate bonus is chosen at roll time, so it cannot be folded into the
+        // percentage above. Flag that it is available instead of guessing a number.
+        const heroplate = findItemBySource(
+            actor,
+            DeathSettings.getItemSource('heroplate'),
+            item => item.type === "armor" && item.system?.equipped === true
+        );
+
+        if (heroplate) {
+            const label = game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateAvailable");
+            riskProbText += `<div style="color: #FFD700; font-size: 0.8em; margin-top: ${hasReliquary ? '4px' : '15px'}; text-shadow: 0 0 5px black;">🛡 ${heroplate.name} (${label})</div>`;
+        }
 
         return {
             avoid: avoidProb,
             blaze: `${deathLabel}: 100%`,
             risk: riskProbText
         };
+    }
+
+    /**
+     * Walks the 12x12 Hope/Fear grid to get the Risk It All odds.
+     * A tie is a critical success, so it counts towards LIFE — which is why a flat
+     * bonus on the Hope die shifts the split rather than just the win count.
+     * @param {number} bonus - Flat bonus applied to the Hope die.
+     * @returns {{life: number, death: number}} Whole-number percentages.
+     */
+    static _calculateRiskOdds(bonus = 0) {
+        let life = 0;
+
+        for (let hope = 1; hope <= 12; hope++) {
+            for (let fear = 1; fear <= 12; fear++) {
+                if (hope + bonus >= fear) life++;
+            }
+        }
+
+        const lifePercent = Math.round((life / 144) * 100);
+        return { life: lifePercent, death: 100 - lifePercent };
     }
 
     /**
@@ -290,6 +334,79 @@ export class DeathUI {
         if (result) {
             onTrigger(result);
         }
+    }
+
+    /**
+     * Asks how much Hope to burn on the Heroplate's Blessed feature.
+     * Closing the dialog spends nothing — the death move is already committed at this
+     * point, so there is no cancel path back out of it.
+     * @param {number} maxHope - The character's current Hope.
+     * @param {string} itemName - Name of the armor, shown in the dialog.
+     * @returns {Promise<number>} Hope spent, 0 if none.
+     */
+    static async showHeroplateHopeDialog(maxHope, itemName) {
+        const { DialogV2 } = foundry.applications.api;
+
+        class HeroplateDialog extends DialogV2 {
+            _onRender(context, options) {
+                const slider = this.element.querySelector("#heroplate-slider");
+                const spentSpan = this.element.querySelector("#heroplate-spent-val");
+                const leftSpan = this.element.querySelector("#heroplate-left-val");
+
+                if (slider && spentSpan && leftSpan) {
+                    slider.addEventListener("input", (ev) => {
+                        const val = parseInt(ev.target.value);
+                        spentSpan.textContent = val;
+                        leftSpan.textContent = maxHope - val;
+                    });
+                }
+            }
+        }
+
+        const content = `
+            <div class="death-moves-dialog-content">
+                <div class="death-form-group" style="text-align: center; padding: 10px;">
+                    <h3 style="margin-bottom: 20px; color: #FFD700; font-size: 1.4em;">
+                        ${game.i18n.format("DEATH_OPTIONS.UI.Risk.HeroplateHint", { item: itemName })}
+                    </h3>
+
+                    <div class="flexrow" style="align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                        <div style="text-align: center; width: 70px;">
+                            <label style="display: block; font-weight: bold; color: #FFD700; margin-bottom: 5px;">${game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateSpent")}</label>
+                            <span id="heroplate-spent-val" style="font-size: 1.8em; font-weight: bold; color: white;">0</span>
+                        </div>
+
+                        <input type="range" id="heroplate-slider" min="0" max="${maxHope}" value="0" style="flex: 1; margin: 0 10px; cursor: pointer;">
+
+                        <div style="text-align: center; width: 70px;">
+                            <label style="display: block; font-weight: bold; color: #ccc; margin-bottom: 5px;">${game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateLeft")}</label>
+                            <span id="heroplate-left-val" style="font-size: 1.8em; font-weight: bold; color: white;">${maxHope}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const result = await HeroplateDialog.wait({
+            window: {
+                title: game.i18n.localize("DEATH_OPTIONS.UI.Risk.HeroplateTitle"),
+                icon: "fas fa-shield-halved"
+            },
+            content: content,
+            buttons: [{
+                action: "spend",
+                label: game.i18n.localize("DEATH_OPTIONS.UI.Apply"),
+                icon: "fas fa-check",
+                callback: (event, button, dialog) => {
+                    const slider = dialog.element.querySelector("#heroplate-slider");
+                    return slider ? parseInt(slider.value) : 0;
+                }
+            }],
+            close: () => 0,
+            classes: ["death-moves-dialog"]
+        });
+
+        return Number(result) || 0;
     }
 
     /**

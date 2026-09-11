@@ -1,0 +1,35 @@
+{{!-- An ApplicationV2 Handlebars part must render exactly one root element. --}}
+<section class="death-moves-supported-items__body">
+    <p class="death-moves-supported-items__intro">{{localize "DEATH_OPTIONS.Settings.ItemSources.Intro"}}</p>
+
+    {{#each fields}}
+    <div class="form-group">
+        <label>{{this.label}}</label>
+        <div class="form-fields">
+            <div class="death-moves-supported-items__slot {{#unless this.resolved}}is-missing{{/unless}}"
+                 data-drop-key="{{this.key}}">
+                <img class="death-moves-supported-items__img" src="{{this.img}}" alt="">
+                <div class="death-moves-supported-items__info">
+                    <span class="death-moves-supported-items__name">{{this.name}}</span>
+                    <span class="death-moves-supported-items__uuid">
+                        {{#if this.resolved}}{{this.uuid}}{{else}}{{localize "DEATH_OPTIONS.Settings.ItemSources.Missing"}}{{/if}}
+                    </span>
+                </div>
+                {{#unless this.isDefault}}
+                <button type="button" class="death-moves-supported-items__reset" data-action="resetSlot" data-key="{{this.key}}"
+                        data-tooltip="{{localize "DEATH_OPTIONS.Settings.ItemSources.ResetSlot"}}">
+                    <i class="fas fa-rotate-left"></i>
+                </button>
+                {{/unless}}
+            </div>
+        </div>
+        <p class="hint">{{this.hint}}</p>
+    </div>
+    {{/each}}
+
+    <footer class="form-footer">
+        <button type="button" data-action="resetAll">
+            <i class="fas fa-rotate-left"></i> {{localize "DEATH_OPTIONS.Settings.ItemSources.ResetAll"}}
+        </button>
+    </footer>
+</section>

@@ -1,4 +1,5 @@
-import { MODULE_ID } from './constants.js';
+import { MODULE_ID, SUPPORTED_ITEMS, ITEM_SOURCES_SETTING } from './constants.js';
+import { SupportedItemsConfig } from './supported-items-config.js';
 
 /**
  * Manages all module settings registration and access.
@@ -43,13 +44,23 @@ export class DeathSettings {
             default: "dialog"
         });
 
-        game.settings.register(MODULE_ID, 'phoenixItemName', {
-            name: "Phoenix Item Name",
-            hint: "Name of the item that grants +1 bonus to Avoid Death rolls.",
+        // Slots are stored as source uuids, so a renamed or translated copy on a
+        // sheet still matches. Kept out of the settings list because the window
+        // below is a drop target, not a set of text fields.
+        game.settings.register(MODULE_ID, ITEM_SOURCES_SETTING, {
             scope: 'world',
-            config: true,
-            type: String,
-            default: "Phoenix Feather"
+            config: false,
+            type: Object,
+            default: Object.fromEntries(Object.entries(SUPPORTED_ITEMS).map(([key, def]) => [key, def.uuid]))
+        });
+
+        game.settings.registerMenu(MODULE_ID, 'supportedItemsMenu', {
+            name: "DEATH_OPTIONS.Settings.ItemSources.Name",
+            hint: "DEATH_OPTIONS.Settings.ItemSources.Hint",
+            label: "DEATH_OPTIONS.Settings.ItemSources.Label",
+            icon: 'fas fa-scroll',
+            type: SupportedItemsConfig,
+            restricted: true
         });
 
         game.settings.register(MODULE_ID, 'blazeChatMessage', {
@@ -105,5 +116,15 @@ export class DeathSettings {
      */
     static get(key) {
         return game.settings.get(MODULE_ID, key);
+    }
+
+    /**
+     * Source uuid this world uses for one of the supported items.
+     * @param {string} key - A key of SUPPORTED_ITEMS (phoenix, reliquary, ...).
+     * @returns {string} The configured uuid, or the one the item ships with.
+     */
+    static getItemSource(key) {
+        const sources = this.get(ITEM_SOURCES_SETTING) ?? {};
+        return sources[key] || SUPPORTED_ITEMS[key]?.uuid;
     }
 }

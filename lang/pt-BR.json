@@ -19,15 +19,47 @@
       "ShowProbabilities": {
         "Name": "Mostrar Probabilidades",
         "Hint": "Mostra as chances calculadas em % nos botões."
+      },
+      "ItemSources": {
+        "Name": "Itens Suportados",
+        "Hint": "Qual item cada automação procura. A busca é pela origem, não pelo nome.",
+        "Label": "Configurar Itens",
+        "Title": "Death Moves: Itens Suportados",
+        "Intro": "Cada campo guarda o item que a automação procura. A busca é feita pela origem, então uma cópia renomeada ou traduzida na ficha continua funcionando. Arraste um item de um compêndio ou de uma ficha para cima do campo para trocar.",
+        "Missing": "Origem não encontrada",
+        "ResetSlot": "Restaurar o item padrão",
+        "ResetAll": "Restaurar Todos os Padrões",
+        "Assigned": "Death Moves: campo apontado para {item}.",
+        "DropItemOnly": "Death Moves: solte um Item aqui.",
+        "DropUnresolved": "Death Moves: não consegui ler esse item."
       }
     },
     "UI": {
       "MainTitle": "Escolha seu Destino",
       "MainTitleSpectator": "Aguardando Escolha do Jogador...",
       "Close": "Fechar",
-      "Avoid": { "Title": "Evitar a Morte", "Subtitle": "Encare o medo da morte.", "ScarLabel": "Chance de Cicatriz" },
-      "Blaze": { "Title": "Glória Final", "Subtitle": "Parta com um estrondo.", "DeathLabel": "Morte" },
-      "Risk": { "Title": "Arriscar Tudo", "Subtitle": "Role os dados pela sua vida.", "ProbText": "Padrão/Sequencial", "DistributeTitle": "Arriscar Tudo: Esperança", "DistributeHint": "Distribua {total} pontos para reduzir HP e/ou Estresse." },
+      "Avoid": {
+        "Title": "Evitar a Morte",
+        "Subtitle": "Encare o medo da morte.",
+        "ScarLabel": "Chance de Cicatriz"
+      },
+      "Blaze": {
+        "Title": "Glória Final",
+        "Subtitle": "Parta com um estrondo.",
+        "DeathLabel": "Morte"
+      },
+      "Risk": {
+        "Title": "Arriscar Tudo",
+        "Subtitle": "Role os dados pela sua vida.",
+        "ProbText": "Padrão/Sequencial",
+        "DistributeTitle": "Arriscar Tudo: Esperança",
+        "DistributeHint": "Distribua {total} pontos para reduzir HP e/ou Estresse.",
+        "HeroplateTitle": "Abençoado: Gastar Esperança",
+        "HeroplateHint": "Gaste Esperança para aumentar seu Dado de Esperança. O bônus é igual à Esperança gasta. ({item})",
+        "HeroplateSpent": "Gastar",
+        "HeroplateLeft": "Esperança Restante",
+        "HeroplateAvailable": "gastar Esperança"
+      },
       "Apply": "Aplicar"
     },
     "Chat": {
@@ -40,7 +72,9 @@
         "Flavor": "Luta contra a luz que se apaga...",
         "NoActor": "Rolagem: {roll} (Sem Ator Atribuído)"
       },
-      "Blaze": { "Title": "UM HERÓI CAI" },
+      "Blaze": {
+        "Title": "UM HERÓI CAI"
+      },
       "Risk": {
         "Speaker": "Destino",
         "HopeTitle": "ESPERANÇA TRIUNFA",
@@ -50,7 +84,38 @@
         "CriticalTitle": "SUCESSO LENDÁRIO",
         "CriticalDesc": "Você retorna com vida cheia e um ponto de Esperança!",
         "Recovered": "Recuperado",
-        "AllRecovered": "Todo HP e Estresse"
+        "AllRecovered": "Todo HP e Estresse",
+        "HopeDie": "Dado de Esperança"
+      },
+      "Sprite": {
+        "Title": "A GARRAFA SE ESTILHAÇA",
+        "Desc": "Um Sprite se liberta e limpa todos os Pontos de Vida de {actor} antes de desaparecer do Reino Mortal."
+      },
+      "Tears": {
+        "Title": "A MORTE NÃO TE ALCANÇA",
+        "Desc": "{actor} faz uma última rolagem de ação e cai em um sono profundo. Só o movimento de descanso Cuidar dos Ferimentos de um aliado vai limpar esses Pontos de Vida."
+      }
+    },
+    "Items": {
+      "phoenix": {
+        "Label": "Pena de Fênix",
+        "Hint": "Concede +1 na rolagem de Evitar a Morte."
+      },
+      "reliquary": {
+        "Label": "Relicário do Santo Cego",
+        "Hint": "Concede +1 no Dado de Esperança em Arriscar Tudo."
+      },
+      "heroplate": {
+        "Label": "Peitoral Sagrado",
+        "Hint": "Armadura equipada cuja característica Abençoado permite gastar Esperança para aumentar o Dado de Esperança em Arriscar Tudo, uma vez por descanso longo."
+      },
+      "tears": {
+        "Label": "Lágrimas do Herói Imortal",
+        "Hint": "Carregada, não bebida antes. Troca o movimento de morte por uma última rolagem de ação e um sono profundo, e é consumida."
+      },
+      "sprite": {
+        "Label": "Garrafa de Sprite",
+        "Hint": "Estilhaça no último Ponto de Vida, limpa todos eles e é consumida. Nenhum movimento de morte acontece."
       }
     }
   }

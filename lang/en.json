@@ -19,15 +19,47 @@
       "ShowProbabilities": {
         "Name": "Show Probabilities",
         "Hint": "If checked, displays the percentage chance of outcomes below each death option."
+      },
+      "ItemSources": {
+        "Name": "Supported Items",
+        "Hint": "Which item each automation watches for. Matched by source, not by name.",
+        "Label": "Configure Items",
+        "Title": "Death Moves: Supported Items",
+        "Intro": "Each slot holds the item the automation looks for. Matching is done by source, so a renamed or translated copy on a character sheet still works. Drag an item from a compendium or a character sheet onto a slot to change it.",
+        "Missing": "Source not found",
+        "ResetSlot": "Restore the default item",
+        "ResetAll": "Restore All Defaults",
+        "Assigned": "Death Moves: slot now set to {item}.",
+        "DropItemOnly": "Death Moves: drop an Item here.",
+        "DropUnresolved": "Death Moves: that item could not be read."
       }
     },
     "UI": {
       "MainTitle": "CHOOSE YOUR FATE",
       "MainTitleSpectator": "Waiting for Player Choice...",
       "Close": "Close",
-      "Avoid": { "Title": "Avoid Death", "Subtitle": "Roll a Die vs Level", "ScarLabel": "SCAR" },
-      "Blaze": { "Title": "Blaze of Glory", "Subtitle": "Go out with a bang!", "DeathLabel": "DEATH" },
-      "Risk": { "Title": "Risk it All", "Subtitle": "Death or Legend", "ProbText": "DEATH: 50% | LIFE: 50%", "DistributeTitle": "Risk it All: Hope", "DistributeHint": "Distribute {total} points to reduce HP and/or Stress." },
+      "Avoid": {
+        "Title": "Avoid Death",
+        "Subtitle": "Roll a Die vs Level",
+        "ScarLabel": "SCAR"
+      },
+      "Blaze": {
+        "Title": "Blaze of Glory",
+        "Subtitle": "Go out with a bang!",
+        "DeathLabel": "DEATH"
+      },
+      "Risk": {
+        "Title": "Risk it All",
+        "Subtitle": "Death or Legend",
+        "ProbText": "DEATH: 50% | LIFE: 50%",
+        "DistributeTitle": "Risk it All: Hope",
+        "DistributeHint": "Distribute {total} points to reduce HP and/or Stress.",
+        "HeroplateTitle": "Blessed: Spend Hope",
+        "HeroplateHint": "Spend Hope to raise your Hope Die. The bonus equals the Hope spent. ({item})",
+        "HeroplateSpent": "Spend",
+        "HeroplateLeft": "Hope Left",
+        "HeroplateAvailable": "spend Hope"
+      },
       "Apply": "Apply"
     },
     "Chat": {
@@ -49,9 +81,42 @@
         "CriticalTitle": "CRITICAL SUCCESS!",
         "CriticalDesc": "You stand and clear all Hit Points and Stress.",
         "Recovered": "Recovered",
-        "AllRecovered": "All HP & Stress"
+        "AllRecovered": "All HP & Stress",
+        "HopeDie": "Hope Die"
       },
-      "Blaze": { "Title": "BLAZE OF GLORY!" }
+      "Blaze": {
+        "Title": "BLAZE OF GLORY!"
+      },
+      "Sprite": {
+        "Title": "THE BOTTLE SHATTERS",
+        "Desc": "A Sprite bursts free and clears every Hit Point from {actor} before fading from the Mortal Realm."
+      },
+      "Tears": {
+        "Title": "DEATH CANNOT TOUCH YOU",
+        "Desc": "{actor} takes one final action roll, then falls into a dreamless slumber. Only an ally's Tend to Wounds downtime move will clear those Hit Points."
+      }
+    },
+    "Items": {
+      "phoenix": {
+        "Label": "Phoenix Feather",
+        "Hint": "Grants +1 to the Avoid Death roll."
+      },
+      "reliquary": {
+        "Label": "Reliquary of the Sightless Saint",
+        "Hint": "Grants +1 to the Hope Die on Risk It All."
+      },
+      "heroplate": {
+        "Label": "Hallowed Heroplate",
+        "Hint": "Equipped armor whose Blessed feature lets you spend Hope to raise the Hope Die on Risk It All, once per long rest."
+      },
+      "tears": {
+        "Label": "Tears of the Undying Hero",
+        "Hint": "Carried, not drunk in advance. Replaces the death move with one final action roll and a dreamless slumber, and is consumed."
+      },
+      "sprite": {
+        "Label": "Sprite Bottle",
+        "Hint": "Shatters on the last Hit Point, clears them all, and is consumed. No death move happens."
+      }
     }
   }
 }

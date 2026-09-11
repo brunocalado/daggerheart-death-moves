@@ -174,9 +174,14 @@ class DeathMovesController {
      * @param {Object} options - Additional options.
      */
     static async _runFlow(targetUserName = null, options = {}) {
-        const executeTrigger = (targetUserId) => {
+        // Returns false when an item resolved the moment on its own, so the caller
+        // knows there is no player flow to wait on.
+        const executeTrigger = async (targetUserId) => {
             const targetUser = game.users.get(targetUserId);
             const targetActor = targetUser ? targetUser.character : null;
+
+            if (await DeathLogic.interceptDeathMove(targetActor)) return false;
+
             const probs = DeathUI.calculateProbabilitiesForActor(targetActor);
 
             const payload = {
@@ -187,12 +192,14 @@ class DeathMovesController {
             game.socket.emit(SOCKET_NAME, { ...payload, type: SOCKET_TYPES.SHOW_UI });
             game.socket.emit(SOCKET_NAME, { ...payload, type: SOCKET_TYPES.SHOW_SPECTATOR_UI });
             DeathMovesController._handleSpectatorUI(payload);
+            return true;
         };
 
         if (targetUserName && !options.showDialog) {
             const targetUser = game.users.getName(targetUserName);
             if (!targetUser) return ui.notifications.warn(`Death Moves: User "${targetUserName}" not found.`);
-            executeTrigger(targetUser.id);
+            const shown = await executeTrigger(targetUser.id);
+            if (!shown) return;
             return DeathMovesController._waitForFlowComplete();
         }
 
@@ -206,8 +213,9 @@ class DeathMovesController {
         }
 
         return new Promise((resolve) => {
-            DeathUI.createGMDialog(users, (targetUserId) => {
-                executeTrigger(targetUserId);
+            DeathUI.createGMDialog(users, async (targetUserId) => {
+                const shown = await executeTrigger(targetUserId);
+                if (!shown) return resolve();
                 DeathMovesController._waitForFlowComplete().then(resolve);
             }, preSelectedUserId, options.reason, options.characterName);
         });

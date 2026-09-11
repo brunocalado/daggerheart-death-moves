@@ -3,7 +3,14 @@
   "title": "Daggerheart: Death Moves",
   "description": "Enhances the Death Move moment with a dramatic interface for choosing between Avoid Death, Blaze of Glory, or Risk it All — with full automation support.",
   
-  "version": "2.1.0",
+  "version": "2.2",
+
+  "authors": [
+    {
+      "name": "Mestre Digital",
+      "url": "https://www.youtube.com/@mestredigital"
+    }
+  ],
   
   "compatibility": {
     "minimum": "14",
@@ -19,7 +26,7 @@
         "id": "daggerheart",
         "type": "system",
         "compatibility": {
-          "minimum": "2.2.6"
+          "minimum": "2.9.4"
         }
       }
     ],
@@ -38,6 +45,9 @@
   "styles": [
     {
       "src": "styles/style.css"
+    },
+    {
+      "src": "styles/supported-items-config.css"
     }
   ],
   "languages": [
@@ -55,21 +65,6 @@
     }
   ],
   
-  "socket": true,
-  
-  "packs": [
-    {
-      "label": "Death Moves - Macros",
-      "type": "Macro",
-      "name": "death-moves-macros",
-      "path": "packs/death-moves-macros",
-      "system": "daggerheart",
-      "ownership": {
-        "PLAYER": "NONE",
-        "ASSISTANT": "OWNER"
-      },
-      "flags": {}
-    }
-  ]
+  "socket": true
   
 }

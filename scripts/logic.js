@@ -1,5 +1,6 @@
 import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
+import { findItemBySource } from './helpers.js';
 import { SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 
 /**
@@ -81,8 +82,9 @@ export class DeathLogic {
 
         // --- PHOENIX FEATHER CHECK ---
         const actor = game.user.character;
-        const phoenixName = DeathSettings.get('phoenixItemName');
-        const hasPhoenix = actor ? actor.items.some(i => i.name === phoenixName) : false;
+        const phoenix = findItemBySource(actor, DeathSettings.getItemSource('phoenix'));
+        const hasPhoenix = !!phoenix;
+        const phoenixName = phoenix?.name ?? "";
 
         const formula = hasPhoenix ? '1d12 + 1' : '1d12';
 
@@ -264,6 +266,14 @@ export class DeathLogic {
      * Triggered after player selects "Risk it All" from the overlay.
      */
     static async handleRiskItAll() {
+        const actor = game.user.character;
+
+        // Every bonus here raises the Hope die itself, so it feeds both the Hope vs
+        // Fear comparison and the amount of HP/Stress cleared on a Hope result.
+        // Resolved before any dice because the Heroplate is spent "before you make
+        // the Risk It All death move".
+        const bonus = await this._prepareRiskItAllBonus(actor);
+
         // Fear die first — purple border
         DeathUI.showBorderEffect('fear');
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'fear' });
@@ -280,7 +290,7 @@ export class DeathLogic {
         DeathUI.showBorderEffect('hope');
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.SHOW_BORDER, borderType: 'hope' });
 
-        const hopeRoll = new Roll('1d12');
+        const hopeRoll = new Roll(bonus.total > 0 ? `1d12 + ${bonus.total}` : '1d12');
         await hopeRoll.evaluate();
 
         if (hopeRoll.terms[0]) hopeRoll.terms[0].options.appearance = { colorset: "custom", foreground: "#000000", background: "#FFD700", texture: "none" };
@@ -291,15 +301,97 @@ export class DeathLogic {
         DeathUI.removeBorderEffect();
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.REMOVE_BORDER });
 
-        await this._processRiskResult(hopeRoll.total, fearRoll.total);
+        await this._processRiskResult(hopeRoll.total, fearRoll.total, {
+            raw: hopeRoll.terms[0].total,
+            entries: bonus.entries
+        });
+    }
+
+    /**
+     * Collects every item bonus that applies to the Risk It All Hope die.
+     * Runs before the dice so the Heroplate prompt lands where the rules put it.
+     * @param {Actor|null} actor - The acting character, if one is assigned.
+     * @returns {Promise<{total: number, entries: Array<{label: string, value: number}>}>}
+     */
+    static async _prepareRiskItAllBonus(actor) {
+        const entries = [];
+
+        if (!actor) return { total: 0, entries };
+
+        // --- RELIQUARY OF THE SIGHTLESS SAINT --- flat, always on
+        const reliquary = findItemBySource(actor, DeathSettings.getItemSource('reliquary'));
+        if (reliquary) {
+            entries.push({ label: reliquary.name, value: 1 });
+        }
+
+        // --- HALLOWED HEROPLATE --- player chooses how much Hope to burn
+        const heroplate = this._findHeroplateFeature(actor);
+        if (heroplate) {
+            const hope = foundry.utils.getProperty(actor, "system.resources.hope.value") || 0;
+
+            if (hope > 0) {
+                const spent = await DeathUI.showHeroplateHopeDialog(hope, heroplate.armor.name);
+
+                if (spent > 0) {
+                    await actor.update({ "system.resources.hope.value": Math.max(0, hope - spent) });
+                    await this._consumeHeroplateUse(heroplate);
+                    entries.push({ label: heroplate.armor.name, value: spent });
+                }
+            }
+        }
+
+        const total = entries.reduce((sum, e) => sum + e.value, 0);
+        return { total, entries };
+    }
+
+    /**
+     * Locates the Blessed feature on the equipped Heroplate, if it is still usable.
+     * The armor's own action carries the once-per-long-rest counter the system already
+     * refreshes during downtime, so that counter is the source of truth — not a module flag.
+     * @param {Actor} actor - The acting character.
+     * @returns {{armor: Item, action: Object}|null} The armor and its Blessed action, or null.
+     */
+    static _findHeroplateFeature(actor) {
+        // An unequipped armor grants none of its features.
+        const armor = findItemBySource(
+            actor,
+            DeathSettings.getItemSource('heroplate'),
+            item => item.type === "armor" && item.system?.equipped === true
+        );
+
+        if (!armor) return null;
+
+        const features = armor.system.armorFeatures ?? [];
+        const blessed = features.find(f => f.value === "blessed") ?? features.find(f => f.actionIds?.length);
+        const actionId = blessed?.actionIds?.[0];
+        const action = actionId ? armor.system.actions?.get(actionId) : null;
+
+        if (!action) return null;
+
+        // uses.value counts upwards towards uses.max, matching UsesField.hasUses().
+        const max = Number(action.uses?.max) || 0;
+        const used = Number(action.uses?.value) || 0;
+        if (max && used + 1 > max) return null;
+
+        return { armor, action };
+    }
+
+    /**
+     * Marks the Heroplate's Blessed action as spent for this long rest.
+     * @param {{armor: Item, action: Object}} heroplate - The armor and its Blessed action.
+     */
+    static async _consumeHeroplateUse(heroplate) {
+        const used = Number(heroplate.action.uses?.value) || 0;
+        await heroplate.armor.update({ [`system.actions.${heroplate.action.id}.uses.value`]: used + 1 });
     }
 
     /**
      * Processes the result of Risk It All based on Hope vs Fear.
-     * @param {number} hopeVal - Value of the Hope die.
+     * @param {number} hopeVal - Final value of the Hope die, bonus included.
      * @param {number} fearVal - Value of the Fear die.
+     * @param {Object|null} hopeDetails - Hope die breakdown ({raw, entries}).
      */
-    static async _processRiskResult(hopeVal, fearVal) {
+    static async _processRiskResult(hopeVal, fearVal, hopeDetails = null) {
         let mainTitle, mainText;
 
         if (hopeVal > fearVal) {
@@ -313,11 +405,21 @@ export class DeathLogic {
             mainText = game.i18n.localize("DEATH_OPTIONS.Chat.Risk.CriticalDesc");
         }
 
+        const bonusEntries = hopeDetails?.entries ?? [];
+
+        const hopeBonusText = bonusEntries.length
+            ? `<div style="color: #FFD700; font-size: 0.85em; margin-bottom: 10px; text-shadow: 1px 1px 2px black;">
+                   <div>${game.i18n.localize("DEATH_OPTIONS.Chat.Risk.HopeDie")}: ${hopeDetails.raw}</div>
+                   ${bonusEntries.map(e => `<div>✦ ${e.label}: +${e.value}</div>`).join('')}
+               </div>`
+            : "";
+
         const diceText = `
             <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; font-weight: bold; width: 100%;">
                 <span style="color: #FFD700; text-shadow: 1px 1px 2px black;">Hope: ${hopeVal}</span>
                 <span style="color: #da70d6; text-shadow: 1px 1px 2px black;">Fear: ${fearVal}</span>
-            </div>`;
+            </div>
+            ${hopeBonusText}`;
 
         let distributionMsg = "";
 
@@ -360,6 +462,111 @@ export class DeathLogic {
             content: this._createStyledChatContent(mainTitle, fullText),
             style: CONST.CHAT_MESSAGE_STYLES.OTHER
         });
+    }
+
+    /**
+     * Resolves items that replace the death move before it is ever shown.
+     * Runs GM-side, because it edits the player's sheet and inventory.
+     * @param {Actor|null} actor - The character that would take the death move.
+     * @returns {Promise<boolean>} True when the death move must be skipped.
+     */
+    static async interceptDeathMove(actor) {
+        if (!actor) return false;
+
+        // "none" means the module keeps its hands off the sheet, so the GM resolves
+        // these items by hand and the normal death move still appears.
+        if (DeathSettings.get('automationMode') === 'none') return false;
+
+        try {
+            // The Sprite Bottle comes first: it prevents the situation outright, while
+            // the Tears only swap the death move for a final action roll.
+            if (await this._resolveSpriteBottle(actor)) return true;
+            if (await this._resolveUndyingHero(actor)) return true;
+        } catch (err) {
+            console.error("Death Moves | Item interception failed:", err);
+            ui.notifications.error("Death Moves: item automation failed. See console for details.");
+        }
+
+        return false;
+    }
+
+    /**
+     * Sprite Bottle: shatters on the last Hit Point, clears them all, and is gone.
+     * @param {Actor} actor - The character that would take the death move.
+     * @returns {Promise<boolean>} True when the bottle fired.
+     */
+    static async _resolveSpriteBottle(actor) {
+        const bottle = findItemBySource(
+            actor,
+            DeathSettings.getItemSource('sprite'),
+            item => Number(item.system?.quantity ?? 1) > 0
+        );
+
+        if (!bottle) return false;
+
+        const bottleName = bottle.name;
+        await actor.update({ "system.resources.hitPoints.value": 0 });
+        await this._consumeOne(bottle);
+
+        ChatMessage.create({
+            speaker: ChatMessage.getSpeaker({ alias: bottleName }),
+            content: this._createStyledChatContent(
+                game.i18n.localize("DEATH_OPTIONS.Chat.Sprite.Title"),
+                game.i18n.format("DEATH_OPTIONS.Chat.Sprite.Desc", { actor: actor.name })
+            ),
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER
+        });
+
+        return true;
+    }
+
+    /**
+     * Tears of the Undying Hero: carried, not drunk in advance. The potion is spent
+     * at the moment it is needed, the character takes one final action roll, then
+     * sleeps until an ally spends Tend to Wounds.
+     * @param {Actor} actor - The character that would take the death move.
+     * @returns {Promise<boolean>} True when the potion fired.
+     */
+    static async _resolveUndyingHero(actor) {
+        const potion = findItemBySource(
+            actor,
+            DeathSettings.getItemSource('tears'),
+            item => Number(item.system?.quantity ?? 1) > 0
+        );
+
+        if (!potion) return false;
+
+        const potionName = potion.name;
+        await this._consumeOne(potion);
+
+        ChatMessage.create({
+            speaker: ChatMessage.getSpeaker({ alias: potionName }),
+            content: this._createStyledChatContent(
+                game.i18n.localize("DEATH_OPTIONS.Chat.Tears.Title"),
+                game.i18n.format("DEATH_OPTIONS.Chat.Tears.Desc", { actor: actor.name })
+            ),
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER
+        });
+
+        // The slumber lasts until an ally spends Tend to Wounds, which is a downtime
+        // move the system already handles — this only puts the character under.
+        const unconscious = CONFIG.DH?.GENERAL?.defeatedConditionChoices?.unconscious?.id;
+        if (unconscious && typeof actor.setDeathMoveDefeated === 'function') {
+            await actor.setDeathMoveDefeated(unconscious);
+        }
+
+        return true;
+    }
+
+    /**
+     * Spends one of a stacked item, deleting it when the last one is used.
+     * @param {Item} item - The item to consume.
+     */
+    static async _consumeOne(item) {
+        const quantity = Number(item.system?.quantity ?? 1);
+
+        if (quantity > 1) await item.update({ "system.quantity": quantity - 1 });
+        else await item.delete();
     }
 
     /**

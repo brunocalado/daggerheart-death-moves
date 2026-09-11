@@ -1,0 +1,67 @@
+.daggerheart-death-moves.death-moves-supported-items {
+    .death-moves-supported-items__intro {
+        margin: 0 0 0.75rem;
+        color: var(--color-text-secondary);
+    }
+
+    .death-moves-supported-items__slot {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.25rem 0.5rem;
+        border: 1px dashed var(--color-border-light-tertiary);
+        border-radius: 4px;
+        min-height: var(--input-height);
+
+        &.is-dragover {
+            border-style: solid;
+            border-color: var(--color-warm-2, #c9a060);
+            background: rgba(201, 160, 96, 0.15);
+        }
+
+        &.is-missing .death-moves-supported-items__uuid {
+            color: var(--color-level-error, #a94442);
+        }
+    }
+
+    .death-moves-supported-items__img {
+        flex: 0 0 auto;
+        width: 32px;
+        height: 32px;
+        object-fit: cover;
+        border: none;
+        border-radius: 3px;
+    }
+
+    .death-moves-supported-items__info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .death-moves-supported-items__name {
+        font-weight: bold;
+    }
+
+    .death-moves-supported-items__uuid {
+        font-size: var(--font-size-11);
+        color: var(--color-text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .death-moves-supported-items__reset {
+        flex: 0 0 auto;
+        width: auto;
+        padding: 0 0.4rem;
+    }
+
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.75rem;
+    }
+}

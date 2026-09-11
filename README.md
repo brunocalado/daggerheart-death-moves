@@ -6,6 +6,9 @@
   <img width="700" src="docs/preview.webp">
 </p>
 
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mestredigital) [![More Modules](https://img.shields.io/badge/Foundry%20VTT-More%20Modules-red?style=for-the-badge&logo=gamepad)](https://mestredigital.online/pages/projetos-en)
+
 ---
 
 ## 🌟 Key Features
@@ -14,7 +17,7 @@
 * **Selection Screen:** The dying player faces a compact interface to choose their fate: **Avoid Death**, **Blaze of Glory**, or **Risk it All**.
 * **Spectator Mode:** While the active player decides, all other players (and the GM) see a synchronized "Waiting..." screen, keeping the entire party focused on the moment.
 * **Dramatic Announcements:** Once a choice is made, a text banner appears for everyone, announcing the decision before the results are revealed.
-* **Probability Display:** Each option shows the calculated probability of outcomes based on the character's level.
+* **Probability Display:** Each option shows the calculated probability of outcomes, based on the character's level and on any supported item they are carrying.
 
 ### 🎲 Mechanics & Automation
 * **Sequential Risk Rolls:** "Risk it All" builds maximum tension by rolling the **Fear** die first, pausing for effect, and then rolling the **Hope** die — with colored border effects for each phase.
@@ -23,6 +26,10 @@
 * **Homebrew Automation:** Supports alternate scar rules — lets the player pick from six scar types (Evasion, Hit Point, Hope, Negative Experience, Stress, Thresholds) with Active Effects applied automatically.
 * **HP Trigger:** Optionally detects when a character's HP reaches maximum and triggers the Death Move automatically (or opens a GM confirmation dialog).
 * **Phoenix Feather Support:** Recognizes a configurable item that grants +1 bonus to Avoid Death rolls.
+* **Reliquary of the Sightless Saint Support:** Recognizes a configurable item that grants +1 bonus to the Hope Die on Risk It All.
+* **Hallowed Heroplate Support:** Before the Risk It All dice, the wearer of the equipped armor is offered a slider to spend Hope, raising the Hope Die by the amount spent. The once-per-long-rest limit uses the armor's own Blessed counter, so a Daggerheart long rest refreshes it.
+* **Tears of the Undying Hero Support:** Carrying the potion skips the death move. It is consumed, the character takes one final action roll, and is left unconscious until an ally uses Tend to Wounds.
+* **Sprite Bottle Support:** Carrying the bottle skips the death move entirely. Hit Points are cleared, the bottle is consumed, and a chat card explains what happened.
 * **Queue System:** Multiple simultaneous death triggers are queued and processed one at a time.
 
 ---
@@ -40,9 +47,11 @@ The Gamemaster initiates the scene when a character falls:
 
 ### 2. The Player Chooses
 The target player receives the interactive screen.
-* **Avoid Death:** Automatically rolls 1d12 against the character's Level.
-* **Risk it All:** Initiates the sequential Fear → Hope roll with border effects.
+* **Avoid Death:** Automatically rolls 1d12 against the character's Level, plus 1 with a Phoenix Feather.
+* **Risk it All:** Initiates the sequential Fear → Hope roll with border effects. With a Hallowed Heroplate equipped, the player is first asked how much Hope to spend.
 * **Blaze of Glory:** Posts a dramatic farewell message to chat.
+
+Some items resolve the moment on their own. A character carrying a Sprite Bottle or Tears of the Undying Hero never sees this screen — the item fires instead, and a chat card explains what happened.
 
 ### 3. The Table Watches
 Everyone else is in **Spectator Mode**. They cannot interact, but they see the announcement banner in sync with the active player.
@@ -55,7 +64,7 @@ Customize the experience in **Configure Settings > Daggerheart: Death Moves**:
 
 * **Automation Mode:** Choose between **None**, **Core** (auto-apply scars and HP/Stress), or **Homebrew** (alternate scar picker).
 * **Max HP Trigger:** Set to **None**, **Open GM Dialog**, or **Trigger Automatically** when HP reaches maximum.
-* **Phoenix Item Name:** Name of the item that grants +1 bonus to Avoid Death rolls.
+* **Supported Items:** Opens a window with one slot per automated item. Drag an item from a compendium or a character sheet onto a slot to change what the automation looks for. Matching is by source, not by name, so a renamed or translated copy still works. An item only carries a source if it reached the sheet from a compendium, directly or by way of the world Items directory. Homebrew created from scratch in the world Items directory carries none, so put it in a world compendium first and drag it from there.
 * **Blaze of Glory Message:** Customize the farewell message posted to chat.
 * **Show Probabilities:** Toggle probability percentages on the selection buttons.
 
@@ -64,7 +73,10 @@ Customize the experience in **Configure Settings > Daggerheart: Death Moves**:
 ## 🚀 Installation
 
 Install via the Foundry VTT Module browser or use this manifest link:
-`https://raw.githubusercontent.com/brunocalado/daggerheart-death-moves/main/module.json`
+
+```
+https://raw.githubusercontent.com/brunocalado/daggerheart-death-moves/main/module.json
+```
 
 ---
 
@@ -78,20 +90,26 @@ Install via the Foundry VTT Module browser or use this manifest link:
 
 | Module | Description |
 | :--- | :--- |
-| 💀 [**Adversary Manager**](https://github.com/brunocalado/daggerheart-advmanager) | Scale adversaries instantly and build balanced encounters in Foundry VTT. |
-| 💥 [**Critical**](https://github.com/brunocalado/daggerheart-critical) | Animated Critical. |
+| 💀 [**Adversary Manager**](https://github.com/brunocalado/daggerheart-advmanager) | Scale adversaries instantly and build balanced encounters. |
+| 🖼️ [**Art Mapper**](https://github.com/brunocalado/dh-assets) | Automatically assigns artwork to system compendiums, actors, tokens, and custom module content — keeping your visuals organized and up to date. |
+| 🐉 [**Colossus**](https://github.com/brunocalado/dh-colossus) | Manage massive multi-part boss encounters with independent HP per part and a single shared stress pool. |
+| 📦 [**Containers**](https://github.com/brunocalado/dh-containers) | Group inventory items into collapsible containers — pouches, chests, backpacks — to declutter character sheets. |
+| 💥 [**Critical**](https://github.com/brunocalado/daggerheart-critical) | Animated criticals. |
 | 💠 [**Custom Stat Tracker**](https://github.com/brunocalado/dh-new-stat-tracker) | Add custom trackers to actors. |
 | ☠️ [**Death Moves**](https://github.com/brunocalado/daggerheart-death-moves) | Enhances the Death Move moment with a dramatic interface and full automation. |
 | 📏 [**Distances**](https://github.com/brunocalado/daggerheart-distances) | Visualizes combat ranges with customizable rings and hover calculations. |
-| 📦 [**Extra Content**](https://github.com/brunocalado/daggerheart-extra-content) | Homebrew for Daggerheart. |
-| 🤖 [**Fear Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Automatically executes macros when the Fear resource is changed. |
+| 📦 [**Extra Content**](https://github.com/brunocalado/daggerheart-extra-content) | Homebrew content pack. |
 | 😱 [**Fear Tracker**](https://github.com/brunocalado/daggerheart-fear-tracker) | Adds an animated slider bar with configurable fear tokens to the UI. |
+| 🧟 [**Horde**](https://github.com/brunocalado/dh-horde) | Explode single horde tokens into dozens of individual tokens and manage their movement and stats automatically. |
 | 🎁 [**Mystery Box**](https://github.com/brunocalado/dh-mystery-box) | Introduces mystery box mechanics for random loot and surprises. |
 | ⚡ [**Quick Actions**](https://github.com/brunocalado/daggerheart-quickactions) | Quick access to common mechanics like Falling Damage, Downtime, etc. |
 | 📜 [**Quick Rules**](https://github.com/brunocalado/daggerheart-quickrules) | Fast and accessible reference guide for the core rules. |
+| 🤖 [**Resource Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Automatically executes macros when the Fear, Hope, Stress, HP, or Armor resources change. |
 | 🎲 [**Stats**](https://github.com/brunocalado/daggerheart-stats) | Tracks dice rolls from GM and Players. |
-| 🧠 [**Stats Toolbox**](https://github.com/brunocalado/dh-statblock-importer) | Import using a statblock. |
-| 🛒 [**Store**](https://github.com/brunocalado/daggerheart-store) | A dynamic, interactive, and fully configurable store for Foundry VTT. |
+| 🧠 [**Stats Toolbox**](https://github.com/brunocalado/dh-statblock-importer) | Import actors using a statblock. |
+| 🛒 [**Store**](https://github.com/brunocalado/daggerheart-store) | A dynamic, interactive, and fully configurable in-game store. |
+| 🔍 [**Unidentified**](https://github.com/brunocalado/dh-unidentified) | Obfuscates item names and descriptions until they are identified by the players. |
+| 🌌 [**Void**](https://github.com/brunocalado/the-void-unofficial) | Unofficial module that brings The Void playtesting content — experimental classes, subclasses, ancestries, communities, adversaries, loot, weapons, and more. |
 
 # 🗺️ Adventures
 
