@@ -103,7 +103,7 @@ https://raw.githubusercontent.com/brunocalado/daggerheart-death-moves/main/modul
 
 **Disclaimer:** This module is an independent creation and is not affiliated with Darrington Press.
 
-* thumbnail.webp https://www.pexels.com/license/ / https://www.pexels.com/photo/woman-wearing-a-scary-costume-with-horns-18424789/
+* **Artwork:** `thumbnail.webp` — [photo by Sebastian Arie Voortman](https://www.pexels.com/photo/woman-wearing-a-scary-costume-with-horns-18424789/), used under the [Pexels License](https://www.pexels.com/license/).
 
 # 🧰 My Daggerheart Modules
 
