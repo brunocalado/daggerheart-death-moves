@@ -8,7 +8,7 @@
 
 import { DeathSettings } from './settings.js';
 import { findItemBySource, heroplateBlessedAction, renderElement } from './helpers.js';
-import { DEATH_MOVES, DIALOG_CLASSES, ELEMENT_IDS, MODULE_ID, TEMPLATES } from './constants.js';
+import { DEATH_MOVES, DIALOG_CLASSES, ELEMENT_IDS, MODULE_ID, SCAR_CHECK, TEMPLATES } from './constants.js';
 
 /**
  * Everything the module puts on screen.
@@ -168,10 +168,13 @@ export class DeathUI {
      * Builds the three death move options in the order the overlay lays them out.
      * @param {Object|null} probs - Odds from calculateProbabilitiesForActor().
      * @param {Object} controls - Item controls from getItemControls().
+     * @param {"death"|"scar"} mode - "scar" offers only the Avoid Death roll, as a scar check.
      * @returns {Array<Object>} Render context for each option.
      */
-    static _buildOptions(probs, controls) {
-        return Object.entries(DEATH_MOVES).map(([key, move]) => ({
+    static _buildOptions(probs, controls, mode) {
+        const moves = mode === 'scar' ? { avoid: SCAR_CHECK } : DEATH_MOVES;
+
+        return Object.entries(moves).map(([key, move]) => ({
             key,
             icon: move.icon,
             title: game.i18n.localize(`DEATH_OPTIONS.UI.${move.i18n}.Title`),
@@ -187,28 +190,32 @@ export class DeathUI {
      * @param {Object} callbacks - onCancel, onChoose(key, hopeSpent), onUseItem(key).
      * @param {boolean} isSpectator - If true, the moves are visible but not clickable.
      * @param {Object} [forceProbs] - Odds computed by the GM, so every client agrees.
+     * @param {"death"|"scar"} [mode] - "scar" for a scar check sent outside a death move.
      * @returns {Promise<HTMLElement|null>} The overlay, or null if it was cancelled mid-render.
      */
-    static async createOverlay(callbacks, isSpectator = false, forceProbs = null) {
+    static async createOverlay(callbacks, isSpectator = false, forceProbs = null, mode = 'death') {
         this.removeOverlay();
         const request = ++this._overlayRequest;
 
         const probs = forceProbs ?? (isSpectator ? null : this.calculateProbabilitiesForActor(game.user.character));
 
         // Spectators can see the moment but never act in it, so they get no controls.
-        const controls = isSpectator
+        // A scar check gets none either: the consumables answer the last Hit Point,
+        // which a scar check is not.
+        const controls = isSpectator || mode === 'scar'
             ? { consumables: [], heroplate: null }
             : this.getItemControls(game.user.character);
+
+        const titleKey = `DEATH_OPTIONS.UI.MainTitle${mode === 'scar' ? 'Scar' : ''}${isSpectator ? 'Spectator' : ''}`;
 
         const overlay = await renderElement(TEMPLATES.overlay, {
             id: ELEMENT_IDS.overlay,
             isSpectator,
-            title: isSpectator
-                ? game.i18n.localize("DEATH_OPTIONS.UI.MainTitleSpectator")
-                : game.i18n.localize("DEATH_OPTIONS.UI.MainTitle"),
+            isScar: mode === 'scar',
+            title: game.i18n.localize(titleKey),
             closeIcon: isSpectator ? 'fa-eye-slash' : 'fa-xmark',
             closeLabel: game.i18n.localize(isSpectator ? "DEATH_OPTIONS.UI.CloseView" : "DEATH_OPTIONS.UI.Close"),
-            options: this._buildOptions(probs, controls),
+            options: this._buildOptions(probs, controls, mode),
             items: controls.consumables.length
                 ? {
                     id: ELEMENT_IDS.itemsBar,
@@ -389,15 +396,18 @@ export class DeathUI {
      * @param {string|null} selectedUserId - Pre-selected user id.
      * @param {string|null} reason - Why the dialog opened, for automatic triggers.
      * @param {string|null} characterName - Character name for display.
+     * @param {"death"|"scar"} [mode] - Which screen is being sent.
      */
-    static async createGMDialog(users, onTrigger, selectedUserId = null, reason = null, characterName = null) {
+    static async createGMDialog(users, onTrigger, selectedUserId = null, reason = null, characterName = null, mode = 'death') {
         const { DialogV2 } = foundry.applications.api;
         const selectId = `${MODULE_ID}-user-select`;
+        const dialogKey = `DEATH_OPTIONS.Dialog.${mode === 'scar' ? 'ScarTrigger' : 'Trigger'}`;
+        const icon = `fa-solid ${mode === 'scar' ? SCAR_CHECK.icon : 'fa-skull'}`;
 
         const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.dialogTrigger, {
-            title: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.Title"),
+            title: game.i18n.localize(`${dialogKey}.Title`),
             playerLabel: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.Player"),
-            hint: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.Hint"),
+            hint: game.i18n.localize(`${dialogKey}.Hint`),
             selectId,
             reason,
             characterName,
@@ -409,13 +419,13 @@ export class DeathUI {
         });
 
         const result = await DialogV2.wait({
-            window: { title: "DEATH_OPTIONS.Dialog.Trigger.Title", icon: "fa-solid fa-skull" },
+            window: { title: `${dialogKey}.Title`, icon },
             classes: DIALOG_CLASSES,
             content,
             buttons: [{
                 action: "trigger",
-                label: game.i18n.localize("DEATH_OPTIONS.Dialog.Trigger.Submit"),
-                icon: "fa-solid fa-skull",
+                label: game.i18n.localize(`${dialogKey}.Submit`),
+                icon,
                 default: true,
                 callback: (event, button, dialog) => dialog.element.querySelector('[data-dm-user-select]')?.value ?? null
             }],

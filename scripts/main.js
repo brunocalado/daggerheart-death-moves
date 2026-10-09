@@ -6,7 +6,7 @@
  * it under the terms of the GNU General Public License version 3.
  */
 
-import { DEATH_MOVES, SOCKET_NAME, SOCKET_TYPES, TEMPLATES } from './constants.js';
+import { DEATH_MOVES, SCAR_CHECK, SOCKET_NAME, SOCKET_TYPES, TEMPLATES } from './constants.js';
 import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
 import { DeathLogic } from './logic.js';
@@ -57,7 +57,10 @@ class DeathMovesController {
         });
 
         // Expose API globally
-        window.DeathMoves = { trigger: DeathMovesController.gmTriggerFlow };
+        window.DeathMoves = {
+            trigger: DeathMovesController.gmTriggerFlow,
+            scar: (targetName = null) => DeathMovesController.gmTriggerFlow(targetName, { mode: 'scar' })
+        };
 
         // Backward compatibility
         window.DeathOptions = {
@@ -137,7 +140,8 @@ class DeathMovesController {
     /**
      * Triggered by GM to select a player — enqueues and processes sequentially.
      * @param {string|null} targetUserName - Name of the target user.
-     * @param {Object} options - Additional options (showDialog, reason, characterName).
+     * @param {Object} options - Additional options (showDialog, reason, characterName, and
+     *   mode: "scar" to send only the Avoid Death roll as a scar check).
      */
     static gmTriggerFlow(targetUserName = null, options = {}) {
         if (!game.user.isGM) return ui.notifications.warn(game.i18n.localize("DEATH_OPTIONS.Notifications.GmOnly"));
@@ -218,7 +222,8 @@ class DeathMovesController {
 
             const payload = {
                 targetUserId: targetUserId,
-                probs: probs
+                probs: probs,
+                mode: options.mode ?? 'death'
             };
 
             game.socket.emit(SOCKET_NAME, { ...payload, type: SOCKET_TYPES.SHOW_UI });
@@ -248,14 +253,14 @@ class DeathMovesController {
             DeathUI.createGMDialog(users, (targetUserId) => {
                 executeTrigger(targetUserId);
                 DeathMovesController._waitForFlowComplete().then(resolve);
-            }, preSelectedUserId, options.reason, options.characterName);
+            }, preSelectedUserId, options.reason, options.characterName, options.mode);
         });
     }
 
     /**
      * Handles displaying the INTERACTIVE UI for the specific target user.
      * Triggered by SHOW_UI socket event.
-     * @param {Object} payload - Socket payload with targetUserId and probs.
+     * @param {Object} payload - Socket payload with targetUserId, probs and mode.
      */
     static async _handleShowUI(payload) {
         if (game.user.id !== payload.targetUserId) return;
@@ -270,9 +275,9 @@ class DeathMovesController {
                 emitFlowComplete();
             },
             onChoose: async (key, hopeSpent) => {
-                await DeathMovesController._handleSelectionSequence(key);
+                await DeathMovesController._handleSelectionSequence(key, payload.mode);
 
-                if (key === 'avoid') await DeathLogic.handleAvoidDeath();
+                if (key === 'avoid') await DeathLogic.handleAvoidDeath(payload.mode);
                 else if (key === 'blaze') await DeathLogic.handleBlazeOfGlory();
                 else await DeathLogic.handleRiskItAll(hopeSpent);
 
@@ -290,25 +295,27 @@ class DeathMovesController {
             }
         };
 
-        await DeathUI.createOverlay(callbacks, false, payload.probs);
+        await DeathUI.createOverlay(callbacks, false, payload.probs, payload.mode);
     }
 
     /**
      * Handles displaying the PASSIVE UI for spectators.
-     * @param {Object} payload - Socket payload with targetUserId and probs.
+     * @param {Object} payload - Socket payload with targetUserId, probs and mode.
      */
     static async _handleSpectatorUI(payload) {
         if (game.user.id === payload.targetUserId) return;
-        await DeathUI.createOverlay({}, true, payload.probs);
+        await DeathUI.createOverlay({}, true, payload.probs, payload.mode);
     }
 
     /**
      * Sequence after a player selects a death move option:
      * Hide other buttons -> Remove UI -> Show announcement -> Wait.
      * @param {string} optionKey - Key of the selected move.
+     * @param {"death"|"scar"} [mode] - "scar" announces the scar check instead of Avoid Death.
      */
-    static async _handleSelectionSequence(optionKey) {
-        const name = game.i18n.localize(`DEATH_OPTIONS.UI.${DEATH_MOVES[optionKey].i18n}.Title`);
+    static async _handleSelectionSequence(optionKey, mode = 'death') {
+        const move = mode === 'scar' ? SCAR_CHECK : DEATH_MOVES[optionKey];
+        const name = game.i18n.localize(`DEATH_OPTIONS.UI.${move.i18n}.Title`);
 
         // 0. Fade the moves that were not taken, for everyone
         game.socket.emit(SOCKET_NAME, { type: SOCKET_TYPES.HIDE_UNSELECTED, optionKey });
@@ -348,11 +355,15 @@ Hooks.once('init', () => {
 Hooks.on("renderDaggerheartMenu", async (app, element, data) => {
     const fieldset = await renderElement(TEMPLATES.menuButton, {
         legend: game.i18n.localize("DEATH_OPTIONS.Menu.Legend"),
-        label: game.i18n.localize("DEATH_OPTIONS.Menu.Trigger")
+        label: game.i18n.localize("DEATH_OPTIONS.Menu.Trigger"),
+        scarLabel: game.i18n.localize("DEATH_OPTIONS.Menu.Scar"),
+        scarIcon: SCAR_CHECK.icon
     });
 
     fieldset.querySelector('[data-dm-action="trigger"]')
         .addEventListener('click', () => DeathMovesController.gmTriggerFlow());
+    fieldset.querySelector('[data-dm-action="scar"]')
+        .addEventListener('click', () => DeathMovesController.gmTriggerFlow(null, { mode: 'scar' }));
 
     // Slot it after the menu's existing group when there is one, so it reads as
     // another section rather than something appended to the bottom of the window.

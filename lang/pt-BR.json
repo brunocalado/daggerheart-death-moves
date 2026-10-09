@@ -37,11 +37,17 @@
     "UI": {
       "MainTitle": "Escolha seu Destino",
       "MainTitleSpectator": "Aguardando Escolha do Jogador...",
+      "MainTitleScar": "QUAL SERÁ O PREÇO?",
+      "MainTitleScarSpectator": "Aguardando o Teste de Cicatriz...",
       "Close": "Fechar",
       "Avoid": {
         "Title": "Evitar a Morte",
         "Subtitle": "Encare o medo da morte.",
         "ScarLabel": "Chance de Cicatriz"
+      },
+      "Scar": {
+        "Title": "Teste de Cicatriz",
+        "Subtitle": "Role um dado contra o seu nível."
       },
       "Blaze": {
         "Title": "Glória Final",
@@ -89,6 +95,13 @@
         "RollLabel": "Rolagem (d12)",
         "Threshold": "Limiar de nível: {level}",
         "ScarChosen": "Cicatriz escolhida:"
+      },
+      "Scar": {
+        "Flavor": "Teste de Cicatriz",
+        "ResultScar": "MARCADO",
+        "ResultSafe": "SEM CICATRIZ",
+        "MsgScar": "Marque uma Cicatriz.",
+        "MsgSafe": "Nenhuma cicatriz desta vez."
       },
       "Blaze": {
         "Title": "UM HERÓI CAI"
@@ -150,6 +163,11 @@
         "LastHp": "Último Ponto de Vida marcado!",
         "FromSheet": "Death Move solicitado pela ficha de {character}."
       },
+      "ScarTrigger": {
+        "Title": "Enviar Teste de Cicatriz",
+        "Hint": "Isso envia o Teste de Cicatriz para o jogador selecionado.",
+        "Submit": "Enviar"
+      },
       "Scar": {
         "Title": "Escolha uma Cicatriz",
         "Hint": "Escolha o custo permanente que essa sobrevivência cobrou."
@@ -166,7 +184,8 @@
     },
     "Menu": {
       "Legend": "Death Moves",
-      "Trigger": "Acionar Death Move"
+      "Trigger": "Acionar Death Move",
+      "Scar": "Enviar Teste de Cicatriz"
     },
     "Notifications": {
       "GmOnly": "Death Moves: apenas o Mestre pode acionar isso.",

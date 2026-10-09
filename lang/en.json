@@ -37,11 +37,17 @@
     "UI": {
       "MainTitle": "CHOOSE YOUR FATE",
       "MainTitleSpectator": "Waiting for Player Choice...",
+      "MainTitleScar": "WHAT WILL IT COST YOU?",
+      "MainTitleScarSpectator": "Waiting for the Scar Check...",
       "Close": "Close",
       "Avoid": {
         "Title": "Avoid Death",
         "Subtitle": "Roll a Die vs Level",
         "ScarLabel": "SCAR"
+      },
+      "Scar": {
+        "Title": "Scar Check",
+        "Subtitle": "Roll a Die vs Level"
       },
       "Blaze": {
         "Title": "Blaze of Glory",
@@ -89,6 +95,13 @@
         "RollLabel": "Roll (d12)",
         "Threshold": "Level threshold: {level}",
         "ScarChosen": "Scar chosen:"
+      },
+      "Scar": {
+        "Flavor": "Scar Check",
+        "ResultScar": "Scar Check Result: SCAR",
+        "ResultSafe": "Scar Check Result: SAFE",
+        "MsgScar": "You got a Scar!",
+        "MsgSafe": "No scar this time."
       },
       "Risk": {
         "Speaker": "Risk It All",
@@ -150,6 +163,11 @@
         "LastHp": "Last Hit Point marked!",
         "FromSheet": "Death Move requested from {character}'s sheet."
       },
+      "ScarTrigger": {
+        "Title": "Send Scar Check",
+        "Hint": "This will send the Scar Check to the selected player.",
+        "Submit": "Send"
+      },
       "Scar": {
         "Title": "Select a Scar",
         "Hint": "Choose the permanent cost this survival carried."
@@ -166,7 +184,8 @@
     },
     "Menu": {
       "Legend": "Death Moves",
-      "Trigger": "Trigger Death Move"
+      "Trigger": "Trigger Death Move",
+      "Scar": "Send Scar Check"
     },
     "Notifications": {
       "GmOnly": "Death Moves: only the GM can trigger this.",

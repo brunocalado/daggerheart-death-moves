@@ -62,8 +62,12 @@ export class DeathLogic {
      * Logic for the "Avoid Death" option.
      * Rolls 1d12 and checks against character level.
      * Triggered after player selects "Avoid Death" from the overlay.
+     * @param {"death"|"scar"} [mode] - "scar" when the GM sent the roll on its own,
+     *   outside a death move: same roll and automation, worded as a scar check.
      */
-    static async handleAvoidDeath() {
+    static async handleAvoidDeath(mode = 'death') {
+        const chatKey = `DEATH_OPTIONS.Chat.${mode === 'scar' ? 'Scar' : 'Avoid'}`;
+
         await this._raiseBorder('hope');
 
         // --- PHOENIX FEATHER CHECK ---
@@ -82,7 +86,7 @@ export class DeathLogic {
 
         if (!actor) {
             return DeathChat.simple({
-                title: game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.Flavor"),
+                title: game.i18n.localize(`${chatKey}.Flavor`),
                 text: game.i18n.format("DEATH_OPTIONS.Chat.Avoid.NoActor", { roll: rollTotal }),
                 icon: 'fa-shield-heart'
             });
@@ -91,8 +95,8 @@ export class DeathLogic {
         const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
         const isScar = rollTotal <= level;
 
-        let title = game.i18n.localize(`DEATH_OPTIONS.Chat.Avoid.Result${isScar ? 'Scar' : 'Safe'}`);
-        let text = game.i18n.localize(`DEATH_OPTIONS.Chat.Avoid.Msg${isScar ? 'Scar' : 'Safe'}`);
+        let title = game.i18n.localize(`${chatKey}.Result${isScar ? 'Scar' : 'Safe'}`);
+        let text = game.i18n.localize(`${chatKey}.Msg${isScar ? 'Scar' : 'Safe'}`);
         let scarCount = null;
 
         // --- AUTOMATION ---
@@ -101,7 +105,7 @@ export class DeathLogic {
         if (automation === 'homebrew' && isScar) {
             // The homebrew flow asks which scar was taken and posts its own card.
             const { DeathHomebrew } = await import('./homebrew.js');
-            return DeathHomebrew.handleAvoidDeathScar(actor, { rawRoll, rollTotal, level, bonuses });
+            return DeathHomebrew.handleAvoidDeathScar(actor, { title, text, rawRoll, rollTotal, level, bonuses });
         }
 
         if (automation === 'core' && isScar) {

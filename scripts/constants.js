@@ -81,6 +81,12 @@ export const DEATH_MOVES = {
 };
 
 /**
+ * The scar check the GM can send without a death move. It is the Avoid Death roll on
+ * its own, so it runs as the `avoid` move and only how it is presented changes.
+ */
+export const SCAR_CHECK = { icon: 'fa-droplet', i18n: 'Scar' };
+
+/**
  * Items this module automates, keyed by a stable id used for form fields and for
  * localization under DEATH_OPTIONS.Items.
  *

@@ -104,6 +104,12 @@
     }
 }
 
+/* A scar check offers a single card, which would otherwise stretch across a panel
+   sized for three. */
+.daggerheart-death-moves.dm-overlay--scar .dm-overlay__panel {
+    width: min(480px, 94vw);
+}
+
 /* --- One death move ------------------------------------------------------- */
 
 .daggerheart-death-moves .dm-option {

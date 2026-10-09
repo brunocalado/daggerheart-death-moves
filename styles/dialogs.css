@@ -181,6 +181,9 @@
  * and buttons, so this only asks the button to fill its group.
  */
 .daggerheart-death-moves.dm-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     margin-top: var(--dm-gap);
 
     .dm-menu__btn {

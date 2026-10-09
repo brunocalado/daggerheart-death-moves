@@ -3,7 +3,7 @@
     an Application, so it carries the module scoping class itself instead of picking
     one up from DEFAULT_OPTIONS.classes.
 --}}
-<div id="{{id}}" class="daggerheart-death-moves dm-overlay{{#if isSpectator}} dm-overlay--spectator{{/if}}">
+<div id="{{id}}" class="daggerheart-death-moves dm-overlay{{#if isSpectator}} dm-overlay--spectator{{/if}}{{#if isScar}} dm-overlay--scar{{/if}}">
     <div class="dm-overlay__panel">
         <button type="button" class="dm-overlay__close" data-dm-action="close">
             <i class="fa-solid {{closeIcon}}" inert></i>
