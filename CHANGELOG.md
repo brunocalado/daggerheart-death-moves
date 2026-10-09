@@ -1,3 +1,11 @@
+# 2.6
+
+- [Added] The GM can send the Avoid Death roll on its own as a Scar Check, to a character who still has Hit Points left: a Send Scar Check button in the Daggerheart Menu, or `DeathMoves.scar()` in a macro. The player gets the death move screen with that single option, the table watches, and the roll follows the same rules and automation as Avoid Death, Phoenix Feather included. The player can close it, and the GM can send it again.
+- [Added] A Scar Threshold setting with an escalating homebrew rule. The threshold starts at 1, rises by 1 with every roll that avoids a scar (up to 10), and returns to 1 once a scar is actually on the sheet; a homebrew scar list closed without a choice leaves it alone. Each character's threshold is an Active Effect named after its value on the Effects tab, and deleting it resets it to 1. Ignored when Automation Mode is None.
+- [Changed] Releases are published from GitHub. The manifest points at the latest release instead of the main branch, so Foundry installs a released zip.
+- [Changed] Requires Daggerheart 2.10.11.
+- [Changed] The README covers the Scar Check and the scar threshold, with new screenshots of the Daggerheart Menu and the settings.
+
 # 2.5
 
 - [Changed] The skull the character sheet draws over the portrait once every Hit Point is marked now sends this module's death move screen instead of opening the system's own Death Move dialog. It is the same screen the GM sends from the Daggerheart menu, so both ways into a death move now end in the same place.
