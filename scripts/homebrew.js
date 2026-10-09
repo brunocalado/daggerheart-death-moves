@@ -102,7 +102,7 @@ export class DeathHomebrew {
     /**
      * Asks which scar was taken, then applies it and reports the roll.
      * @param {Actor} actor - The character that survived.
-     * @param {Object} rollData - The Avoid Death roll: title, text, rawRoll, rollTotal, level, bonuses.
+     * @param {Object} rollData - The Avoid Death roll: title, text, icon, rawRoll, rollTotal, level, bonuses.
      */
     static async handleAvoidDeathScar(actor, rollData) {
         const index = await this._promptForScar();
@@ -162,7 +162,7 @@ export class DeathHomebrew {
      * Writes the chosen scar onto the sheet and posts the result card.
      * @param {Actor} actor - The character that survived.
      * @param {{name: string, description: string}} scar - The scar that was picked.
-     * @param {Object} rollData - The Avoid Death roll: title, text, rawRoll, rollTotal, level, bonuses.
+     * @param {Object} rollData - The Avoid Death roll: title, text, icon, rawRoll, rollTotal, level, bonuses.
      */
     static async applyScar(actor, scar, rollData) {
         if (scar.name === NEGATIVE_EXPERIENCE_SCAR) await this._addNegativeExperience(actor);
@@ -179,6 +179,7 @@ export class DeathHomebrew {
         return DeathChat.avoid({
             title: rollData.title,
             text: rollData.text,
+            icon: rollData.icon,
             rawRoll: rollData.rawRoll,
             total: rollData.rollTotal,
             level: rollData.level,

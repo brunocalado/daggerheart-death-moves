@@ -10,7 +10,7 @@ import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
 import { DeathChat } from './chat.js';
 import { findItemBySource, heroplateBlessedAction } from './helpers.js';
-import { DEATH_DICE_APPEARANCE, SOCKET_NAME, SOCKET_TYPES } from './constants.js';
+import { DEATH_DICE_APPEARANCE, DEATH_MOVES, SCAR_CHECK, SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 
 /**
  * Handles game rules, dice rolls, and chat messages.
@@ -66,7 +66,8 @@ export class DeathLogic {
      *   outside a death move: same roll and automation, worded as a scar check.
      */
     static async handleAvoidDeath(mode = 'death') {
-        const chatKey = `DEATH_OPTIONS.Chat.${mode === 'scar' ? 'Scar' : 'Avoid'}`;
+        const move = mode === 'scar' ? SCAR_CHECK : DEATH_MOVES.avoid;
+        const chatKey = `DEATH_OPTIONS.Chat.${move.i18n}`;
 
         await this._raiseBorder('hope');
 
@@ -88,7 +89,7 @@ export class DeathLogic {
             return DeathChat.simple({
                 title: game.i18n.localize(`${chatKey}.Flavor`),
                 text: game.i18n.format("DEATH_OPTIONS.Chat.Avoid.NoActor", { roll: rollTotal }),
-                icon: 'fa-shield-heart'
+                icon: move.icon
             });
         }
 
@@ -105,7 +106,7 @@ export class DeathLogic {
         if (automation === 'homebrew' && isScar) {
             // The homebrew flow asks which scar was taken and posts its own card.
             const { DeathHomebrew } = await import('./homebrew.js');
-            return DeathHomebrew.handleAvoidDeathScar(actor, { title, text, rawRoll, rollTotal, level, bonuses });
+            return DeathHomebrew.handleAvoidDeathScar(actor, { title, text, icon: move.icon, rawRoll, rollTotal, level, bonuses });
         }
 
         if (automation === 'core' && isScar) {
@@ -120,7 +121,7 @@ export class DeathLogic {
             }
         }
 
-        return DeathChat.avoid({ title, text, rawRoll, total: rollTotal, level, bonuses, scarCount });
+        return DeathChat.avoid({ title, text, icon: move.icon, rawRoll, total: rollTotal, level, bonuses, scarCount });
     }
 
     /**

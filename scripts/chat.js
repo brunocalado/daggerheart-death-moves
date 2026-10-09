@@ -70,12 +70,13 @@ export class DeathChat {
      * @param {Array<{label: string, value: number}>} [options.bonuses] - Item bonuses.
      * @param {string} [options.scarName] - Scar the player picked, in homebrew mode.
      * @param {number} [options.scarCount] - Scars now carried, in core mode.
+     * @param {string} [options.icon] - Header icon; a scar check uses its own.
      * @returns {Promise<ChatMessage>} The created message.
      */
-    static avoid({ title, text, rawRoll, total, level, bonuses = [], scarName = null, scarCount = null }) {
+    static avoid({ title, text, rawRoll, total, level, bonuses = [], scarName = null, scarCount = null, icon = 'fa-shield-heart' }) {
         return this.post({
             title,
-            icon: 'fa-shield-heart',
+            icon,
             variant: 'avoid',
             bodyTemplate: TEMPLATES.chatAvoid,
             bodyContext: {
