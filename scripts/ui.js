@@ -7,6 +7,7 @@
  */
 
 import { DeathSettings } from './settings.js';
+import { ScarThreshold } from './scar-threshold.js';
 import { findItemBySource, heroplateBlessedAction, renderElement } from './helpers.js';
 import { DEATH_MOVES, DIALOG_CLASSES, ELEMENT_IDS, MODULE_ID, SCAR_CHECK, TEMPLATES } from './constants.js';
 
@@ -44,9 +45,8 @@ export class DeathUI {
 
         let avoid;
         if (actor) {
-            const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
-            const effectiveLevelThreshold = level - (phoenix ? 1 : 0);
-            const outcomeCount = Math.min(12, Math.max(0, effectiveLevelThreshold));
+            const effectiveThreshold = ScarThreshold.get(actor) - (phoenix ? 1 : 0);
+            const outcomeCount = Math.min(12, Math.max(0, effectiveThreshold));
 
             avoid = {
                 text: `${scarLabel}: ${Math.round((outcomeCount / 12) * 100)}%`,

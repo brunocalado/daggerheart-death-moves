@@ -7,6 +7,7 @@
  */
 
 import { DeathChat } from './chat.js';
+import { ScarThreshold } from './scar-threshold.js';
 import { DIALOG_CLASSES, MODULE_ID, TEMPLATES } from './constants.js';
 
 const NEGATIVE_EXPERIENCE_SCAR = "Scar (Negative Experience)";
@@ -102,7 +103,7 @@ export class DeathHomebrew {
     /**
      * Asks which scar was taken, then applies it and reports the roll.
      * @param {Actor} actor - The character that survived.
-     * @param {Object} rollData - The Avoid Death roll: title, text, icon, rawRoll, rollTotal, level, bonuses.
+     * @param {Object} rollData - The Avoid Death roll: title, text, icon, rawRoll, rollTotal, threshold, escalating, bonuses.
      */
     static async handleAvoidDeathScar(actor, rollData) {
         const index = await this._promptForScar();
@@ -162,7 +163,7 @@ export class DeathHomebrew {
      * Writes the chosen scar onto the sheet and posts the result card.
      * @param {Actor} actor - The character that survived.
      * @param {{name: string, description: string}} scar - The scar that was picked.
-     * @param {Object} rollData - The Avoid Death roll: title, text, icon, rawRoll, rollTotal, level, bonuses.
+     * @param {Object} rollData - The Avoid Death roll: title, text, icon, rawRoll, rollTotal, threshold, escalating, bonuses.
      */
     static async applyScar(actor, scar, rollData) {
         if (scar.name === NEGATIVE_EXPERIENCE_SCAR) await this._addNegativeExperience(actor);
@@ -176,13 +177,18 @@ export class DeathHomebrew {
 
         await actor.createEmbeddedDocuments("Item", [itemData]);
 
+        // Only here is the scar settled: a picker closed without a choice leaves the
+        // escalating counter where it was.
+        await ScarThreshold.record(actor, true);
+
         return DeathChat.avoid({
             title: rollData.title,
             text: rollData.text,
             icon: rollData.icon,
             rawRoll: rollData.rawRoll,
             total: rollData.rollTotal,
-            level: rollData.level,
+            threshold: rollData.threshold,
+            escalating: rollData.escalating,
             bonuses: rollData.bonuses ?? [],
             scarName: scar.name
         });

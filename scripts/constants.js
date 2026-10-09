@@ -86,6 +86,9 @@ export const DEATH_MOVES = {
  */
 export const SCAR_CHECK = { icon: 'fa-droplet', i18n: 'Scar' };
 
+/** Flag on the Active Effect that carries the escalating scar threshold. */
+export const SCAR_THRESHOLD_FLAG = 'scarThreshold';
+
 /**
  * Items this module automates, keyed by a stable id used for form fields and for
  * localization under DEATH_OPTIONS.Items.

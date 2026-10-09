@@ -5,6 +5,12 @@
         "Name": "Automation Mode",
         "Hint": "Choose how the module interacts with character sheets."
       },
+      "ScarThreshold": {
+        "Name": "Scar Threshold",
+        "Hint": "What the Avoid Death roll and the Scar Check must beat to avoid a scar. Escalating starts at 1, rises by 1 with every roll that avoids a scar (up to 10), and returns to 1 once a scar is taken; each character tracks it on an Active Effect. Ignored when Automation Mode is None.",
+        "Level": "Character level (core rules)",
+        "Escalating": "Escalating counter (homebrew)"
+      },
       "HpAutomation": {
         "Name": "Max HP Trigger",
         "Hint": "Define behavior when HP reaches maximum (Death).",
@@ -94,6 +100,7 @@
         "NoActor": "Rolled: <strong>{roll}</strong> (No actor assigned)",
         "RollLabel": "Roll (d12)",
         "Threshold": "Level threshold: {level}",
+        "ScarThreshold": "Scar threshold: {value}",
         "ScarChosen": "Scar chosen:"
       },
       "Scar": {
@@ -153,6 +160,10 @@
         "Label": "Sprite Bottle",
         "Hint": "Shatters on the last Hit Point, clears them all, and is consumed. No death move happens."
       }
+    },
+    "ScarThreshold": {
+      "Name": "Scar Threshold {value}",
+      "Description": "<p>On an Avoid Death roll or a Scar Check, rolling <strong>{value} or less</strong> on the d12 gives a scar and returns this threshold to 1.</p><p>Every roll that avoids a scar raises it by 1, up to {max}.</p><p>Delete this effect to reset the threshold to 1.</p>"
     },
     "Dialog": {
       "Trigger": {

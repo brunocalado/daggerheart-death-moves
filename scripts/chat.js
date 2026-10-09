@@ -66,14 +66,15 @@ export class DeathChat {
      * @param {string} options.text - The outcome in prose.
      * @param {number} options.rawRoll - The d12 before any bonus.
      * @param {number} options.total - The d12 plus every bonus.
-     * @param {number} options.level - The level the total was measured against.
+     * @param {number} options.threshold - What the total was measured against.
+     * @param {boolean} [options.escalating] - Whether that is the escalating counter, not the level.
      * @param {Array<{label: string, value: number}>} [options.bonuses] - Item bonuses.
      * @param {string} [options.scarName] - Scar the player picked, in homebrew mode.
      * @param {number} [options.scarCount] - Scars now carried, in core mode.
      * @param {string} [options.icon] - Header icon; a scar check uses its own.
      * @returns {Promise<ChatMessage>} The created message.
      */
-    static avoid({ title, text, rawRoll, total, level, bonuses = [], scarName = null, scarCount = null, icon = 'fa-shield-heart' }) {
+    static avoid({ title, text, rawRoll, total, threshold, escalating = false, bonuses = [], scarName = null, scarCount = null, icon = 'fa-shield-heart' }) {
         return this.post({
             title,
             icon,
@@ -88,7 +89,9 @@ export class DeathChat {
                 scarCount,
                 rollLabel: game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.RollLabel"),
                 totalLabel: game.i18n.localize("DEATH_OPTIONS.Chat.Total"),
-                thresholdNote: game.i18n.format("DEATH_OPTIONS.Chat.Avoid.Threshold", { level }),
+                thresholdNote: escalating
+                    ? game.i18n.format("DEATH_OPTIONS.Chat.Avoid.ScarThreshold", { value: threshold })
+                    : game.i18n.format("DEATH_OPTIONS.Chat.Avoid.Threshold", { level: threshold }),
                 scarChosenLabel: game.i18n.localize("DEATH_OPTIONS.Chat.Avoid.ScarChosen"),
                 scarCountLabel: game.i18n.localize("DEATH_OPTIONS.UI.Avoid.ScarLabel")
             }

@@ -38,6 +38,19 @@ export class DeathSettings {
             }
         });
 
+        game.settings.register(MODULE_ID, 'scarThreshold', {
+            name: "DEATH_OPTIONS.Settings.ScarThreshold.Name",
+            hint: "DEATH_OPTIONS.Settings.ScarThreshold.Hint",
+            scope: 'world',
+            config: true,
+            type: String,
+            choices: {
+                "level": "DEATH_OPTIONS.Settings.ScarThreshold.Level",
+                "escalating": "DEATH_OPTIONS.Settings.ScarThreshold.Escalating"
+            },
+            default: "level"
+        });
+
         game.settings.register(MODULE_ID, 'hpAutomationTrigger', {
             name: "DEATH_OPTIONS.Settings.HpAutomation.Name",
             hint: "DEATH_OPTIONS.Settings.HpAutomation.Hint",

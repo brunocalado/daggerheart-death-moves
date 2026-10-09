@@ -9,6 +9,7 @@
 import { DeathSettings } from './settings.js';
 import { DeathUI } from './ui.js';
 import { DeathChat } from './chat.js';
+import { ScarThreshold } from './scar-threshold.js';
 import { findItemBySource, heroplateBlessedAction } from './helpers.js';
 import { DEATH_DICE_APPEARANCE, DEATH_MOVES, SCAR_CHECK, SOCKET_NAME, SOCKET_TYPES } from './constants.js';
 
@@ -60,7 +61,8 @@ export class DeathLogic {
 
     /**
      * Logic for the "Avoid Death" option.
-     * Rolls 1d12 and checks against character level.
+     * Rolls 1d12 and checks against the scar threshold: the character's level, or the
+     * escalating counter when that homebrew is on.
      * Triggered after player selects "Avoid Death" from the overlay.
      * @param {"death"|"scar"} [mode] - "scar" when the GM sent the roll on its own,
      *   outside a death move: same roll and automation, worded as a scar check.
@@ -93,8 +95,9 @@ export class DeathLogic {
             });
         }
 
-        const level = foundry.utils.getProperty(actor, "system.levelData.level.current") || 0;
-        const isScar = rollTotal <= level;
+        const threshold = ScarThreshold.get(actor);
+        const escalating = ScarThreshold.isEscalating();
+        const isScar = rollTotal <= threshold;
 
         let title = game.i18n.localize(`${chatKey}.Result${isScar ? 'Scar' : 'Safe'}`);
         let text = game.i18n.localize(`${chatKey}.Msg${isScar ? 'Scar' : 'Safe'}`);
@@ -103,14 +106,19 @@ export class DeathLogic {
         // --- AUTOMATION ---
         const automation = DeathSettings.get('automationMode');
 
+        // A scar moves the counter only once it is on the sheet, which each branch
+        // below does itself; a roll that avoided one is settled already.
+        if (!isScar) await ScarThreshold.record(actor, false);
+
         if (automation === 'homebrew' && isScar) {
             // The homebrew flow asks which scar was taken and posts its own card.
             const { DeathHomebrew } = await import('./homebrew.js');
-            return DeathHomebrew.handleAvoidDeathScar(actor, { title, text, icon: move.icon, rawRoll, rollTotal, level, bonuses });
+            return DeathHomebrew.handleAvoidDeathScar(actor, { title, text, icon: move.icon, rawRoll, rollTotal, threshold, escalating, bonuses });
         }
 
         if (automation === 'core' && isScar) {
             await this._applyCoreScar(actor);
+            await ScarThreshold.record(actor, true);
 
             // Re-read scars after the effect applies, to check the threshold.
             const scars = foundry.utils.getProperty(actor, "system.scars") || 0;
@@ -121,7 +129,7 @@ export class DeathLogic {
             }
         }
 
-        return DeathChat.avoid({ title, text, icon: move.icon, rawRoll, total: rollTotal, level, bonuses, scarCount });
+        return DeathChat.avoid({ title, text, icon: move.icon, rawRoll, total: rollTotal, threshold, escalating, bonuses, scarCount });
     }
 
     /**

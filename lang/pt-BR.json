@@ -5,6 +5,12 @@
         "Name": "Modo de Automação",
         "Hint": "Escolha como o módulo interage com as fichas de personagem."
       },
+      "ScarThreshold": {
+        "Name": "Limiar de Cicatriz",
+        "Hint": "O que a rolagem de Evitar a Morte e o Teste de Cicatriz precisam superar para evitar uma cicatriz. O progressivo começa em 1, sobe 1 a cada rolagem que evita a cicatriz (até 10) e volta a 1 quando uma cicatriz é marcada; cada personagem o acompanha num Active Effect. Ignorado quando o Modo de Automação é None.",
+        "Level": "Nível do personagem (regra oficial)",
+        "Escalating": "Contador progressivo (homebrew)"
+      },
       "HpAutomation": {
         "Name": "Gatilho de HP Máximo",
         "Hint": "Define o comportamento quando o HP atinge o máximo (Morte).",
@@ -94,6 +100,7 @@
         "NoActor": "Rolagem: {roll} (Sem Ator Atribuído)",
         "RollLabel": "Rolagem (d12)",
         "Threshold": "Limiar de nível: {level}",
+        "ScarThreshold": "Limiar de cicatriz: {value}",
         "ScarChosen": "Cicatriz escolhida:"
       },
       "Scar": {
@@ -153,6 +160,10 @@
         "Label": "Garrafa de Sprite",
         "Hint": "Estilhaça no último Ponto de Vida, limpa todos eles e é consumida. Nenhum movimento de morte acontece."
       }
+    },
+    "ScarThreshold": {
+      "Name": "Limiar de Cicatriz {value}",
+      "Description": "<p>Na rolagem de Evitar a Morte ou no Teste de Cicatriz, tirar <strong>{value} ou menos</strong> no d12 dá uma cicatriz e faz este limiar voltar a 1.</p><p>Cada rolagem que evita a cicatriz aumenta o limiar em 1, até {max}.</p><p>Apague este efeito para voltar o limiar a 1.</p>"
     },
     "Dialog": {
       "Trigger": {
