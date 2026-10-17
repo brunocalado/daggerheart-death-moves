@@ -54,12 +54,16 @@ export class DeathSkull {
      * @param {HTMLElement} element - The sheet's root element.
      */
     static _onRenderSheet(app, element) {
-        const button = element.querySelector('.death-roll-btn');
+        // The dh-nice-sheets character sheet extends the system's, so this hook reaches it
+        // too, but it draws its own labelled banner instead of the portrait skull. The
+        // banner already looks the part, so it is rewired without being restyled.
+        const skull = element.querySelector('.death-roll-btn');
+        const button = skull ?? element.querySelector('.nice-death-banner');
         if (!button) return;
 
         // base.css hangs the module's design tokens off this class, so the button has to
         // carry it for styles/character-sheet.css to resolve them.
-        button.classList.add(MODULE_ID);
+        if (skull) button.classList.add(MODULE_ID);
 
         // The sheet only sets the action when the death move is actually viable; without
         // it the button stays hidden, so there is nothing to take over.
