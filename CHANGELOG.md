@@ -1,3 +1,8 @@
+# 2.7
+
+- [Fixed] Works with the Nice Sheets character sheet. Its Take Death Move banner now sends this module's death move screen instead of opening the system's own Death Move dialog. The banner keeps the sheet's own look.
+- [Changed] The README covers the Nice Sheets banner and lists Nice Sheets among the Daggerheart modules.
+
 # 2.6
 
 - [Added] The GM can send the Avoid Death roll on its own as a Scar Check, to a character who still has Hit Points left: a Send Scar Check button in the Daggerheart Menu, or `DeathMoves.scar()` in a macro. The player gets the death move screen with that single option, the table watches, and the roll follows the same rules and automation as Avoid Death, Phoenix Feather included. The player can close it, and the GM can send it again.
