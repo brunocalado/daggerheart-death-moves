@@ -15,7 +15,7 @@ Daggerheart: Death Moves does that whole sequence. When the last Hit Point is ma
 
 ### The death move screen
 
-- The skull the character sheet puts over the portrait once every Hit Point is marked opens this module's screen instead of the system's own Death Move dialog. It is painted purple so you can tell it apart. The GM can press it, and so can the player the character belongs to.
+- The skull the character sheet puts over the portrait once every Hit Point is marked opens this module's screen instead of the system's own Death Move dialog. It is painted purple so you can tell it apart. The GM can press it, and so can the player the character belongs to. On the [Nice Sheets](https://github.com/brunocalado/dh-nice-sheets) character sheet, the **Take Death Move** banner at the top of the sidebar opens the same screen and keeps the sheet's own look.
 - The dying player sees the three death moves side by side and picks one.
 - Everyone else, GM included, sees the same screen in spectator mode while the player decides.
 - Once the choice is made, a banner with the chosen move appears on every screen before the dice are rolled.
@@ -46,7 +46,7 @@ Daggerheart: Death Moves does that whole sequence. When the last Hit Point is ma
 
 There are four ways in, and all of them lead to the same screen:
 
-- On the character sheet, press the purple skull over the portrait. It appears once every Hit Point is marked. A player pressing it asks the GM's client to run the scene, since that is where the queue and the chat cards live, so a GM has to be connected. A death move acts on the character assigned to the player, so the sheet has to be that character.
+- On the character sheet, press the purple skull over the portrait, or the **Take Death Move** banner on a Nice Sheets sheet. It appears once every Hit Point is marked. A player pressing it asks the GM's client to run the scene, since that is where the queue and the chat cards live, so a GM has to be connected. A death move acts on the character assigned to the player, so the sheet has to be that character.
 - In the Daggerheart Menu in the sidebar, click **Trigger Death Move** (skull icon) and select the player from the list.
 - In a script macro, run `DeathMoves.trigger()`. You can use `DeathMoves.trigger("User Name")` to send it straight to one player.
 - With **Max HP Trigger** configured, reaching maximum Hit Points starts the move on its own, or opens a confirmation dialog for the GM first.
@@ -152,6 +152,7 @@ It needs Foundry VTT v14, the Daggerheart system 2.10.11 or later, and the Dice 
 | 😱 [**Fear Tracker**](https://github.com/brunocalado/daggerheart-fear-tracker) | Adds an animated slider bar with configurable fear tokens to the UI. |
 | 🧟 [**Horde**](https://github.com/brunocalado/dh-horde) | Explode single horde tokens into dozens of individual tokens and manage their movement and stats automatically. |
 | 🎁 [**Mystery Box**](https://github.com/brunocalado/dh-mystery-box) | Introduces mystery box mechanics for random loot and surprises. |
+| 📝 [**Nice Sheets**](https://github.com/brunocalado/dh-nice-sheets) | An alternative character sheet with a resource sidebar, ranked trait plaques, and the character's art filling the background. |
 | ⚡ [**Quick Actions**](https://github.com/brunocalado/daggerheart-quickactions) | Quick access to common mechanics like Falling Damage, Downtime, etc. |
 | 📜 [**Quick Rules**](https://github.com/brunocalado/daggerheart-quickrules) | Fast and accessible reference guide for the core rules. |
 | 🤖 [**Resource Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Automatically executes macros when the Fear, Hope, Stress, HP, or Armor resources change. |
