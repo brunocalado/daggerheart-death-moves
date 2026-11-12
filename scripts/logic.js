@@ -171,8 +171,6 @@ export class DeathLogic {
                     description: "<p>A scar from avoiding death.</p>",
                     resource: null,
                     actions: {},
-                    originItemType: null,
-                    multiclassOrigin: false,
                     featureForm: "passive"
                 },
                 effects: [{

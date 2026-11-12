@@ -28,8 +28,6 @@ export class DeathHomebrew {
                 "description": "",
                 "resource": null,
                 "actions": {},
-                "originItemType": null,
-                "multiclassOrigin": false,
                 "featureForm": "passive"
             },
             "effects": []
