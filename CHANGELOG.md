@@ -1,4 +1,4 @@
-# Unreleased
+# 2.7.1
 
 - [Fixed] Scars are written in Foundry v14's Active Effect format, so applying one no longer logs deprecation warnings and keeps working once Foundry drops the old format.
 - [Changed] Verified with Daggerheart 2.12.8.
