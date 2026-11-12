@@ -91,7 +91,7 @@ export function readDragData(event) {
 export function heroplateBlessedAction(armor) {
     if (!armor) return null;
 
-    const features = armor.system?.armorFeatures ?? [];
+    const features = Object.values(armor.system?.itemFeatures ?? {});
     const blessed = features.find(f => f.value === "blessed") ?? features.find(f => f.actionIds?.length);
     const actionId = blessed?.actionIds?.[0];
     const action = actionId ? armor.system?.actions?.get(actionId) : null;
