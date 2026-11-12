@@ -52,48 +52,45 @@ export class DeathHomebrew {
             "Scar (Evasion)": [{
                 "name": "Scar (Evasion)",
                 "type": "base",
-                "system": { "rangeDependence": { "enabled": false, "type": "withinRange", "target": "hostile", "range": "melee" } },
                 "img": "icons/skills/wounds/injury-pain-body-orange.webp",
-                "changes": [{ "key": "system.evasion", "mode": 2, "value": "-1", "priority": null }],
+                "system": { "changes": [{ "key": "system.evasion", "type": "add", "value": "-1", "phase": "initial", "priority": null }] },
                 "disabled": false,
                 "transfer": true
             }],
             "Scar (Hit Point)": [{
                 "name": "Scar (Hit Point)",
                 "type": "base",
-                "system": { "rangeDependence": { "enabled": false, "type": "withinRange", "target": "hostile", "range": "melee" } },
                 "img": "icons/skills/wounds/injury-pain-body-orange.webp",
-                "changes": [{ "key": "system.resources.hitPoints.max", "mode": 2, "value": "-1", "priority": null }],
+                "system": { "changes": [{ "key": "system.resources.hitPoints.max", "type": "add", "value": "-1", "phase": "initial", "priority": null }] },
                 "disabled": false,
                 "transfer": true
             }],
             "Scar (Hope)": [{
                 "name": "Scar (Hope)",
                 "type": "base",
-                "system": { "rangeDependence": { "enabled": false, "type": "withinRange", "target": "hostile", "range": "melee" } },
                 "img": "icons/skills/wounds/injury-pain-body-orange.webp",
-                "changes": [{ "key": "system.scars", "mode": 2, "value": "1", "priority": null }],
+                "system": { "changes": [{ "key": "system.scars", "type": "add", "value": "1", "phase": "initial", "priority": null }] },
                 "disabled": false,
                 "transfer": true
             }],
             "Scar (Stress)": [{
                 "name": "Scar (Stress)",
                 "type": "base",
-                "system": { "rangeDependence": { "enabled": false, "type": "withinRange", "target": "hostile", "range": "melee" } },
                 "img": "icons/skills/wounds/injury-pain-body-orange.webp",
-                "changes": [{ "key": "system.resources.stress.max", "mode": 2, "value": "-1", "priority": null }],
+                "system": { "changes": [{ "key": "system.resources.stress.max", "type": "add", "value": "-1", "phase": "initial", "priority": null }] },
                 "disabled": false,
                 "transfer": true
             }],
             "Scar (Thresholds)": [{
                 "name": "Scar (Thresholds)",
                 "type": "base",
-                "system": { "rangeDependence": { "enabled": false, "type": "withinRange", "target": "hostile", "range": "melee" } },
                 "img": "icons/skills/wounds/injury-pain-body-orange.webp",
-                "changes": [
-                    { "key": "system.damageThresholds.major", "mode": 2, "value": "-2", "priority": null },
-                    { "key": "system.damageThresholds.severe", "mode": 2, "value": "-2", "priority": null }
-                ],
+                "system": {
+                    "changes": [
+                        { "key": "system.damageThresholds.major", "type": "add", "value": "-2", "phase": "initial", "priority": null },
+                        { "key": "system.damageThresholds.severe", "type": "add", "value": "-2", "phase": "initial", "priority": null }
+                    ]
+                },
                 "disabled": false,
                 "transfer": true
             }]

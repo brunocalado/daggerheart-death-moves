@@ -1,3 +1,7 @@
+# Unreleased
+
+- [Fixed] Scars are written in Foundry v14's Active Effect format, so applying one no longer logs deprecation warnings and keeps working once Foundry drops the old format.
+
 # 2.7
 
 - [Fixed] Works with the Nice Sheets character sheet. Its Take Death Move banner now sends this module's death move screen instead of opening the system's own Death Move dialog. The banner keeps the sheet's own look.

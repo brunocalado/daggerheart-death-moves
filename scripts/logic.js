@@ -145,20 +145,20 @@ export class DeathLogic {
 
         if (existingItem) {
             // Item already exists — find the AE change for system.scars and increment its value
+            // v14 keeps changes under system; scars saved in the old top-level shape are
+            // moved there by core's migrateData on load, so this finds both.
             const effect = existingItem.effects.find(e =>
-                e.changes.some(c => c.key === "system.scars")
+                e.system.changes?.some(c => c.key === "system.scars")
             );
 
             if (effect) {
-                const changeIndex = effect.changes.findIndex(c => c.key === "system.scars");
-                const currentValue = parseInt(effect.changes[changeIndex].value) || 1;
-                const newValue = currentValue + 1;
+                // The source copy, so the update carries plain data rather than core's shims.
+                const changes = effect.toObject().system.changes;
+                const changeIndex = changes.findIndex(c => c.key === "system.scars");
+                const currentValue = parseInt(changes[changeIndex].value) || 1;
+                changes[changeIndex].value = String(currentValue + 1);
 
-                const updatedChanges = effect.changes.map((c, i) =>
-                    i === changeIndex ? { ...c, value: String(newValue) } : c
-                );
-
-                await effect.update({ changes: updatedChanges });
+                await effect.update({ "system.changes": changes });
             }
         } else {
             // Item does not exist — create it with value "1"
@@ -178,21 +178,16 @@ export class DeathLogic {
                 effects: [{
                     name: SCAR_ITEM_NAME,
                     type: "base",
-                    system: {
-                        rangeDependence: {
-                            enabled: false,
-                            type: "withinRange",
-                            target: "hostile",
-                            range: "melee"
-                        }
-                    },
                     img: "icons/skills/wounds/injury-pain-body-orange.webp",
-                    changes: [{
-                        key: "system.scars",
-                        mode: 2,
-                        value: "1",
-                        priority: null
-                    }],
+                    system: {
+                        changes: [{
+                            key: "system.scars",
+                            type: "add",
+                            value: "1",
+                            phase: "initial",
+                            priority: null
+                        }]
+                    },
                     disabled: false,
                     transfer: true
                 }]
